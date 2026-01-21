@@ -13,6 +13,8 @@
   "exclude": [
     "node_modules", // Exclude node_modules
     "dist",          // Exclude output directory itself
-    "**/*.test.ts"   // Exclude test files from tsc build
+    "**/*.test.ts",  // Exclude test files from tsc build
+    "**/*.spec.ts",  // Common alternate test suffix
+    "**/__tests__/**" // Exclude Jest-style test directories
   ]
 }

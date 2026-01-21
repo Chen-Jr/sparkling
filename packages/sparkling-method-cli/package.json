@@ -1,7 +1,13 @@
 {
   "name": "sparkling-method",
-  "version": "2.0.0",
+  "version": "2.0.0-rc.0",
   "description": "CLI utilities for managing Sparkling method modules with cross-platform code generation",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tiktok/sparkling",
+    "directory": "packages/sparkling-method-cli"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

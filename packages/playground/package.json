@@ -1,8 +1,14 @@
 {
   "name": "sparkling-playground",
-  "version": "2.0.0",
+  "version": "2.0.0-rc.0",
   "type": "module",
   "description": "Multi-page Sparkling app template with main app and second page demos",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tiktok/sparkling",
+    "directory": "packages/playground"
+  },
   "scripts": {
     "build": "pnpm -C ../.. --filter sparkling-method-sdk --filter sparkling-router --filter sparkling-storage build && rspeedy build && node scripts/copy-assets.js",
     "dev": "rspeedy dev",

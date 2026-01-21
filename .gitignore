@@ -21,5 +21,11 @@ template/sparkling-app-template/ios/SparklingGo/SparklingGo/Resource/Assets/
 
 tsconfig.tsbuildinfo
 
+# Internal test helpers live as TS source only; prevent accidental in-place emits.
+packages/common/test-utils/*.js
+packages/common/test-utils/*.js.map
+packages/common/test-utils/*.d.ts
+packages/common/test-utils/*.d.ts.map
+
 # Python
 __pycache__/

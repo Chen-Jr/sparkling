@@ -1,6 +1,12 @@
 {
   "name": "sparkling-sdk",
-  "version": "2.0.0",
+  "version": "2.0.0-rc.0",
   "license": "Apache-2.0",
-  "description": "Android & iOS SDK for Sparkling Framework"
+  "description": "Android & iOS SDK for Sparkling Framework",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tiktok/sparkling",
+    "directory": "packages/sparkling-sdk"
+  }
 }

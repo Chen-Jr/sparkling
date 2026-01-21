@@ -1,7 +1,12 @@
 {
   "name": "sparkling",
-  "version": "2.0.0",
+  "version": "2.0.0-rc.0",
   "description": "Sparkling is the mobile cross-platform development infrastructure for TikTok App.",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tiktok/sparkling"
+  },
   "scripts": {
     "postinstall": "echo \"All packages installed successfully\"",
     "build": "pnpm -r build"
