@@ -6,6 +6,7 @@ import sparklingLogo from './assets/sparkling_icon.png';
 import type { NavigateResponse } from 'sparkling-router';
 import * as router from 'sparkling-router';
 import * as storage from 'sparkling-storage';
+import * as media from 'sparkling-media';
 import type { InputEvent } from './typing.js';
 
 export function App(props: {
@@ -93,11 +94,48 @@ export function App(props: {
     );
   };
 
+  const chooseImage = () => {
+    media.chooseMedia({
+      mediaTypes: ['image'],
+      sourceType: 'album',
+      maxCount: 1,
+    }, (v: media.ChooseMediaResponse) => {
+      console.log('Choose image result:', v);
+      setApiResponse(`Choose Image: ${JSON.stringify(v)}`);
+    });
+  };
+
+  const chooseVideo = () => {
+    media.chooseMedia({
+      mediaTypes: ['video'],
+      sourceType: 'album',
+      maxCount: 1,
+    }, (v: media.ChooseMediaResponse) => {
+      console.log('Choose video result:', v);
+      setApiResponse(`Choose Video: ${JSON.stringify(v)}`);
+    });
+  };
+
+  const takePhoto = () => {
+    media.chooseMedia({
+      mediaTypes: ['image'],
+      sourceType: 'camera',
+      cameraType: 'back',
+      maxCount: 1,
+    }, (v: media.ChooseMediaResponse) => {
+      console.log('Take photo result:', v);
+      setApiResponse(`Take Photo: ${JSON.stringify(v)}`);
+    });
+  };
+
   const listItems = [
     { id: 1, title: 'open', api: routerOpen},
     { id: 2, title: 'setStorage', api: setStorageItem},
     { id: 3, title: 'getStorage', api: getStorageItem },
     { id: 4, title: 'cardView', api: openCardView },
+    { id: 5, title: 'chooseImage', api: chooseImage },
+    { id: 6, title: 'chooseVideo', api: chooseVideo },
+    { id: 7, title: 'takePhoto', api: takePhoto },
   ];
 
   return (

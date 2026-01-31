@@ -20,6 +20,7 @@ end
 def sparkling_methods_dep
 pod 'Sparkling-SPKRouter', :path => '../../methods/sparkling-router/ios'
 pod 'Sparkling-SPKStorage', :path => '../../methods/sparkling-storage/ios'
+pod 'Sparkling-Media', :path => '../../methods/sparkling-media/ios'
 end
 
 def sparkling_kit

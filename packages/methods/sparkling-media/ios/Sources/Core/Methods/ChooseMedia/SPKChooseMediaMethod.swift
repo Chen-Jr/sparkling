@@ -125,10 +125,10 @@ public class SPKChooseMediaMethod: PipeMethod {
     }
     
     public override var methodName: String {
-        return "x.chooseMedia"
+        return "media.chooseMedia"
     }
     
     public override class func methodName() -> String {
-        return "x.chooseMedia"
+        return "media.chooseMedia"
     }
 }

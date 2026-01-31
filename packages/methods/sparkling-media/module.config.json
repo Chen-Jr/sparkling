@@ -1,0 +1,6 @@
+{
+  "packageName": "com.tiktok.sparkling.method",
+  "moduleName": "Media",
+  "androidDsl": "kts",
+  "projectName": "sparkling-media"
+}

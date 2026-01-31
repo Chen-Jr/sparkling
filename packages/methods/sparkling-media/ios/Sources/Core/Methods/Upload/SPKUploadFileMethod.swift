@@ -93,10 +93,10 @@ public class SPKUploadFileMethod: PipeMethod {
     }
     
     public override var methodName: String {
-        return "x.uploadFile"
+        return "media.uploadFile"
     }
     
     public override class func methodName() -> String {
-        return "x.uploadFile"
+        return "media.uploadFile"
     }
 }

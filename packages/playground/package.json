@@ -10,7 +10,7 @@
     "directory": "packages/playground"
   },
   "scripts": {
-    "build": "pnpm -C ../.. --filter sparkling-method-sdk --filter sparkling-router --filter sparkling-storage build && rspeedy build && node scripts/copy-assets.js",
+    "build": "pnpm -C ../.. --filter sparkling-method-sdk --filter sparkling-router --filter sparkling-storage --filter sparkling-media build && rspeedy build && node scripts/copy-assets.js",
     "dev": "rspeedy dev",
     "format": "prettier --write .",
     "preview": "rspeedy preview",
@@ -20,7 +20,8 @@
   "dependencies": {
     "@lynx-js/react": "^0.107.0",
     "sparkling-router": "workspace:*",
-    "sparkling-storage": "workspace:*"
+    "sparkling-storage": "workspace:*",
+    "sparkling-media": "workspace:*"
   },
   "devDependencies": {
     "@lynx-js/qrcode-rsbuild-plugin": "^0.3.6",

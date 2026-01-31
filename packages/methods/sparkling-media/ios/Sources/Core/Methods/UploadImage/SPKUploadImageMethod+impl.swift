@@ -5,10 +5,32 @@
 import Foundation
 import SparklingMethod
 
-extension SPKUploadFileMethod {
+// Status code enumeration for upload image
+enum SPKUploadImageStatusCode: Int {
+    case succeeded = 0
+    case failed = -1
+    case invalidParameter = -2
+    case malformedResponse = -3
+}
+
+// Status model for upload image
+class SPKUploadImageStatus: NSObject {
+    var statusCode: SPKUploadImageStatusCode = .succeeded
+    var message: String?
+    
+    init(statusCode: SPKUploadImageStatusCode, message: String? = nil) {
+        self.statusCode = statusCode
+        self.message = message
+    }
+}
+
+// Completion handler type for upload image
+typealias SPKUploadImageCompletionHandler = (SPKHttpResponse?, Any?, Error?) -> Void
+
+extension SPKUploadImageMethod {
     @objc public override func call(withParamModel paramModel: Any, completionHandler: CompletionHandlerProtocol) {
         // Check parameter model type
-        guard let typedParamModel = paramModel as? SPKUploadFileMethodParamModel else {
+        guard let typedParamModel = paramModel as? SPKUploadImageMethodParamModel else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "Invalid parameter model type"), result: nil)
             return
         }
@@ -32,13 +54,13 @@ extension SPKUploadFileMethod {
         }
         
         // Wrapped completion handler
-        let wrappedCompletionHandler: SPKUploadFileCompletionHandler = { [weak self] response, responseData, error in
+        let wrappedCompletionHandler: SPKUploadImageCompletionHandler = { [weak self] response, responseData, error in
             guard let self = self else { return }
             
             let httpResponse = response as? SPKHttpResponseChromium
-            let resultModel = SPKUploadFileMethodResultModel()
+            let resultModel = SPKUploadImageMethodResultModel()
             resultModel.clientCode = 0
-            var status: SPKUploadStatus?
+            var status: SPKUploadImageStatus?
             
             if let httpResponse = httpResponse {
                 resultModel.httpCode = httpResponse.statusCode
@@ -47,21 +69,23 @@ extension SPKUploadFileMethod {
             
             if let error = error {
                 resultModel.clientCode = error._code
-                status = SPKUploadStatus(statusCode: .failed, message: error.localizedDescription)
+                status = SPKUploadImageStatus(statusCode: .failed, message: error.localizedDescription)
             } else if httpResponse == nil {
-                status = SPKUploadStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
+                status = SPKUploadImageStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
             } else {
                 // Set response data if available
                 resultModel.responseData = responseData as? [String: Any]
+                
+                // Extract URL/URI from response if available
+                if let responseDict = responseData as? [String: Any] {
+                    resultModel.url = responseDict["url"] as? String
+                    resultModel.uri = responseDict["uri"] as? String
+                }
             }
             
             // Convert to SparklingMethod required format
             if let status = status {
-                let errorInfo: [String: Any] = [
-                    "code": status.statusCode.rawValue,
-                    "message": status.message ?? ""
-                ]
-                completionHandler.handleCompletion(status: .failed(message: errorInfo["message"] as? String), result: resultModel)
+                completionHandler.handleCompletion(status: .failed(message: status.message), result: resultModel)
             } else {
                 completionHandler.handleCompletion(status: .succeeded(), result: resultModel)
             }
@@ -70,7 +94,7 @@ extension SPKUploadFileMethod {
         // Set default values for upload parameters
         let uploadName = typedParamModel.name ?? "file"
         let uploadFileName = typedParamModel.fileName ?? fileURL.lastPathComponent
-        let uploadMimeType = typedParamModel.mimeType ?? self.guessMimeType(for: fileURL)
+        let uploadMimeType = guessMimeType(for: fileURL)
         
         // Create upload task
         let task = TTNetworkManager.shared.uploadTaskWithRequest(url,
@@ -94,12 +118,11 @@ extension SPKUploadFileMethod {
         task.resume()
     }
     
-    // Helper method to guess MIME type based on file extension
+    // Helper method to guess MIME type for images
     private func guessMimeType(for fileURL: URL) -> String {
         let pathExtension = fileURL.pathExtension.lowercased()
         
         switch pathExtension {
-        // Image types
         case "jpg", "jpeg":
             return "image/jpeg"
         case "png":
@@ -112,64 +135,14 @@ extension SPKUploadFileMethod {
             return "image/heic"
         case "heif":
             return "image/heif"
-            
-        // Video types
-        case "mp4":
-            return "video/mp4"
-        case "mov":
-            return "video/quicktime"
-        case "avi":
-            return "video/x-msvideo"
-        case "mkv":
-            return "video/x-matroska"
-        case "wmv":
-            return "video/x-ms-wmv"
-            
-        // Audio types
-        case "mp3":
-            return "audio/mpeg"
-        case "wav":
-            return "audio/wav"
-        case "aac":
-            return "audio/aac"
-        case "m4a":
-            return "audio/mp4"
-            
-        // Document types
-        case "pdf":
-            return "application/pdf"
-        case "doc", "docx":
-            return "application/msword"
-        case "xls", "xlsx":
-            return "application/vnd.ms-excel"
-        case "ppt", "pptx":
-            return "application/vnd.ms-powerpoint"
-        case "txt":
-            return "text/plain"
-            
-        // Archive types
-        case "zip":
-            return "application/zip"
-        case "rar":
-            return "application/x-rar-compressed"
-        case "7z":
-            return "application/x-7z-compressed"
-            
-        // Other common types
-        case "json":
-            return "application/json"
-        case "xml":
-            return "application/xml"
-        case "html":
-            return "text/html"
-        case "css":
-            return "text/css"
-        case "js":
-            return "text/javascript"
-            
-        // Default to binary data
+        case "bmp":
+            return "image/bmp"
+        case "tiff", "tif":
+            return "image/tiff"
+        case "svg":
+            return "image/svg+xml"
         default:
-            return "application/octet-stream"
+            return "image/jpeg"  // Default to JPEG for images
         }
     }
 }
