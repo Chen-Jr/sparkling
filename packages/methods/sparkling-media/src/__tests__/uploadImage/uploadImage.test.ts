@@ -1,5 +1,5 @@
 /// <reference types="jest" />
-// Copyright (c) 2025 TikTok Pte. Ltd.
+// Copyright (c) 2022 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -8,7 +8,7 @@ import type { UploadImageRequest, UploadImageResponse } from '../../uploadImage/
 import { createMockPipe, TEST_CONSTANTS, MockPipe } from '../test-utils';
 
 // Mock the pipe module
-jest.mock('sparkling-method-sdk', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }));
 
 describe('uploadImage', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;
@@ -16,7 +16,7 @@ describe('uploadImage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPipe = jest.requireMock('sparkling-method-sdk') as unknown as MockPipe;
+    mockPipe = jest.requireMock('sparkling-method') as unknown as MockPipe;
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 

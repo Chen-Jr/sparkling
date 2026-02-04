@@ -12,7 +12,7 @@ install! 'cocoapods',
 inhibit_all_warnings!
 
 def sparkling_methods
-  pod 'SparklingMethod', :path => '../../sparkling-method-sdk/ios', :subspecs => [
+  pod 'SparklingMethod', :path => '../../sparkling-method/ios', :subspecs => [
   'Lynx', 'DIProvider', 'Debug'
   ]
 end

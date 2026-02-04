@@ -1,7 +1,7 @@
 // Copyright (c) 2025 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
-import pipe from 'sparkling-method-sdk';
+import pipe from 'sparkling-method';
 import type { ChooseMediaRequest, ChooseMediaResponse } from './chooseMedia.d';
 import { validateParams, validationRules, isValidCallback, logInvalidCallback } from '../utils/validation';
 

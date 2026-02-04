@@ -1,6 +1,6 @@
-# sparkling-method-sdk
+# sparkling-method
 
-[![npm version](https://img.shields.io/npm/v/sparkling-method-sdk.svg)](https://npmjs.com/package/sparkling-method-sdk)
+[![npm version](https://img.shields.io/npm/v/sparkling-method.svg)](https://npmjs.com/package/sparkling-method)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../LICENSE)
 
 SDK for building Sparkling methods that bridge JavaScript and native code through LynxPipe.
@@ -8,13 +8,13 @@ SDK for building Sparkling methods that bridge JavaScript and native code throug
 ## Installation
 
 ```bash
-npm install sparkling-method-sdk@latest
+npm install sparkling-method@latest
 ```
 
 ## Usage
 
 ```typescript
-import LynxPipe from 'sparkling-method-sdk';
+import LynxPipe from 'sparkling-method';
 
 // Callback-based call
 LynxPipe.call('methodName', { param: 'value' }, (response) => {

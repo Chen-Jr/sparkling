@@ -74,9 +74,9 @@ Sparkling’s Lynx container wrapper sets up method pipe integration automatical
 - `MethodPipe.setupLynxPipe(config:)` is called during Lynx view setup.
 - `MethodPipe(withLynxView:)` is created per container to handle calls/events.
 
-## JavaScript (sparkling-method-sdk)
+## JavaScript (sparkling-method)
 
-The JS-side `sparkling-method-sdk` provides a default pipe object (exported as `default`) with:
+The JS-side `sparkling-method` package provides a default pipe object (exported as `default`) with:
 - `call(methodName, params, callback)`
 - `callAsync(methodName, params, options?, timeout?)`
 - `on(eventName, callback)` / `off(eventName, callback)`

@@ -54,6 +54,6 @@ This package calls:
 - `storage.getItem`
 
 Your host app must register native implementations for these methods. See
-[Sparkling Method SDK](../sparkling-method-sdk.md).
+[Sparkling Method SDK](../sparkling-method.md).
 
 

@@ -136,7 +136,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 groupId = publishingGroupId
-                artifactId = "sparkling-method-sdk"
+                artifactId = "sparkling-method"
                 version = publishingVersion
 
                 from(components["release"])
@@ -144,7 +144,7 @@ afterEvaluate {
                 artifact(emptyJavadocJar)
 
                 pom {
-                    name.set("sparkling-method-sdk")
+                    name.set("sparkling-method")
                     description.set("Sparkling method Android SDK module")
                 }
             }

@@ -1,11 +1,11 @@
 {
-  "name": "sparkling-method-sdk",
+  "name": "sparkling-method",
   "version": "2.0.0-rc.1",
   "homepage": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/tiktok/sparkling",
-    "directory": "packages/sparkling-method-sdk"
+    "directory": "packages/sparkling-method"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

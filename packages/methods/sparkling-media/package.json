@@ -29,7 +29,7 @@
   "license": "Apache-2.0",
   "description": "Sparkling media methods for choosing, uploading, and downloading media files",
   "dependencies": {
-    "sparkling-method-sdk": "2.0.0-rc.0"
+    "sparkling-method": "workspace:*"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
