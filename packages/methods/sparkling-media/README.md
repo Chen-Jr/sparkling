@@ -1,17 +1,54 @@
-# Sparkling Method Module Template
+# sparkling-media
 
-This directory is copied when running `pnpm dlx sparkling-method init <name>`. It
-contains a minimal project layout with placeholder TypeScript definitions under
-`src/method.d.ts`. Feel free to remove these examples after scaffolding a new
-module.
+[![npm version](https://img.shields.io/npm/v/sparkling-media.svg)](https://npmjs.com/package/sparkling-media)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../../LICENSE)
 
-After editing the `.d.ts` declarations, run `pnpm dlx sparkling-method codegen` (or
-`pnpm --filter <module> codegen` inside a workspace) to produce cross-platform implementations:
+Media handling methods for Sparkling applications, enabling image/video selection, upload, and download.
 
-- **Kotlin IDL** sources under `android/` directories
-- **Swift IDL** sources under `ios/` directories
-- **TypeScript implementation** with validation and pipe integration under `src/`
-- **Package exports** in `index.ts` for easy importing
+## Installation
 
-The generated TypeScript code provides type-safe wrappers around the Sparkling pipe SDK,
-following the same patterns used in `sparkling-router` and `sparkling-storage`.
+```bash
+npm install sparkling-media@latest
+```
+
+After installing, run `sparkling-cli autolink` to automatically link the native modules:
+
+```bash
+npx sparkling autolink
+```
+
+## Usage
+
+```typescript
+import { chooseMedia, uploadFile, downloadFile } from 'sparkling-media';
+
+// Select media from album
+chooseMedia({
+  mediaTypes: ['image'],
+  sourceType: 'album',
+  maxCount: 9,
+}, (result) => {
+  console.log(result.data?.tempFiles);
+});
+
+// Upload file
+uploadFile({
+  url: 'https://api.example.com/upload',
+  filePath: '/path/to/file.jpg',
+}, (result) => {
+  console.log(result);
+});
+
+// Download file
+downloadFile({
+  url: 'https://example.com/image.png',
+  extension: 'png',
+}, (result) => {
+  console.log(result.data?.filePath);
+});
+```
+
+## Documentation
+
+- [API Reference](./API.md) - Detailed API documentation, parameters, and response formats
+- [Manual Installation](./API.md#manual-installation-fallback) - Fallback installation if autolink fails

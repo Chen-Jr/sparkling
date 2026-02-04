@@ -1,30 +1,35 @@
-# Sparkling App Template
+# sparkling-playground
 
-React/Lynx template used by `create-sparkling-app`. It ships with router, storage, and media bridge
-methods wired into the native shells.
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../LICENSE)
 
-## Getting started
+Demo application for testing and showcasing Sparkling framework features with integrated method modules.
+
+## Getting Started
+
 ```bash
 pnpm install
 pnpm run dev
 ```
-Edit `src/App.tsx` or the pages under `src/pages`—the app hot reloads.
 
-## Build/preview
+Edit `src/pages/` — the app hot reloads.
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build production bundle |
+| `pnpm preview` | Preview built bundle |
+| `pnpm test` | Run tests |
+
+## Run on Device
+
+From the repository root:
+
 ```bash
-pnpm run build   # bundles assets to dist/ and copies them for native shells
-pnpm run preview
+# Android
+npx sparkling run:android
+
+# iOS
+npx sparkling run:ios
 ```
-
-## Add another Sparkling method
-1) Add the package as a dependency (workspace path or version):
-   ```bash
-   pnpm add ../packages/<your-method> -C .
-   ```
-2) Android: include the module in `android/settings.gradle.kts` and add it as an `implementation`
-   dependency in `android/app/build.gradle.kts`.
-3) iOS: add the module’s podspec path to `ios/Podfile`, then run `pod install`.
-4) Rebuild the app (`pnpm run build`) so JavaScript and native layers pick up the new method.
-
-Use `npx sparkling run:android` or `npx sparkling run:ios` from the repo root to launch the native demos after
-adding methods.
