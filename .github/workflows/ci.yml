@@ -21,10 +21,10 @@ jobs:
     outputs:
       force_all: ${{ github.event_name == 'workflow_dispatch' }}
       run_all: ${{ steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
-      any_unit_tests: ${{ steps.filter.outputs.create_sparkling_app == 'true' || steps.filter.outputs.sparkling_method_cli == 'true' || steps.filter.outputs.sparkling_method_sdk == 'true' || steps.filter.outputs.sparkling_router == 'true' || steps.filter.outputs.sparkling_storage == 'true' || steps.filter.outputs.playground == 'true' || steps.filter.outputs.app_template == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
+      any_unit_tests: ${{ steps.filter.outputs.create_sparkling_app == 'true' || steps.filter.outputs.sparkling_method_cli == 'true' || steps.filter.outputs.sparkling_method == 'true' || steps.filter.outputs.sparkling_router == 'true' || steps.filter.outputs.sparkling_storage == 'true' || steps.filter.outputs.playground == 'true' || steps.filter.outputs.app_template == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
       create_sparkling_app: ${{ steps.filter.outputs.create_sparkling_app }}
       sparkling_method_cli: ${{ steps.filter.outputs.sparkling_method_cli }}
-      sparkling_method_sdk: ${{ steps.filter.outputs.sparkling_method_sdk }}
+      sparkling_method: ${{ steps.filter.outputs.sparkling_method }}
       sparkling_router: ${{ steps.filter.outputs.sparkling_router }}
       sparkling_storage: ${{ steps.filter.outputs.sparkling_storage }}
       playground: ${{ steps.filter.outputs.playground }}
@@ -47,8 +47,8 @@ jobs:
               - 'packages/create-sparkling-app/**'
             sparkling_method_cli:
               - 'packages/sparkling-method-cli/**'
-            sparkling_method_sdk:
-              - 'packages/sparkling-method-sdk/**'
+            sparkling_method:
+              - 'packages/sparkling-method/**'
             sparkling_router:
               - 'packages/methods/sparkling-router/**'
             sparkling_storage:
@@ -94,7 +94,7 @@ jobs:
           echo ""
           echo "create_sparkling_app=${{ needs.changes.outputs.create_sparkling_app }}"
           echo "sparkling_method_cli=${{ needs.changes.outputs.sparkling_method_cli }}"
-          echo "sparkling_method_sdk=${{ needs.changes.outputs.sparkling_method_sdk }}"
+          echo "sparkling_method=${{ needs.changes.outputs.sparkling_method }}"
           echo "sparkling_router=${{ needs.changes.outputs.sparkling_router }}"
           echo "sparkling_storage=${{ needs.changes.outputs.sparkling_storage }}"
           echo "playground=${{ needs.changes.outputs.playground }}"
@@ -132,9 +132,9 @@ jobs:
       #   if: needs.changes.outputs.any_unit_tests == 'true'
       #   run: pnpm install --frozen-lockfile
       #
-      # - name: Build sparkling-method-sdk (for router/storage tests)
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method_sdk == 'true' || needs.changes.outputs.sparkling_router == 'true' || needs.changes.outputs.sparkling_storage == 'true'
-      #   run: pnpm --filter sparkling-method-sdk build
+      # - name: Build sparkling-method (for router/storage tests)
+      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_router == 'true' || needs.changes.outputs.sparkling_storage == 'true'
+      #   run: pnpm --filter sparkling-method build
       #
       # - name: Test create-sparkling-app
       #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.create_sparkling_app == 'true'
@@ -145,11 +145,11 @@ jobs:
       #   run: pnpm --filter sparkling-method test
       #
       # - name: Test sparkling-router
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method_sdk == 'true' || needs.changes.outputs.sparkling_router == 'true'
+      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_router == 'true'
       #   run: pnpm --filter sparkling-router test
       #
       # - name: Test sparkling-storage
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method_sdk == 'true' || needs.changes.outputs.sparkling_storage == 'true'
+      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_storage == 'true'
       #   run: pnpm --filter sparkling-storage test
       #
       # - name: Build playground deps (router/storage)

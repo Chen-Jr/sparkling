@@ -26,7 +26,7 @@ body:
       description: Which area is affected?
       options:
         - packages/sparkling-sdk
-        - packages/sparkling-method-sdk
+        - packages/sparkling-method
         - packages/methods
         - packages/sparkling-cli
         - packages/create-sparkling-app
