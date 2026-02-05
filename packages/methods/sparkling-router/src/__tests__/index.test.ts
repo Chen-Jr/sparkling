@@ -9,7 +9,7 @@ import { open as openDirect } from '../open/open';
 import { close as closeDirect } from '../close/close';
 import { navigate as navigateDirect } from '../navigate/navigate';
 
-jest.mock('sparkling-method-sdk', () => createMockPipe());
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('sparkling-router module exports', () => {
   describe('function exports', () => {

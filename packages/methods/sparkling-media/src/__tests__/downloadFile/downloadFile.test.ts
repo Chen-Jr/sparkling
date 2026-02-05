@@ -8,7 +8,7 @@ import type { DownloadFileRequest, DownloadFileResponse } from '../../downloadFi
 import { createMockPipe, TEST_CONSTANTS, MockPipe } from '../test-utils';
 
 // Mock the pipe module
-jest.mock('sparkling-method', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('downloadFile', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;

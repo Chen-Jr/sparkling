@@ -6,7 +6,7 @@ import { setItem } from '../../setStorageItem/setStorageItem';
 import type { SetItemRequest, SetItemResponse } from '../../setStorageItem/setStorageItem.d';
 import { createMockPipe, createSuccessResponse, createErrorResponse, TEST_CONSTANTS } from '../test-utils';
 
-jest.mock('sparkling-method-sdk', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('setItem', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;
@@ -14,7 +14,7 @@ describe('setItem', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPipe = jest.requireMock('sparkling-method-sdk') as ReturnType<typeof createMockPipe>;
+    mockPipe = jest.requireMock('sparkling-method') as ReturnType<typeof createMockPipe>;
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 

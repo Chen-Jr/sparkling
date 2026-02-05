@@ -7,7 +7,7 @@ import type { GetItemRequest, GetItemResponse } from '../../getStorageItem/getSt
 import { createMockPipe, createSuccessResponse, createErrorResponse, TEST_CONSTANTS, MOCK_STORAGE_RESPONSES, MockPipe } from '../test-utils';
 
 // Mock the pipe module
-jest.mock('sparkling-method-sdk', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('getItem', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;
@@ -15,7 +15,7 @@ describe('getItem', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPipe = jest.requireMock('sparkling-method-sdk') as unknown as MockPipe;
+    mockPipe = jest.requireMock('sparkling-method') as unknown as MockPipe;
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 

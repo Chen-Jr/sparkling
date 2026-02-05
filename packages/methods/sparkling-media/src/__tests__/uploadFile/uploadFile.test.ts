@@ -8,7 +8,7 @@ import type { UploadFileRequest, UploadFileResponse } from '../../uploadFile/upl
 import { createMockPipe, TEST_CONSTANTS, MockPipe } from '../test-utils';
 
 // Mock the pipe module
-jest.mock('sparkling-method', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('uploadFile', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;

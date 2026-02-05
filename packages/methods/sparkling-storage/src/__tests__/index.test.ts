@@ -7,7 +7,7 @@ import * as storageModule from '../../index';
 import { setItem as setItemDirect } from '../setStorageItem/setStorageItem';
 import { getItem as getItemDirect } from '../getStorageItem/getStorageItem';
 
-jest.mock('sparkling-method-sdk', () => createMockPipe());
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('sparkling-storage module exports', () => {
   describe('function exports', () => {
@@ -132,7 +132,7 @@ describe('sparkling-storage module exports', () => {
         setItem: typeof storageModule.setItem;
         getItem: typeof storageModule.getItem;
       };
-      const mockPipe = jest.requireMock('sparkling-method-sdk');
+      const mockPipe = jest.requireMock('sparkling-method');
 
       mockPipe.call.mockImplementation((method: string, params: any, callback: any) => {
         if (method === 'storage.setItem') {
@@ -164,7 +164,7 @@ describe('sparkling-storage module exports', () => {
         setItem: typeof storageModule.setItem;
         getItem: typeof storageModule.getItem;
       };
-      const mockPipe = jest.requireMock('sparkling-method-sdk');
+      const mockPipe = jest.requireMock('sparkling-method');
 
       mockPipe.call.mockImplementation((method: string, params: any, callback: any) => {
         callback({ code: -1, msg: 'Storage error', data: undefined });

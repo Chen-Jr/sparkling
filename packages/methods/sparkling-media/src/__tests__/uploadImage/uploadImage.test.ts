@@ -8,7 +8,7 @@ import type { UploadImageRequest, UploadImageResponse } from '../../uploadImage/
 import { createMockPipe, TEST_CONSTANTS, MockPipe } from '../test-utils';
 
 // Mock the pipe module
-jest.mock('sparkling-method', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('uploadImage', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;

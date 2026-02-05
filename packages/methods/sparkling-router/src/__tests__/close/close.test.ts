@@ -7,7 +7,7 @@ import { close } from '../../close/close';
 import type { CloseRequest, CloseResponse } from '../../close/close.d';
 import { createMockPipe, createSuccessResponse, createErrorResponse, TEST_CONSTANTS, MockPipe } from '../test-utils';
 
-jest.mock('sparkling-method-sdk', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('close', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;
@@ -15,7 +15,7 @@ describe('close', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPipe = jest.requireMock('sparkling-method-sdk') as unknown as MockPipe;
+    mockPipe = jest.requireMock('sparkling-method') as unknown as MockPipe;
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 

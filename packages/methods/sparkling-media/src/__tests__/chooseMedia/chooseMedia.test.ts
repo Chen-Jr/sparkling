@@ -8,7 +8,7 @@ import type { ChooseMediaRequest, ChooseMediaResponse } from '../../chooseMedia/
 import { createMockPipe, createSuccessResponse, createErrorResponse, MockPipe } from '../test-utils';
 
 // Mock the pipe module
-jest.mock('sparkling-method', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('chooseMedia', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;

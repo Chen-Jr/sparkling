@@ -8,7 +8,7 @@ import type { OpenRequest, OpenResponse, OpenOptions } from '../../open/open.d';
 import { createMockPipe, createSuccessResponse, createErrorResponse, TEST_CONSTANTS, MockPipe } from '../test-utils';
 
 // Mock the pipe modul
-jest.mock('sparkling-method-sdk', () => ({ call: jest.fn() }));
+jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
 describe('open', () => {
   let mockPipe: ReturnType<typeof createMockPipe>;
@@ -16,7 +16,7 @@ describe('open', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPipe = jest.requireMock('sparkling-method-sdk') as unknown as MockPipe;
+    mockPipe = jest.requireMock('sparkling-method') as unknown as MockPipe;
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
