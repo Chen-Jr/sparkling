@@ -3,11 +3,18 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.hybridkit.config
 
-import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(
+    sdk = [33],
+    packageName = "com.tiktok.sparkling"
+)
 class RuntimeInfoTest {
 
     private lateinit var runtimeInfo: RuntimeInfo
@@ -17,9 +24,141 @@ class RuntimeInfoTest {
         runtimeInfo = RuntimeInfo()
     }
 
+    // Individual constant tests
+    @Test
+    fun testContainerIdConstant() {
+        assertEquals("containerID", RuntimeInfo.CONTAINER_ID)
+    }
+
+    @Test
+    fun testQueryItemsConstant() {
+        assertEquals("queryItems", RuntimeInfo.QUERY_ITEMS)
+    }
+
+    @Test
+    fun testScreenWidthConstant() {
+        assertEquals("screenWidth", RuntimeInfo.SCREEN_WIDTH)
+    }
+
+    @Test
+    fun testScreenHeightConstant() {
+        assertEquals("screenHeight", RuntimeInfo.SCREEN_HEIGHT)
+    }
+
+    @Test
+    fun testOsConstant() {
+        assertEquals("os", RuntimeInfo.OS)
+    }
+
+    @Test
+    fun testOsVersionConstant() {
+        assertEquals("osVersion", RuntimeInfo.OS_VERSION)
+    }
+
+    @Test
+    fun testLanguageConstant() {
+        assertEquals("language", RuntimeInfo.LANGUAGE)
+    }
+
+    @Test
+    fun testStatusBarHeightConstant() {
+        assertEquals("statusBarHeight", RuntimeInfo.STATUS_BAR_HEIGHT)
+    }
+
+    @Test
+    fun testSafeAreaHeightConstant() {
+        assertEquals("safeAreaHeight", RuntimeInfo.SAFEAREA_HEIGHT)
+    }
+
+    @Test
+    fun testIsPadConstant() {
+        assertEquals("isPad", RuntimeInfo.IS_PAD)
+    }
+
+    @Test
+    fun testNavigationBarHeightConstant() {
+        assertEquals("navigationBarHeight", RuntimeInfo.NAVIGATION_BAR_HEIGHT)
+    }
+
+    @Test
+    fun testPixelRatioConstant() {
+        assertEquals("pixelRatio", RuntimeInfo.PIXEL_RATIO)
+    }
+
+    @Test
+    fun testAppLanguageConstant() {
+        assertEquals("appLanguage", RuntimeInfo.APP_LANGUAGE)
+    }
+
+    @Test
+    fun testAppLocaleConstant() {
+        assertEquals("appLocale", RuntimeInfo.APP_LOCALE)
+    }
+
+    @Test
+    fun testLynxSdkVersionConstant() {
+        assertEquals("lynxSdkVersion", RuntimeInfo.LYNX_SDK_VERSION)
+    }
+
+    @Test
+    fun testTemplateResDataConstant() {
+        assertEquals("templateResData", RuntimeInfo.TEMPLATE_RES_DATA)
+    }
+
+    @Test
+    fun testIsLowPowerModeConstant() {
+        assertEquals("isLowPowerMode", RuntimeInfo.IS_LOW_POWER_MODE)
+    }
+
+    @Test
+    fun testIsAppBackgroundConstant() {
+        assertEquals("isAppBackground", RuntimeInfo.IS_APP_BACKGROUND)
+    }
+
+    @Test
+    fun testA11yModeConstant() {
+        assertEquals("accessibleMode", RuntimeInfo.A11Y_MODE)
+    }
+
+    @Test
+    fun testDeviceModelConstant() {
+        assertEquals("deviceModel", RuntimeInfo.DEVICE_MODEL)
+    }
+
+    @Test
+    fun testEnvironmentConstant() {
+        assertEquals("env", RuntimeInfo.ENVIRONMENT)
+    }
+
+    @Test
+    fun testScreenOrientationConstant() {
+        assertEquals("screenOrientation", RuntimeInfo.SCREEN_ORIENTATION)
+    }
+
+    @Test
+    fun testOrientationConstant() {
+        assertEquals("orientation", RuntimeInfo.ORIENTATION)
+    }
+
+    @Test
+    fun testHasInitDataResConstant() {
+        assertEquals("hasInitDataRes", RuntimeInfo.HAS_INIT_DATA_RES)
+    }
+
+    // Functional tests
     @Test
     fun testRuntimeInfoInheritsFromConcurrentHashMap() {
         assertTrue(runtimeInfo is java.util.concurrent.ConcurrentHashMap<String, Any>)
+    }
+
+    @Test
+    fun testRuntimeInfoIsConcurrentHashMap() {
+        runtimeInfo["key1"] = "value1"
+        runtimeInfo["key2"] = 123
+        
+        assertEquals("value1", runtimeInfo["key1"])
+        assertEquals(123, runtimeInfo["key2"])
+        assertEquals(2, runtimeInfo.size)
     }
 
     @Test
@@ -31,31 +170,6 @@ class RuntimeInfoTest {
         assertEquals("test-container-id", runtimeInfo[RuntimeInfo.CONTAINER_ID])
         assertEquals(1080, runtimeInfo[RuntimeInfo.SCREEN_WIDTH])
         assertEquals(1920, runtimeInfo[RuntimeInfo.SCREEN_HEIGHT])
-    }
-
-    @Test
-    fun testConstantValues() {
-        assertEquals("containerID", RuntimeInfo.CONTAINER_ID)
-        assertEquals("queryItems", RuntimeInfo.QUERY_ITEMS)
-        assertEquals("screenWidth", RuntimeInfo.SCREEN_WIDTH)
-        assertEquals("screenHeight", RuntimeInfo.SCREEN_HEIGHT)
-        assertEquals("os", RuntimeInfo.OS)
-        assertEquals("osVersion", RuntimeInfo.OS_VERSION)
-        assertEquals("language", RuntimeInfo.LANGUAGE)
-        assertEquals("appLanguage", RuntimeInfo.APP_LANGUAGE)
-        assertEquals("appLocale", RuntimeInfo.APP_LOCALE)
-        assertEquals("lynxSdkVersion", RuntimeInfo.LYNX_SDK_VERSION)
-        assertEquals("statusBarHeight", RuntimeInfo.STATUS_BAR_HEIGHT)
-        assertEquals("safeAreaHeight", RuntimeInfo.SAFEAREA_HEIGHT)
-        assertEquals("templateResData", RuntimeInfo.TEMPLATE_RES_DATA)
-        assertEquals("isLowPowerMode", RuntimeInfo.IS_LOW_POWER_MODE)
-        assertEquals("isAppBackground", RuntimeInfo.IS_APP_BACKGROUND)
-        assertEquals("accessibleMode", RuntimeInfo.A11Y_MODE)
-        assertEquals("deviceModel", RuntimeInfo.DEVICE_MODEL)
-        assertEquals("env", RuntimeInfo.ENVIRONMENT)
-        assertEquals("screenOrientation", RuntimeInfo.SCREEN_ORIENTATION)
-        assertEquals("orientation", RuntimeInfo.ORIENTATION)
-        assertEquals("hasInitDataRes", RuntimeInfo.HAS_INIT_DATA_RES)
     }
 
     @Test

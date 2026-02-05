@@ -37,6 +37,19 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.jvmArgs("-Xmx2048m", "-XX:MaxMetaspaceSize=512m")
+                it.systemProperty("robolectric.logging.enabled", "true")
+                it.systemProperty(
+                    "user.home",
+                    buildDir.resolve("robolectric-home").absolutePath
+                )
+            }
+        }
+    }
 }
 
 dependencies {
@@ -65,6 +78,12 @@ dependencies {
 
     api(libs.lynx.service.devtool)
     api(libs.lynx.devtool)
+}
+
+tasks.withType<Test>().configureEach {
+    doFirst {
+        buildDir.resolve("robolectric-home").mkdirs()
+    }
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {

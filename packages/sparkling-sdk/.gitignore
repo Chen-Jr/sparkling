@@ -6,8 +6,7 @@ dist/
 coverage/
 *.tsbuildinfo
 
-# Android SDK artifacts
-android/.gradle/
+android/**/.gradle/
 android/.idea/
 android/local.properties
 android/**/build/

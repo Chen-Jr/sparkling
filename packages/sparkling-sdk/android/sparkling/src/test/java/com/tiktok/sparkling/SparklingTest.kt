@@ -25,8 +25,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(
   sdk = [33],
-  manifest = "src/main/AndroidManifest.xml",
-  resourceDir = "src/main/res",
   packageName = "com.tiktok.sparkling"
 )
 class SparklingTest {

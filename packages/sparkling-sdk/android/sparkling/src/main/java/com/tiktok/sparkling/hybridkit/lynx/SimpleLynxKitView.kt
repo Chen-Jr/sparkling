@@ -200,7 +200,7 @@ class SimpleLynxKitView : LynxView, IKitView {
     }
 
     override fun onLoadSuccess() {
-        TODO("Not yet implemented")
+        lynxKitLifeCycle?.onLoadFinish(this)
     }
 
     override fun updateData(data: TemplateData?) {

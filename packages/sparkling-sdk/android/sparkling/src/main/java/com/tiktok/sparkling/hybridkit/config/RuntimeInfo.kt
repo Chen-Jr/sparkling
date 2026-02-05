@@ -30,6 +30,9 @@ open class RuntimeInfo() : ConcurrentHashMap<String, Any>() {
         const val SCREEN_ORIENTATION = "screenOrientation"
         const val ORIENTATION = "orientation"
         const val HAS_INIT_DATA_RES = "hasInitDataRes"
+        const val IS_PAD = "isPad"
+        const val NAVIGATION_BAR_HEIGHT = "navigationBarHeight"
+        const val PIXEL_RATIO = "pixelRatio"
     }
 
 }

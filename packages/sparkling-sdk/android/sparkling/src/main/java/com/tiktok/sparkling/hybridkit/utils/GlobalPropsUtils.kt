@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.hybridkit.utils
 
+import android.app.Activity
 import android.content.Context
 import com.lynx.tasm.LynxEnv
 import com.tiktok.sparkling.hybridkit.HybridContext
@@ -66,7 +67,35 @@ class GlobalPropsUtils {
             RuntimeInfo.OS_VERSION to { DevicesUtil.system },
             RuntimeInfo.LANGUAGE to { DevicesUtil.language },
             RuntimeInfo.IS_LOW_POWER_MODE to { if (DevicesUtil.isLowPowerMode(HybridEnvironment.instance.context)) 1 else 0 },
-            RuntimeInfo.A11Y_MODE to { if (DevicesUtil.isTalkBackEnabled(HybridEnvironment.instance.context)) 1 else 0 }
+            RuntimeInfo.A11Y_MODE to { if (DevicesUtil.isTalkBackEnabled(HybridEnvironment.instance.context)) 1 else 0 },
+            RuntimeInfo.SAFEAREA_HEIGHT to {
+                val ctx = HybridEnvironment.instance.context
+                val activity = ctx as? Activity
+                if (activity != null) {
+                    val statusBarHeightDp = DevicesUtil.px2dp(
+                        DevicesUtil.getStatusBarHeight(activity).toDouble(), activity
+                    )
+                    DevicesUtil.safeAreaHeight(statusBarHeightDp, activity)
+                } else {
+                    DevicesUtil.px2dp(
+                        DevicesUtil.getScreenHeight(ctx).toDouble(), ctx
+                    ) - DevicesUtil.px2dp(
+                        DevicesUtil.getStatusBarHeight(ctx).toDouble(), ctx
+                    )
+                }
+            },
+            RuntimeInfo.IS_PAD to {
+                if (DevicesUtil.isPad(HybridEnvironment.instance.context)) 1 else 0
+            },
+            RuntimeInfo.NAVIGATION_BAR_HEIGHT to {
+                DevicesUtil.px2dp(
+                    DevicesUtil.getNavigationBarHeight(HybridEnvironment.instance.context).toDouble(),
+                    HybridEnvironment.instance.context
+                )
+            },
+            RuntimeInfo.PIXEL_RATIO to {
+                DevicesUtil.getPixelRadio(HybridEnvironment.instance.context)
+            }
         )
     }
 

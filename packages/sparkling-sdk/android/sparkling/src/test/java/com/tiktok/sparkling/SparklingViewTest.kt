@@ -1,4 +1,4 @@
-// Copyright (c) 2022 TikTok Pte. Ltd.
+// Copyright (c) 2025 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling
@@ -22,6 +22,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -35,8 +36,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(
   sdk = [33],
-  manifest = "src/main/AndroidManifest.xml",
-  resourceDir = "src/main/res",
   packageName = "com.tiktok.sparkling"
 )
 class SparklingViewTest {
@@ -150,27 +149,28 @@ class SparklingViewTest {
     assertEquals(Color.WHITE, color)
   }
 
-  @Test
-  fun addDebugTagViewHonoursDebugFlag() {
-    mockkObject(HybridCommon)
-    every { HybridCommon.hybridConfig?.baseInfoConfig?.isDebug } returns true
-    val sparklingView = SparklingView(context)
+  // Tests for addDebugTagView are disabled because the method is commented out in SparklingView.kt
+  // @Test
+  // fun addDebugTagViewHonoursDebugFlag() {
+  //   mockkObject(HybridCommon)
+  //   every { HybridCommon.hybridConfig?.baseInfoConfig?.isDebug } returns true
+  //   val sparklingView = SparklingView(context)
+  //
+  //   sparklingView.addDebugTagView()
+  //
+  //   assertEquals(1, sparklingView.childCount)
+  // }
 
-    sparklingView.addDebugTagView()
-
-    assertEquals(1, sparklingView.childCount)
-  }
-
-  @Test
-  fun addDebugTagViewSkipsWhenDebugDisabled() {
-    mockkObject(HybridCommon)
-    every { HybridCommon.hybridConfig?.baseInfoConfig?.isDebug } returns false
-    val sparklingView = SparklingView(context)
-
-    sparklingView.addDebugTagView()
-
-    assertEquals(0, sparklingView.childCount)
-  }
+  // @Test
+  // fun addDebugTagViewSkipsWhenDebugDisabled() {
+  //   mockkObject(HybridCommon)
+  //   every { HybridCommon.hybridConfig?.baseInfoConfig?.isDebug } returns false
+  //   val sparklingView = SparklingView(context)
+  //
+  //   sparklingView.addDebugTagView()
+  //
+  //   assertEquals(0, sparklingView.childCount)
+  // }
 
   @Test
   fun sparklingViewIsFrameLayout() {
@@ -178,10 +178,13 @@ class SparklingViewTest {
     assertTrue(sparklingView is FrameLayout)
   }
 
-  private class RecordingKitView(context: Context) : IKitView {
+  private open class RecordingKitView(context: Context) : IKitView {
     override var hybridContext: HybridContext = HybridContext()
     private val realView = View(context)
     var loadCalled = false
+    var onShowCalled = false
+    var onHideCalled = false
+    var lastGlobalPropsUpdate: Map<String, Any>? = null
 
     override fun realView(): View = realView
 
@@ -197,12 +200,15 @@ class SparklingViewTest {
     }
 
     override fun updateGlobalPropsByIncrement(data: Map<String, Any>) {
+      lastGlobalPropsUpdate = data
     }
 
     override fun onShow() {
+      onShowCalled = true
     }
 
     override fun onHide() {
+      onHideCalled = true
     }
 
     override fun destroy(clearContext: Boolean) {
@@ -216,5 +222,145 @@ class SparklingViewTest {
 
     override fun onLoadSuccess() {
     }
+
+    override fun sendEventByJSON(eventName: String, params: org.json.JSONObject?) {
+    }
+
+    override fun refreshContext(context: Context) {
+    }
+
+    override fun refreshSchemeParam(param: HybridSchemeParam) {
+    }
+  }
+
+  @Test
+  fun getHybridViewContextReturnsContext() {
+    val sparklingView = SparklingView(context)
+    assertEquals(context, sparklingView.getHybridViewContext())
+  }
+
+  @Test
+  fun actualViewReturnsSelf() {
+    val sparklingView = SparklingView(context)
+    assertEquals(sparklingView, sparklingView.actualView())
+  }
+
+  @Test
+  fun obtainHybridContextReturnsSparklingContext() {
+    val kitView = RecordingKitView(context)
+    every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+    val sparklingView = SparklingView(context)
+
+    sparklingView.prepare(baseContext)
+
+    assertEquals(baseContext, sparklingView.obtainHybridContext())
+  }
+
+  @Test
+  fun obtainHybridContextReturnsNullWhenNotPrepared() {
+    val sparklingView = SparklingView(context)
+    assertNull(sparklingView.obtainHybridContext())
+  }
+
+  @Test
+  fun getPerformanceViewHybridContextReturnsSparklingContext() {
+    val kitView = RecordingKitView(context)
+    every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+    val sparklingView = SparklingView(context)
+
+    sparklingView.prepare(baseContext)
+
+    assertEquals(baseContext, sparklingView.getPerformanceViewHybridContext())
+  }
+
+  @Test
+  fun hasReleaseReturnsFalseInitially() {
+    val sparklingView = SparklingView(context)
+    assertFalse(sparklingView.hasRelease())
+  }
+
+  @Test
+  fun hasReleaseReturnsTrueAfterRelease() {
+    val kitView = RecordingKitView(context)
+    every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+    val sparklingView = SparklingView(context)
+
+    sparklingView.prepare(baseContext)
+    sparklingView.release()
+
+    assertTrue(sparklingView.hasRelease())
+  }
+
+  @Test
+  fun releaseIsIdempotent() {
+    val kitView = RecordingKitView(context)
+    every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+    val sparklingView = SparklingView(context)
+
+    sparklingView.prepare(baseContext)
+    sparklingView.release()
+    sparklingView.release() // Second call should be no-op
+
+    assertTrue(sparklingView.hasRelease())
+    assertNull(sparklingView.sparklingContext)
+  }
+
+  @Test
+  fun releaseClearsContext() {
+    val kitView = RecordingKitView(context)
+    every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+    val sparklingView = SparklingView(context)
+
+    sparklingView.prepare(baseContext)
+    assertNotNull(sparklingView.sparklingContext)
+
+    sparklingView.release()
+
+    assertNull(sparklingView.sparklingContext)
+  }
+
+  @Test
+  fun onShowEventDelegatesToKitView() {
+    val kitView = RecordingKitView(context)
+    every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+    val sparklingView = SparklingView(context)
+
+    sparklingView.prepare(baseContext)
+    sparklingView.onShowEvent()
+
+    assertTrue(kitView.onShowCalled)
+  }
+
+  @Test
+  fun onHideEventDelegatesToKitView() {
+    val kitView = RecordingKitView(context)
+    every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+    val sparklingView = SparklingView(context)
+
+    sparklingView.prepare(baseContext)
+    sparklingView.onHideEvent()
+
+    assertTrue(kitView.onHideCalled)
+  }
+
+  @Test
+  fun updateGlobalPropsByIncrementDelegatesToKitView() {
+    val kitView = RecordingKitView(context)
+    every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+    val sparklingView = SparklingView(context)
+    val props = mapOf("key" to "value")
+
+    sparklingView.prepare(baseContext)
+    sparklingView.updateGlobalPropsByIncrement(props)
+
+    assertEquals(props, kitView.lastGlobalPropsUpdate)
+  }
+
+  @Test
+  fun processAfterUseCachedDoesNotThrow() {
+    val sparklingView = SparklingView(context)
+    // Should not throw
+    sparklingView.processAfterUseCached(baseContext)
+    sparklingView.processAfterUseCached(null)
   }
 }

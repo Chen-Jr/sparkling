@@ -237,4 +237,19 @@ object DevicesUtil {
             false
         }
     }
+
+    /**
+     * Get the navigation bar height in pixels.
+     *
+     * @param context Context to access resources
+     * @return Navigation bar height in pixels, or 0 if not found
+     */
+    fun getNavigationBarHeight(context: Context): Int {
+        val resourceId = context.resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        return if (resourceId > 0) {
+            context.resources.getDimensionPixelSize(resourceId)
+        } else {
+            0
+        }
+    }
 }

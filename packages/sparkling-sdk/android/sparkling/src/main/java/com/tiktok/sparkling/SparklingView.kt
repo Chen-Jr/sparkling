@@ -37,6 +37,7 @@ class SparklingView(
     // private var debugInfoTag: TextView? = null
     
     private var loadStatus = IPerformanceView.LoadStatus.INIT
+    private var isReleased = false
 
     fun prepare(sparklingContext: SparklingContext) {
         this.sparklingContext = sparklingContext
@@ -123,7 +124,7 @@ class SparklingView(
     }
 
     override fun getHybridViewContext(): Context {
-        TODO("Not yet implemented")
+        return context
     }
 
     override fun loadUrl() {
@@ -140,47 +141,57 @@ class SparklingView(
         context: Context,
         hybridContext: HybridContext?
     ) {
-        TODO("Not yet implemented")
+        kitViewDelegate?.refreshContext(context)
+        (hybridContext as? SparklingContext)?.let { updatedContext ->
+            updatedContext.hybridSchemeParam?.let {
+                kitViewDelegate?.refreshSchemeParam(it)
+            }
+        }
     }
 
     override fun processAfterUseCached(hybridContext: HybridContext?) {
-        TODO("Not yet implemented")
+        // No-op: reserved for future cache processing logic
     }
 
     override fun obtainHybridContext(): HybridContext? {
-        TODO("Not yet implemented")
+        return sparklingContext
     }
 
     override fun updateGlobalPropsByIncrement(data: Map<String, Any>) {
-        TODO("Not yet implemented")
+        kitViewDelegate?.updateGlobalPropsByIncrement(data)
     }
 
     override fun sendEventByJSON(eventName: String, params: JSONObject?) {
-        TODO("Not yet implemented")
+        kitViewDelegate?.sendEventByJSON(eventName, params)
     }
 
     override fun actualView(): View {
-        TODO("Not yet implemented")
+        return this
     }
 
     override fun onShowEvent() {
-        TODO("Not yet implemented")
+        kitViewDelegate?.onShow()
     }
 
     override fun onHideEvent() {
-        TODO("Not yet implemented")
+        kitViewDelegate?.onHide()
     }
 
     override fun release() {
-        TODO("Not yet implemented")
+        if (isReleased) return
+        isReleased = true
+        kitViewDelegate?.destroy(true)
+        loadingView = null
+        errorView = null
+        sparklingContext = null
     }
 
     override fun getPerformanceViewHybridContext(): HybridContext? {
-        TODO("Not yet implemented")
+        return sparklingContext
     }
 
     override fun hasRelease(): Boolean {
-        TODO("Not yet implemented")
+        return isReleased
     }
 
     fun getKitView(): IKitView? {
