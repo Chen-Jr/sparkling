@@ -14,16 +14,11 @@
     "build:copy": "sparkling-cli build --copy",
     "autolink": "sparkling-cli autolink",
     "format": "prettier --write .",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "android": "sparkling-cli run:android",
-    "ios": "sparkling-cli run:ios",
+    "test": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+
     "run:android": "sparkling-cli run:android",
-    "run:ios": "sparkling-cli run:ios",
-    "android:copy": "sparkling-cli run:android --copy",
-    "ios:copy": "sparkling-cli run:ios --copy",
-    "run:android:copy": "sparkling-cli run:android --copy",
-    "run:ios:copy": "sparkling-cli run:ios --copy"
+    "run:ios": "sparkling-cli run:ios"
   },
   "dependencies": {
     "@lynx-js/react": "^0.107.0",
