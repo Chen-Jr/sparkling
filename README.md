@@ -29,7 +29,7 @@ The full documentation for Sparkling can be found in [`docs`](/docs)
 ## Project Layout
 
 - [`packages/sparkling-sdk`](/packages/sparkling-sdk) Core Sparkling SDK
-- [`packages/sparkling-method-sdk`](/packages/sparkling-method-sdk) Sparkling Method SDK
+- [`packages/sparkling-method`](/packages/sparkling-method) Sparkling Method SDK
 - [`packages/methods`](/packages/methods) Built-in Sparkling methods packages
 - [`packages/sparkling-cli`](/packages/sparkling-cli) Sparkling CLI.
 - [`packages/create-sparkling-app`](/packages/create-sparkling-app) App scaffolding CLI

@@ -59,7 +59,7 @@ test('App', async () => {
                 scroll-orientation="vertical"
                 span-count="1"
                 style="width: 100%; height: 200px;"
-                update-list-info="[{"insertAction":[{"position":0,"type":"__Card__:__snapshot_5c8b8_test_3","item-key":"1"},{"position":1,"type":"__Card__:__snapshot_5c8b8_test_3","item-key":"2"},{"position":2,"type":"__Card__:__snapshot_5c8b8_test_3","item-key":"3"},{"position":3,"type":"__Card__:__snapshot_5c8b8_test_3","item-key":"4"}],"removeAction":[],"updateAction":[]}]"
+                update-list-info="[{"insertAction":[{"position":0,"type":"__Card__:__snapshot_ed605_test_3","item-key":"1"},{"position":1,"type":"__Card__:__snapshot_ed605_test_3","item-key":"2"},{"position":2,"type":"__Card__:__snapshot_ed605_test_3","item-key":"3"},{"position":3,"type":"__Card__:__snapshot_ed605_test_3","item-key":"4"},{"position":4,"type":"__Card__:__snapshot_ed605_test_3","item-key":"5"},{"position":5,"type":"__Card__:__snapshot_ed605_test_3","item-key":"6"},{"position":6,"type":"__Card__:__snapshot_ed605_test_3","item-key":"7"}],"removeAction":[],"updateAction":[]}]"
               />
             </view>
             <view
@@ -68,13 +68,13 @@ test('App', async () => {
               <text
                 class="bold-text"
               >
-                Scheme
+                Bundle Path
               </text>
               <input
                 class="input-box"
-                placeholder="Enter Scheme"
+                placeholder="Enter bundle path (e.g. second.lynx.bundle)"
                 text-color="#000000"
-                value="hybrid://lynxview_page?bundle=second.lynx.bundle&title=Second Page&screen_orientation=portrait"
+                value="second.lynx.bundle"
               />
             </view>
             <view
@@ -84,7 +84,7 @@ test('App', async () => {
                 class="list-header"
               >
                 <text>
-                  Scheme Params 
+                  Route Params 
                   <wrapper>
                     ▼
                   </wrapper>
@@ -100,13 +100,13 @@ test('App', async () => {
   const {
     findByText,
   } = getQueriesForElement(elementTree.root!)
-  const element = await findByText('Scheme')
+  const element = await findByText('Bundle Path')
   expect(element).toBeInTheDocument()
   expect(element).toMatchInlineSnapshot(`
     <text
       class="bold-text"
     >
-      Scheme
+      Bundle Path
     </text>
   `)
 })

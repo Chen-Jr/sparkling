@@ -10,12 +10,10 @@
     "directory": "packages/playground"
   },
   "scripts": {
-    "build": "pnpm -C ../.. --filter sparkling-method-sdk --filter sparkling-router --filter sparkling-storage --filter sparkling-media build && rspeedy build && node scripts/copy-assets.js",
+    "build": "pnpm -C ../.. --filter sparkling-method --filter sparkling-router --filter sparkling-storage --filter sparkling-media build && rspeedy build && node scripts/copy-assets.js",
     "dev": "rspeedy dev",
     "format": "prettier --write .",
-    "preview": "rspeedy preview",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "preview": "rspeedy preview"
   },
   "dependencies": {
     "@lynx-js/react": "^0.107.0",
