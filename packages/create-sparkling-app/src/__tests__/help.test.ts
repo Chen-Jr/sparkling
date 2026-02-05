@@ -19,16 +19,13 @@ describe('help', () => {
     await help();
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Sparkling CLI Usage: sparkling [command]')
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining('build[:type]  Builds the current Sparkling project')
+      expect.stringContaining('Usage: create-sparkling-app [project-name] [options]')
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining('help          Displays this help message')
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining('init [options]  Scaffold a new Sparkling project (alias: create)')
+      expect.stringContaining('init [name]   Scaffold a new Sparkling project (alias: create)')
     );
   });
 

@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import build, { BuildType } from './build';
 import help from './help';
 import init from './init';
 import { UserCancelledError } from './core/project-builder/template';
@@ -45,19 +44,13 @@ export async function main() {
   const args = cleanArgs;
   const commandCandidate = args[0];
   const isExplicitCommand = Boolean(
-    commandCandidate && ['init', 'create', 'help', 'build'].some(prefix => commandCandidate === prefix || commandCandidate.startsWith(`${prefix}:`)),
+    commandCandidate && ['init', 'create', 'help'].some(cmd => commandCandidate === cmd),
   );
   const command = isExplicitCommand ? (commandCandidate as string) : 'init';
   const commandArgs = isExplicitCommand ? args.slice(1) : args;
 
   if (command === 'init' || command === 'create') {
     await init(commandArgs, { verbose: isVerboseEnabled() });
-    return;
-  }
-
-  if (command.startsWith('build')) {
-    const buildType = (command.slice(6) || 'all') as BuildType;
-    await build(buildType);
     return;
   }
 

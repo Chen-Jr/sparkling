@@ -4,11 +4,9 @@
 
 import { withMockArgv } from './test-utils';
 
-const mockBuild = jest.fn();
 const mockHelp = jest.fn();
 const mockInit = jest.fn();
 
-jest.mock('../build', () => mockBuild);
 jest.mock('../help', () => mockHelp);
 jest.mock('../init', () => mockInit);
 
@@ -20,7 +18,6 @@ describe('CLI', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    mockBuild.mockClear();
     mockHelp.mockClear();
     mockInit.mockClear();
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -51,7 +48,6 @@ describe('CLI', () => {
   it('should call init when command is "init"', async () => {
     await testMainFunction(['init'], () => {
       expect(mockInit).toHaveBeenCalledWith([], { verbose: false });
-      expect(mockBuild).not.toHaveBeenCalled();
       expect(mockHelp).not.toHaveBeenCalled();
     });
   });
@@ -59,39 +55,12 @@ describe('CLI', () => {
   it('should call init when command is "create"', async () => {
     await testMainFunction(['create', 'my-app'], () => {
       expect(mockInit).toHaveBeenCalledWith(['my-app'], { verbose: false });
-      expect(mockBuild).not.toHaveBeenCalled();
-    });
-  });
-
-  it('should call build with "all" when command is "build"', async () => {
-    await testMainFunction(['build'], () => {
-      expect(mockBuild).toHaveBeenCalledWith('all');
-      expect(mockInit).not.toHaveBeenCalled();
-    });
-  });
-
-  it('should call build with specific type when command is "build:frontend"', async () => {
-    await testMainFunction(['build:frontend'], () => {
-      expect(mockBuild).toHaveBeenCalledWith('frontend');
-    });
-  });
-
-  it('should call build with specific type when command is "build:android"', async () => {
-    await testMainFunction(['build:android'], () => {
-      expect(mockBuild).toHaveBeenCalledWith('android');
-    });
-  });
-
-  it('should call build with specific type when command is "build:ios"', async () => {
-    await testMainFunction(['build:ios'], () => {
-      expect(mockBuild).toHaveBeenCalledWith('ios');
     });
   });
 
   it('should call help when command is "help"', async () => {
     await testMainFunction(['help'], () => {
       expect(mockHelp).toHaveBeenCalledTimes(1);
-      expect(mockBuild).not.toHaveBeenCalled();
       expect(mockInit).not.toHaveBeenCalled();
     });
   });
@@ -99,7 +68,6 @@ describe('CLI', () => {
   it('should treat unrecognized first argument as init project name', async () => {
     await testMainFunction(['my-app', '--force'], () => {
       expect(mockInit).toHaveBeenCalledWith(['my-app', '--force'], { verbose: false });
-      expect(mockBuild).not.toHaveBeenCalled();
       expect(mockHelp).not.toHaveBeenCalled();
     });
   });

@@ -3,15 +3,19 @@
 // LICENSE file in the root directory of this source tree.
 
 export default async () => {
-  console.log(`Sparkling CLI Usage: sparkling [command]
+  console.log(`Usage: create-sparkling-app [project-name] [options]
 
 Commands:
-  init [options]  Scaffold a new Sparkling project (alias: create)
-  build[:type]  Builds the current Sparkling project
+  init [name]   Scaffold a new Sparkling project (alias: create)
   help          Displays this help message
+
 Options:
   -v, --verbose  Enable verbose logging for debugging
 
- Quick start:
-   npx create-sparkling-app <dir> [options] (defaults to init)`);
+Quick start:
+  npx create-sparkling-app my-app
+
+After creating your project, use sparkling-cli to build and run:
+  npx sparkling run:android
+  npx sparkling run:ios`);
 };
