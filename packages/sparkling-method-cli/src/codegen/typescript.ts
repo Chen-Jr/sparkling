@@ -33,8 +33,18 @@ export function buildTypeScriptView(method: MethodDefinition, config: ModuleConf
     extras: new Map()
   };
 
-  const requestInterface = toTypeScriptInterfaceView(requestObject, `${methodPascal}Request`, tsContext, ['Request']);
-  const responseInterface = toTypeScriptInterfaceView(responseObject, `${methodPascal}Response`, tsContext, ['Response']);
+  const requestInterface = toTypeScriptInterfaceView(
+    requestObject,
+    `${methodPascal}Request`,
+    tsContext,
+    [methodPascal, 'Request']
+  );
+  const responseInterface = toTypeScriptInterfaceView(
+    responseObject,
+    `${methodPascal}Response`,
+    tsContext,
+    [methodPascal, 'Response']
+  );
 
   // Build validation rules from request fields
   const validationRules = buildValidationRules(requestObject, methodPascal);
@@ -47,7 +57,7 @@ export function buildTypeScriptView(method: MethodDefinition, config: ModuleConf
     methodName: method.name,
     methodCamelCase,
     methodPascalCase: methodPascal,
-    packageName: config.packageName || 'sparkling-method-sdk',
+    packageName: config.packageName || 'sparkling-method',
     requestInterface,
     responseInterface,
     extraInterfaces: Array.from(tsContext.extras.values()),

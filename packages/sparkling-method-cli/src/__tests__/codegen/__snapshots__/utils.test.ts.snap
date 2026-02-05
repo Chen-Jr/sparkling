@@ -51,11 +51,11 @@ exports[`Codegen Utilities snapshot testing should maintain consistent transform
     "tsType": "string",
   },
   {
-    "camel": "xmlhttpRequest",
+    "camel": "xmlHttpRequest",
     "jsType": "string",
-    "kebab": "xmlhttp-request",
+    "kebab": "xml-http-request",
     "original": "XMLHttpRequest",
-    "pascal": "XmlhttpRequest",
+    "pascal": "XmlHttpRequest",
     "tsType": "string",
   },
   {
@@ -102,7 +102,7 @@ exports[`Codegen Utilities snapshot testing should maintain consistent type mapp
   {
     "javascript": "object",
     "primitive": "object",
-    "typescript": "Record<string, any>",
+    "typescript": "object",
   },
   {
     "javascript": "undefined",

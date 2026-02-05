@@ -17,25 +17,87 @@ export function sanitizePackageSegment(value: string): string {
 export function toPascalCase(value: string): string {
   const parts = splitIntoWords(value);
   if (parts.length === 0) {
-    return 'Method';
+    return '';
   }
   return parts.map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1).toLowerCase()).join('');
 }
 
 export function splitIntoWords(value: string): string[] {
-  if (!value) {
+  if (typeof value !== 'string' || !value) {
     return [];
   }
-  return value
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .split(/[^a-zA-Z0-9]+/)
-    .filter(Boolean);
+  const chars = Array.from(value);
+  const words: string[] = [];
+  let current = '';
+  let currentHasLetter = false;
+  let prevInWord = '';
+  const isLetter = (char: string) => /\p{L}/u.test(char);
+  const isNumber = (char: string) => /\p{N}/u.test(char);
+  const isUpper = (char: string) => /\p{Lu}/u.test(char);
+  const isLower = (char: string) => /\p{Ll}/u.test(char);
+  const pushCurrent = () => {
+    if (current) {
+      words.push(current);
+      current = '';
+      currentHasLetter = false;
+      prevInWord = '';
+    }
+  };
+
+  for (let i = 0; i < chars.length; i += 1) {
+    const char = chars[i];
+    if (!isLetter(char) && !isNumber(char)) {
+      pushCurrent();
+      continue;
+    }
+
+    if (!current) {
+      current = char;
+      currentHasLetter = isLetter(char);
+      prevInWord = char;
+      continue;
+    }
+
+    const nextChar = chars[i + 1] ?? '';
+    let boundary = false;
+
+    if (isUpper(char)) {
+      if (prevInWord && isUpper(prevInWord) && nextChar && isLower(nextChar)) {
+        boundary = true;
+      } else if (prevInWord && isLower(prevInWord)) {
+        boundary = true;
+      } else if (prevInWord && isNumber(prevInWord) && currentHasLetter) {
+        boundary = true;
+      }
+    } else if (isLower(char)) {
+      if (prevInWord && isNumber(prevInWord) && currentHasLetter) {
+        boundary = true;
+      }
+    }
+
+    if (boundary) {
+      pushCurrent();
+      current = char;
+      currentHasLetter = isLetter(char);
+      prevInWord = char;
+      continue;
+    }
+
+    current += char;
+    if (isLetter(char)) {
+      currentHasLetter = true;
+    }
+    prevInWord = char;
+  }
+
+  pushCurrent();
+  return words;
 }
 
 export function toCamelCase(value: string): string {
   const parts = splitIntoWords(value);
   if (parts.length === 0) {
-    return 'method';
+    return '';
   }
   return parts[0].toLowerCase() + parts.slice(1).map((chunk) =>
     chunk.charAt(0).toUpperCase() + chunk.slice(1).toLowerCase()
@@ -44,6 +106,9 @@ export function toCamelCase(value: string): string {
 
 export function toKebabCase(value: string): string {
   const parts = splitIntoWords(value);
+  if (parts.length === 0) {
+    return '';
+  }
   return parts.map(part => part.toLowerCase()).join('-');
 }
 
@@ -58,7 +123,7 @@ export function mapPrimitiveToTypeScript(kind: string): string {
     case 'void':
       return 'void';
     case 'object':
-      return 'Record<string, any>';
+      return 'object';
     case 'any':
       return 'any';
     default:

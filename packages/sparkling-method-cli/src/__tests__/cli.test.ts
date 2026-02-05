@@ -117,7 +117,7 @@ describe('sparkling-method cli', () => {
       expect(kotlinContent).toContain('duration');
 
       const swiftContent = await fs.readFile(swiftPath, 'utf8');
-      expect(swiftContent).toContain('struct ShowToastResponse');
+      expect(swiftContent).toContain('class SPKShowToastMethodResultModel');
     });
   });
 });

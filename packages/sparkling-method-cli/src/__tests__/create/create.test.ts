@@ -10,9 +10,17 @@ jest.mock('inquirer', () => ({
 }));
 
 jest.mock('chalk', () => ({
+  bold: jest.fn((str) => str),
+  dim: jest.fn((str) => str),
   cyan: jest.fn((str) => str),
   green: jest.fn((str) => str),
-  gray: jest.fn((str) => str)
+  yellow: jest.fn((str) => str),
+  red: jest.fn((str) => str),
+  white: jest.fn((str) => str),
+  gray: jest.fn((str) => str),
+  grey: jest.fn((str) => str),
+  magenta: jest.fn((str) => str),
+  blue: jest.fn((str) => str)
 }));
 
 const mockedPrompt = inquirer.prompt as jest.MockedFunction<typeof inquirer.prompt>;
@@ -173,9 +181,10 @@ describe('Project Creation (runInit)', () => {
     it('should use default template when none specified', async () => {
       await withTempDir(async (tmpDir) => {
         // Mock the template resolution to return a valid path
+        const defaultTemplateDir = await createMockTemplate(tmpDir);
         jest.doMock('../../create/scaffold', () => ({
           ...jest.requireActual('../../create/scaffold'),
-          resolveTemplateDir: jest.fn().mockResolvedValue(await createMockTemplate(tmpDir))
+          resolveTemplateDir: jest.fn().mockResolvedValue(defaultTemplateDir)
         }));
 
         const options: InitOptions = {};
@@ -365,7 +374,13 @@ describe('Project Creation (runInit)', () => {
           expect.stringContaining('Project created successfully')
         );
         expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Next steps:')
+          expect.stringContaining('Tip cd output-test')
+        );
+        expect(consoleLogSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Tip Edit and rename src/method.d.ts')
+        );
+        expect(consoleLogSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Tip Run `npm run codegen`')
         );
       });
     });

@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Project Creation (runInit) snapshot testing should create consistent project structure: project-structure 1`] = `
+{
+  "README.md": "file",
+  "android": {
+    "build.gradle.kts": "file",
+    "src": {
+      "main": {
+        "AndroidManifest.xml": "file",
+        "java": {
+          "com": {
+            "snapshot": {
+              "test": {
+                "snapshotmodule": {},
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "ios": {
+    "Source": {
+      "Core": {
+        "snapshotmodule": {},
+      },
+    },
+    "Sparkling-SnapshotModule.podspec": "file",
+  },
+  "module.config.json": "file",
+  "package.json": "file",
+  "src": {
+    "method.d.ts": "file",
+  },
+}
+`;

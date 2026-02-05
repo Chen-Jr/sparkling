@@ -49,7 +49,7 @@ const testMethodDefinition = {
 };
 
 const testConfig = {
-  packageName: 'sparkling-method-sdk',
+  packageName: 'sparkling-method',
   moduleName: 'ui'
 };
 

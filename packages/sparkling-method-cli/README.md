@@ -1,6 +1,6 @@
-# sparkling-method
+# sparkling-method-cli
 
-[![npm version](https://img.shields.io/npm/v/sparkling-method.svg)](https://npmjs.com/package/sparkling-method)
+[![npm version](https://img.shields.io/npm/v/sparkling-method-cli.svg)](https://npmjs.com/package/sparkling-method-cli)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../LICENSE)
 
 CLI utilities for creating and managing Sparkling method modules with cross-platform code generation.
@@ -8,13 +8,13 @@ CLI utilities for creating and managing Sparkling method modules with cross-plat
 ## Installation
 
 ```bash
-npm install -g sparkling-method@latest
+npm install -g sparkling-method-cli@latest
 ```
 
 Or add to your project:
 
 ```bash
-npm install sparkling-method@latest --save-dev
+npm install sparkling-method-cli@latest --save-dev
 ```
 
 ## Usage

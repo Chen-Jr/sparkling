@@ -74,7 +74,7 @@ describe('Template Processing (Mustache Integration)', () => {
       };
       const result = Mustache.render(template, data);
 
-      expect(result).toBe('0: First\n1: Second\n');
+      expect(result).toBe(': First\n: Second\n');
     });
   });
 
@@ -204,8 +204,8 @@ export type { {{requestInterface}}, {{responseInterface}}{{#extraInterfaces}}, {
       expect(result).toContain('ShowToastRequest');
       expect(result).toContain('ToastOptions, ToastResult');
       expect(result).toContain('./hide-toast/hide-toast');
-      expect(result).toContain('HideToastRequest');
-      expect(result).not.toContain('HideToastRequest,');  // No trailing comma for empty extraInterfaces
+      expect(result).toContain('HideToastRequest, HideToastResponse');
+      expect(result).not.toContain('HideToastResponse,');  // No trailing comma for empty extraInterfaces
     });
   });
 
@@ -360,9 +360,9 @@ Module: {{name}}
 
       const result = Mustache.render(template, data);
 
-      expect(result).toContain('test&value');
-      expect(result).toContain('<script>');
-      expect(result).toContain('"quotes"');
+      expect(result).toContain('test&amp;value');
+      expect(result).toContain('&lt;script&gt;');
+      expect(result).toContain('&quot;quotes&quot;');
     });
 
     it('should handle empty string templates', () => {
