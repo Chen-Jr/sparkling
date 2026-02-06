@@ -23,7 +23,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@lynx-js/rspeedy": "^0.9.7",
+    "@lynx-js/rspeedy": "^0.13.3",
     "commander": "^12.1.0",
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.2.0",
