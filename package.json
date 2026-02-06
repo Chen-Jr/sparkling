@@ -22,8 +22,14 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=7.33.6 <8.0.0"
+    "node": "^22 || ^24",
+    "pnpm": ">=10.0.0"
   },
-  "packageManager": "pnpm@7.33.6"
+  "packageManager": "pnpm@10.26.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js",
+      "esbuild"
+    ]
+  }
 }

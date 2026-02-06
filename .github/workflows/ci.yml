@@ -119,13 +119,13 @@ jobs:
       #   if: needs.changes.outputs.any_unit_tests == 'true'
       #   uses: pnpm/action-setup@v4
       #   with:
-      #     version: 7.33.6
+      #     version: 10.26.0
       #
       # - name: Setup Node.js
       #   if: needs.changes.outputs.any_unit_tests == 'true'
       #   uses: actions/setup-node@v4
       #   with:
-      #     node-version: 18
+      #     node-version: 22
       #     cache: pnpm
       #
       # - name: Install dependencies

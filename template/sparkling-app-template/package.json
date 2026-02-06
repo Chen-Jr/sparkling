@@ -39,7 +39,7 @@
     "sparkling-cli": "rc"
   },
   "engines": {
-    "node": ">=18"
+    "node": "^22 || ^24"
   },
   "private": false
 }

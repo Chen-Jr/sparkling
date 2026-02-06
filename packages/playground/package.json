@@ -35,7 +35,7 @@
     "@vitest/coverage-v8": "^3.1.2"
   },
   "engines": {
-    "node": ">=18"
+    "node": "^22 || ^24"
   },
   "private": true
 }
