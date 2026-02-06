@@ -7,6 +7,7 @@ import path from 'node:path';
 import { autolink } from './commands/autolink';
 import { buildProject } from './commands/build';
 import { copyAssets } from './commands/copy-assets';
+import { doctor } from './commands/doctor';
 import { runAndroid } from './commands/run-android';
 import { runIos } from './commands/run-ios';
 import { ui } from './utils/ui';
@@ -108,6 +109,20 @@ program
       device: opts.device,
       skipPodInstall: opts.skipPodInstall,
     });
+  });
+
+program
+  .command('doctor')
+  .description('Check if your environment is ready to build a Sparkling app')
+  .option('--platform <platform>', 'Platform to check: android|ios|all', 'all')
+  .action(async (opts) => {
+    const raw = String(opts.platform ?? 'all').toLowerCase();
+    const allowed = ['android', 'ios', 'all'];
+    const platform = (allowed.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'all';
+    if (!allowed.includes(raw)) {
+      console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
+    }
+    await doctor({ platform });
   });
 
 program.parse(process.argv);
