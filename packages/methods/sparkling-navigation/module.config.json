@@ -1,5 +1,5 @@
 {
-  "name": "sparkling-router",
+  "name": "sparkling-navigation",
   "platforms": ["android", "ios"],
   "version": "1.0.0",
   "description": "Router methods for navigation and page management in Sparkling apps",
@@ -36,7 +36,7 @@
   "ios": {
     "moduleName": "SPKRouter",
     "className": "RouterMethod",
-    "podspecPath": "ios/Sparkling-SPKRouter.podspec",
+    "podspecPath": "ios/Sparkling-Router.podspec",
     "swiftVersion": "5.0"
   },
   "web": {

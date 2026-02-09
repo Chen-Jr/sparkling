@@ -87,7 +87,7 @@ export function navigate(params: NavigateRequest, callback: (result: NavigateRes
     }
 
     if (typeof callback !== 'function') {
-        console.error('[sparkling-router] navigate: callback must be a function');
+        console.error('[sparkling-navigation] navigate: callback must be a function');
         return;
     }
 

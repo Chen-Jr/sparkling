@@ -33,7 +33,7 @@ export function open(params: OpenRequest, callback: (result: OpenResponse) => vo
     }
 
     if (typeof callback !== 'function') {
-        console.error('[sparkling-router] open: callback must be a function');
+        console.error('[sparkling-navigation] open: callback must be a function');
         return;
     }
 

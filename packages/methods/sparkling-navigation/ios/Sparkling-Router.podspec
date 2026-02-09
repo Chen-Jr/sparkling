@@ -3,18 +3,18 @@ require 'json'
 package = JSON.parse(File.read(File.join(__dir__, '..', 'package.json')))
 
 Pod::Spec.new do |s|
-  s.name           = 'Sparkling-SPKRouter'
+  s.name           = 'Sparkling-Router'
   s.version        = package['version']
   s.summary        = package['description']
   s.description    = package['description']
   s.license        = package['license']
   s.author         = package['author']
-  s.homepage       = 'https://github.com/leeekyrie/Sparkling.git'
+  s.homepage       = 'https://github.com/tiktok/sparkling'
   s.platforms      = {
     :ios => '12.0'
   }
   s.swift_version  = '5.7'
-  s.source         = { git: 'https://github.com/leeekyrie/Sparkling.git' }
+  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }
   s.static_framework = true
 
   s.pod_target_xcconfig = {

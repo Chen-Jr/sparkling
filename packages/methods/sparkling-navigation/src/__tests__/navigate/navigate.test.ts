@@ -89,7 +89,7 @@ describe('navigate', () => {
 
       navigate(params, null as any);
 
-expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-router] navigate: callback must be a function');
+expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] navigate: callback must be a function');
       expect(mockOpen).not.toHaveBeenCalled();
     });
   });

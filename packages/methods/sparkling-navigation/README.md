@@ -1,6 +1,6 @@
-# sparkling-router
+# sparkling-navigation
 
-[![npm version](https://img.shields.io/npm/v/sparkling-router.svg)](https://npmjs.com/package/sparkling-router)
+[![npm version](https://img.shields.io/npm/v/sparkling-navigation.svg)](https://npmjs.com/package/sparkling-navigation)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../../LICENSE)
 
 Navigation methods for Sparkling applications, enabling page routing and navigation control.
@@ -8,10 +8,10 @@ Navigation methods for Sparkling applications, enabling page routing and navigat
 ## Installation
 
 ```bash
-npm install sparkling-router@latest
+npm install sparkling-navigation@latest
 ```
 
-After installing, run `sparkling-cli autolink` to automatically link the native modules:
+After installing, run `sparkling-app-cli autolink` to automatically link the native modules:
 
 ```bash
 npx sparkling autolink
@@ -20,7 +20,7 @@ npx sparkling autolink
 ## Usage
 
 ```typescript
-import { open, navigate, close } from 'sparkling-router';
+import { open, navigate, close } from 'sparkling-navigation';
 
 // Navigate to a page using default scheme (hybrid://lynxview_page)
 // This builds: hybrid://lynxview_page?bundle=second.lynx.bundle

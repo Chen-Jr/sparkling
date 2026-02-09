@@ -11,7 +11,7 @@ import type { CloseRequest, CloseResponse } from './close.d';
  */
 export function close(params?: CloseRequest, callback?: (result: CloseResponse) => void): void {
     if (callback !== undefined && typeof callback !== 'function') {
-        console.error('[sparkling-router] close: callback must be a function');
+        console.error('[sparkling-navigation] close: callback must be a function');
         return;
     }
 

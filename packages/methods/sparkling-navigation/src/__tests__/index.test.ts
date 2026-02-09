@@ -11,7 +11,7 @@ import { navigate as navigateDirect } from '../navigate/navigate';
 
 jest.mock('sparkling-method', () => ({ call: jest.fn() }), { virtual: true });
 
-describe('sparkling-router module exports', () => {
+describe('sparkling-navigation module exports', () => {
   describe('function exports', () => {
     it('should export open function', async () => {
       expect(routerModule.open).toBeDefined();

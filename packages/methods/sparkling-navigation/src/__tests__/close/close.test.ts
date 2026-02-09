@@ -27,14 +27,14 @@ describe('close', () => {
     it('should handle non-function callback', () => {
       close(undefined, 'not-a-function' as any);
 
-expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-router] close: callback must be a function');
+expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] close: callback must be a function');
       expect(mockPipe.call).not.toHaveBeenCalled();
     });
 
     it('should handle null callback', () => {
       close(undefined, null as any);
 
-expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-router] close: callback must be a function');
+expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] close: callback must be a function');
       expect(mockPipe.call).not.toHaveBeenCalled();
     });
 

@@ -1,11 +1,11 @@
 {
-  "name": "sparkling-router",
-  "version": "2.0.0-rc.0",
+  "name": "sparkling-navigation",
+  "version": "2.0.0-rc.2",
   "homepage": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/tiktok/sparkling",
-    "directory": "packages/methods/sparkling-router"
+    "directory": "packages/methods/sparkling-navigation"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,6 +36,6 @@
     "@types/jest": "^29.5.12",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.3"
   }
 }

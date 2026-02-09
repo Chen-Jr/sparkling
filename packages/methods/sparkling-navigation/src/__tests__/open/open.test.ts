@@ -100,7 +100,7 @@ describe('open', () => {
 
       open(params, null as any);
 
-expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-router] open: callback must be a function');
+expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] open: callback must be a function');
       expect(mockPipe.call).not.toHaveBeenCalled();
     });
 
@@ -109,7 +109,7 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-router] open: callback 
 
       open(params, undefined as any);
 
-expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-router] open: callback must be a function');
+expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] open: callback must be a function');
       expect(mockPipe.call).not.toHaveBeenCalled();
     });
   });

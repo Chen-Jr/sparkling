@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`sparkling-router module exports snapshot testing for module structure should maintain consistent module export structure: module-export-structure 1`] = `
+exports[`sparkling-navigation module exports snapshot testing for module structure should maintain consistent module export structure: module-export-structure 1`] = `
 {
   "exportCount": 3,
   "exportedKeys": [
