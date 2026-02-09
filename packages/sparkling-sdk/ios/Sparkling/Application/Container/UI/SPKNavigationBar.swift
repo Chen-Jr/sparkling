@@ -18,7 +18,6 @@ import Foundation
 /// - Right navigation button for additional actions
 /// - Bottom separator line with configurable appearance
 /// 
-/// - Note: This class uses @objcMembers for Objective-C interoperability
 @objcMembers
 open class SPKNavigationBar: UIView {
     
@@ -27,14 +26,8 @@ open class SPKNavigationBar: UIView {
     /// - Parameter navigationBar: The navigation bar instance that triggered the action
     typealias SPKNavigationBarAction = ((SPKNavigationBar) -> Void)?
     
-    /// Height of the bottom separator line in points.
-    /// 
-    /// Default value is 0.5 points for a thin separator line.
     var bottomLineHeight: CGFloat = 0.5
     
-    /// Color of the bottom separator line.
-    /// 
-    /// Setting this property updates the background color of the separator line view.
     var bottomLineColor: UIColor? {
         set {
             self.sepLine.backgroundColor = newValue
@@ -44,9 +37,6 @@ open class SPKNavigationBar: UIView {
         }
     }
     
-    /// Font used for the navigation bar title.
-    /// 
-    /// Setting this property updates the font of the title label.
     var titleFont: UIFont {
         set {
             self.titleLabel.font = newValue
@@ -56,10 +46,6 @@ open class SPKNavigationBar: UIView {
         }
     }
     
-    /// Color used for the title text and button tint colors.
-    /// 
-    /// Setting this property updates the title label text color and the tint colors
-    /// of both left and right navigation buttons for consistent theming.
     var titleColor: UIColor? {
         set {
             self.titleLabel.textColor = newValue
@@ -71,9 +57,6 @@ open class SPKNavigationBar: UIView {
         }
     }
     
-    /// The title text displayed in the navigation bar.
-    /// 
-    /// Setting this property updates the text of the title label.
     var title: String? {
         set {
             self.titleLabel.text = newValue
@@ -83,127 +66,84 @@ open class SPKNavigationBar: UIView {
         }
     }
     
-    /// Action closure called when the left navigation button is tapped.
     var leftButtonAction: SPKNavigationBarAction = nil
     
-    /// Action closure called when the close button is tapped.
     var closeButtonAction: SPKNavigationBarAction = nil
     
-    /// Action closure called when the right navigation button is tapped.
     var rightButtonAction: SPKNavigationBarAction = nil
     
-    /// The label that displays the navigation bar title.
     var titleLabel: UILabel = UILabel(frame: .zero)
     
-    /// The left navigation button (typically used for back navigation).
-    /// 
-    /// This button is lazily initialized with the appropriate target and action.
     lazy var leftNaviButton: UIButton = {
         let button = Self.button(target: self, action: #selector(handleLeftButton(_:)))
         return button
     }()
     
-    /// Image displayed on the left navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var leftButtonImage: UIImage? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Background image for the left navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var leftButtonBackgroundImage: UIImage? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Title text displayed on the left navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var leftButtonTitle: String? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Font used for the left navigation button title.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var leftButtonFont: UIFont? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Color used for the left navigation button title text.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var leftButtonTitleColor: UIColor? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// The close navigation button used for dismissing containers.
-    /// 
-    /// This button is lazily initialized with the appropriate target and action.
     lazy var closeNaviButton: UIButton = {
         let button = Self.button(target: self, action: #selector(handleCloseButton(_:)))
         return button
     }()
     
-    /// Image displayed on the close navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var closeButtonImage: UIImage? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Background image for the close navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var closeButtonBackgroundImage: UIImage? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Title text displayed on the close navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var closeButtonTitle: String? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Font used for the close navigation button title.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var closeButtonFont: UIFont? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Color used for the close navigation button title text.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var closeButtonTitleColor: UIColor? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// The right navigation button used for additional actions.
-    /// 
-    /// This button is lazily initialized with the appropriate target and action.
     lazy var rightNaviButton: UIButton = {
         let button = Self.button(target: self, action: #selector(handleRightButton(_:)))
         return button
@@ -211,9 +151,6 @@ open class SPKNavigationBar: UIView {
     
     var sepLine: UIView = UIView(frame: .zero)
     
-    /// Image displayed on the right navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var rightButtonImage: UIImage? {
         didSet {
             self.rightNaviButton.setImage(self.rightButtonImage?.withRenderingMode(.alwaysTemplate), for: .normal)
@@ -221,53 +158,35 @@ open class SPKNavigationBar: UIView {
         }
     }
     
-    /// Background image for the right navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var rightButtonBackgroundImage: UIImage? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Title text displayed on the right navigation button.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var rightButtonTitle: String? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Font used for the right navigation button title.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var rightButtonFont: UIFont? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Color used for the right navigation button title text.
-    /// 
-    /// Setting this property triggers a UI update to reflect the change.
     var rightButtonTitleColor: UIColor? {
         didSet {
             self.updateUI()
         }
     }
     
-    /// Initializes the navigation bar with the specified frame.
-    /// 
-    /// - Parameter frame: The frame rectangle for the navigation bar.
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.commonInit()
     }
     
-    /// Initializes the navigation bar from a storyboard or XIB file.
-    /// 
-    /// - Parameter coder: The decoder used to initialize the navigation bar.
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.commonInit()
@@ -285,10 +204,6 @@ open class SPKNavigationBar: UIView {
         self.rightButtonAction = block
     }
     
-    /// Performs common initialization tasks for the navigation bar.
-    /// 
-    /// This method sets up the default appearance, configures the title label and separator line,
-    /// and establishes default font settings for navigation buttons.
     func commonInit() {
         self.backgroundColor = .white
         self.titleLabel = UILabel(frame: .zero)
@@ -306,11 +221,6 @@ open class SPKNavigationBar: UIView {
         self.rightButtonFont = UIFont.systemFont(ofSize: 14.0)
     }
     
-    /// Updates the navigation bar UI components.
-    /// 
-    /// This method refreshes all navigation bar elements including buttons, title, and bottom line.
-    /// It handles the visibility and configuration of left, right, and close buttons based on their
-    /// properties and actions, and updates the layout constraints accordingly.
     func updateUI() {
         let containerHeight = 44.0
         if self.leftButtonImage != nil || self.leftButtonTitle != nil || (self.leftButtonAction != nil) {
@@ -381,33 +291,18 @@ open class SPKNavigationBar: UIView {
         }
     }
     
-    /// Handles left navigation button tap events.
-    /// 
-    /// - Parameter sender: The button that triggered the action.
     @objc func handleLeftButton(_ sender: UIButton) {
         self.leftButtonAction?(self)
     }
     
-    /// Handles close navigation button tap events.
-    /// 
-    /// - Parameter sender: The button that triggered the action.
     @objc func handleCloseButton(_ sender: UIButton) {
         self.closeButtonAction?(self)
     }
     
-    /// Handles right navigation button tap events.
-    /// 
-    /// - Parameter sender: The button that triggered the action.
     @objc func handleRightButton(_ sender: UIButton) {
         self.rightButtonAction?(self)
     }
     
-    /// Creates a navigation bar button with default styling and target-action configuration.
-    /// 
-    /// - Parameters:
-    ///   - target: The target object for the button action.
-    ///   - action: The selector to call when the button is tapped.
-    /// - Returns: A configured UIButton instance.
     static func button(target: Any, action: Selector) -> UIButton {
         let button = UIButton(type: .custom)
         button.setTitleColor(UIColor(red: 0.91, green: 0.91, blue: 0.91, alpha: 1), for: .normal)

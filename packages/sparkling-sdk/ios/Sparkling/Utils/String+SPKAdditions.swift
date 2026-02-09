@@ -7,13 +7,6 @@ import Foundation
 extension String: SPKKitCompatibleValue {}
 
 public extension SPKKitWrapper where Base == String {
-    
-    /// Returns a URL-encoded version of the string.
-    /// 
-    /// This property encodes the string using percent-encoding to make it safe for use in URLs.
-    /// It uses a custom character set that excludes certain characters that have special meaning in URLs.
-    /// 
-    /// - Returns: A percent-encoded string suitable for URL usage, or `nil` if encoding fails.
     var urlEncoded: String? {
         let allowedCharacterSet = URL.spk.urlValid.subtracting(.init(charactersIn: ":!*();@/&?+$,='"))
         return base.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
@@ -62,13 +55,6 @@ public extension SPKKitWrapper where Base == String {
         })
         return queryDict.isEmpty ? nil : queryDict
     }
-    
-    /// Extracts the query string portion from a URL string.
-    /// 
-    /// This method parses a URL string and returns only the query parameters part (after the '?' and before any '#').
-    /// It handles multiple consecutive question marks and removes fragments from the result.
-    /// 
-    /// - Returns: The query string without the leading '?' and trailing fragment, or `nil` if no query string found.
     func queryString() -> String? {
         guard let questionMarkRange = base.range(of: "?") else {
             return nil

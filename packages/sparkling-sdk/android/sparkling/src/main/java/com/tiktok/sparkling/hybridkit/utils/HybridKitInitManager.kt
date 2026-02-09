@@ -12,12 +12,10 @@ object HybridKitInitManager {
     var status = HybridKitInitStatus.INIT
     private val callbacks = mutableListOf<HybridKitInitCallback>()
 
-    //
     fun addCallback(callback: HybridKitInitCallback) {
         callbacks.add(callback)
     }
 
-    //
     fun removeCallback(callback: HybridKitInitCallback) {
         callbacks.remove(callback)
     }

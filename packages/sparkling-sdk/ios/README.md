@@ -42,7 +42,7 @@ let result = SPKRouter.open(
 ```
 
 ## Bridging Sparkling methods
-- Add any generated method podspecs (for example, `Sparkling-SPKRouter`, `Sparkling-SPKStorage`,
+- Add any generated method podspecs (for example, `Sparkling-Router`, `Sparkling-Storage`,
   or your custom module) beside the Sparkling pod entry before running `pod install`.
 - Ensure the bundled Lynx assets built by your web app are copied into the app target so routes above
   can resolve.

@@ -5,15 +5,7 @@
 import UIKit
 
 public extension SPKKitWrapper where Base: UIColor {
-    
-    /// Convert a hexadecimal string to a UIColor instance.
-    /// 
-    /// - Parameters:
-    ///   - string: A hexadecimal string beginning with '#', '0x' or '0X'.
-    ///   - alpha: The transparency value from 0.0 to 1.0. Default is 1.0.
-    /// - Returns: A UIColor instance created from the hex string, or clear color if invalid.
     static func color(hexString string: String, alpha: CGFloat = 1.0) -> UIColor {
-        // Remove the prefix
         let string = string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         var hexString: String
         if string.hasPrefix("0x") {
@@ -83,13 +75,11 @@ public extension SPKKitWrapper where Base: UIColor {
         let r, g, b, a: Double
         
         if components.count >= 3 {
-            // RGB color space
             r = Double(components[0])
             g = Double(components[1])
             b = Double(components[2])
             a = components.count >= 4 ? Double(components[3]) : 1.0
         } else if components.count >= 2 {
-            // Grayscale color space
             let gray = Double(components[0])
             r = gray
             g = gray
@@ -106,9 +96,7 @@ public extension SPKKitWrapper where Base: UIColor {
         }
     }
 
-    /// Return the RGB hex string of the color without alpha channel.
     var hexString: String? { hexString(withAlpha: false) }
     
-    /// Return the RGBA hex string of the color including alpha channel.
     var hexStringWithAlpha: String? { hexString(withAlpha: true) }
 }

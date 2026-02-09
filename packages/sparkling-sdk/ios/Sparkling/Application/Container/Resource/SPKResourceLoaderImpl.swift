@@ -94,17 +94,25 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
         guard let url = url else {
             return nil
         }
+        
+        let bundleURL: URL?
         if url.scheme == "asset" {
-            var newUrl = URL.spk.url(string: ".\(url.path)")
-            if let result = self.loadBundleResource(withURL: newUrl),
-               let data = result.resourceData {
-                if let image = UIImage(data: data) {
-                    completion(image, nil)
-                } else {
-                    completion(nil, nil)
-                }
-            }
+            bundleURL = URL.spk.url(string: ".\(url.path)")
+        } else {
+            bundleURL = url
         }
+        
+        if let bundleURL = bundleURL,
+           let result = self.loadBundleResource(withURL: bundleURL),
+           let data = result.resourceData {
+            if let image = UIImage(data: data) {
+                completion(image, nil)
+            } else {
+                completion(nil, nil)
+            }
+            return nil
+        }
+        
         return nil
     }
     
@@ -120,37 +128,52 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
         guard let url = url else {
             return nil
         }
-        guard let relativeUrl = URL.spk.url(string: url.path, relativeTo: URL.spk.url(string: "/LynxResources/Assets/")) else {
+        
+        var relativePath = url.path
+        while relativePath.hasPrefix("./") {
+            relativePath = String(relativePath.dropFirst(2))
+        }
+        if relativePath.hasPrefix("/") {
+            relativePath = String(relativePath.dropFirst())
+        }
+        
+        guard !relativePath.isEmpty else {
             return nil
         }
         
-        let pathExtension = relativeUrl.pathExtension
-        let pathUrl = relativeUrl.deletingPathExtension()
-        
-        var resourceUrl = pathUrl.path
-        if pathUrl.pathComponents.first == "/" {
-            let result = Array(pathUrl.pathComponents.dropFirst())
-            resourceUrl = result.joined(separator: "/")
-        }
-        
-        let bundleUrl = URL.spk.url(string: Bundle.main.path(forResource: resourceUrl, ofType: pathExtension) ?? "")
-        guard let bundleUrl = bundleUrl else {
-            return nil
-        }
-
-        let data = try? Data(NSData(contentsOfFile: bundleUrl.absoluteString))
-        return SPKResourceProvider(resourceData: data)
+        return loadDataFromBundle(relativePath: relativePath)
     }
     
-    /// Creates and starts a data task for the given URL request.
-    /// 
-    /// This method creates a URLSessionDataTask using the shared URLSession,
-    /// configures it with the provided response handler, and immediately starts the task.
-    /// 
-    /// - Parameters:
-    ///   - request: The URL request to execute.
-    ///   - responseHandler: Optional completion handler for the network response.
-    /// - Returns: A task protocol object representing the running network task.
+    private func loadDataFromBundle(relativePath: String) -> SPKResourceProvider? {
+        let nsPath = relativePath as NSString
+        let pathExtension = nsPath.pathExtension
+        let resourceName = nsPath.deletingPathExtension
+        
+        if let bundlePath = Bundle.main.path(forResource: resourceName, ofType: pathExtension) {
+            if let data = try? Data(contentsOf: URL(fileURLWithPath: bundlePath)) {
+                return SPKResourceProvider(resourceData: data)
+            }
+        }
+        
+        if let bundleRoot = Bundle.main.resourceURL {
+            let searchPrefixes = ["LynxResources/Assets", "", "Assets"]
+            for prefix in searchPrefixes {
+                let filePath: URL
+                if prefix.isEmpty {
+                    filePath = bundleRoot.appendingPathComponent(relativePath)
+                } else {
+                    filePath = bundleRoot.appendingPathComponent(prefix).appendingPathComponent(relativePath)
+                }
+                if FileManager.default.fileExists(atPath: filePath.path),
+                   let data = try? Data(contentsOf: filePath) {
+                    return SPKResourceProvider(resourceData: data)
+                }
+            }
+        }
+        
+        return nil
+    }
+    
     func dataTask(withRequest request: URLRequest, responseHandler: SPKResponseCompletion? = nil) -> SPKResourceLoaderTaskProtocol? {
         var task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let responseHandler = responseHandler else {
@@ -162,4 +185,3 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
         return task
     }
 }
-

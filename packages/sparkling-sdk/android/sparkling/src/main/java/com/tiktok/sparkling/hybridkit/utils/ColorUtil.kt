@@ -24,7 +24,7 @@ object ColorUtil {
             }
 
             var hexColor = rgbaColor
-            if (rgbaColor.startsWith("#")) { // e.g. '#99887766' -> '#66998877'
+            if (rgbaColor.startsWith("#")) {
                 hexColor = rgbaColor.drop(1)
             }
             dstColor = hexColor.takeLast(2) + hexColor.dropLast(2)

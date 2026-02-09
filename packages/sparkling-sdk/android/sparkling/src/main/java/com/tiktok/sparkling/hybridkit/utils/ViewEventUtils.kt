@@ -44,15 +44,12 @@ object ViewEventUtils {
 
     fun onPause(hybridContext: HybridContext?) {
         val containerId = hybridContext?.containerId ?: return
-        // send viewDisappeared directly
         hybridContext.sendEvent(VIEW_DISAPPEARED, null)
         when(containerStateMap[containerId]) {
             State.DESTROYED, State.PAUSED -> {
-                // should never reach this block
                 return
             }
             State.RESUMED -> {
-                // paused again in 500ms, no need to resume again
                 containerStateMap[containerId] = State.PAUSED
                 return
             }
@@ -65,7 +62,6 @@ object ViewEventUtils {
             val state = containerStateMap[containerId] ?: return@postDelayed
             when(state) {
                 State.PAUSED -> {
-                    // check paused by background or covered
                     if (isBackground)
                         hybridContext.sendEvent(
                             VIEW_DISAPPEARED_WITH_TYPE, JSONObject().apply {
@@ -80,7 +76,6 @@ object ViewEventUtils {
                         )
                 }
                 State.RESUMED -> {
-                    // check resumed by background or covered
                     if (isBackgroundNow)
                         hybridContext.sendEvent(
                             VIEW_DISAPPEARED_WITH_TYPE, JSONObject().apply {
@@ -93,10 +88,9 @@ object ViewEventUtils {
                                 put(TYPE, HIDDEN)
                             }
                         )
-                    // always send appeared message, just keep things in order
                     hybridContext.sendEvent(VIEW_APPEARED, null)
                 }
-                else -> {}  // do nothing
+                else -> {}
             }
             containerStateMap.remove(containerId)
         }, TIME_LIMIT)
@@ -116,15 +110,12 @@ object ViewEventUtils {
         val containerId = hybridContext?.containerId ?: return
         when(containerStateMap[containerId]) {
             State.DESTROYED -> {
-                // should never reach here
                 return
             }
             State.PAUSED, State.RESUMED -> {
-                // assign state to resumed to keep signals in order
                 containerStateMap[containerId] = State.RESUMED
             }
             else -> {
-                // send appeared message directly
                 hybridContext.sendEvent(VIEW_APPEARED, null)
             }
         }

@@ -31,12 +31,6 @@ object DevicesUtil {
     val model: String
         get() = Build.MODEL
 
-    /**
-     * Get Display
-     *
-     * @param context Context for get WindowManager
-     * @return Display
-     */
     private fun getDisplay(context: Context): Display? {
         val wm: WindowManager?
         wm = if (context is Activity) {
@@ -103,10 +97,6 @@ object DevicesUtil {
 
     private var sStatusBarHeight = 0
 
-    /**
-     * @param context
-     * @return NOTE: unit px
-     */
     fun getStatusBarHeight(context: Context): Int {
         if (sStatusBarHeight > 0) {
             return sStatusBarHeight
@@ -132,7 +122,6 @@ object DevicesUtil {
         return try {
             val contentRect = Rect()
             context.window.decorView.getWindowVisibleDisplayFrame(contentRect)
-            // the obtained rect top should consider the status bar height
             if (px2dp(contentRect.top.toDouble(), context) >= statusBarHeight_) {
                 px2dp(contentRect.height().toDouble(), context)
             } else {
@@ -189,11 +178,6 @@ object DevicesUtil {
         }
     }
 
-    /**
-     * get screen width and height.
-     *
-     * @return return int[] value, first value is width, second value is height.
-     */
     fun getScreenSize(context: Context?): IntArray {
         return if (context == null) {
             intArrayOf(-1, -1)

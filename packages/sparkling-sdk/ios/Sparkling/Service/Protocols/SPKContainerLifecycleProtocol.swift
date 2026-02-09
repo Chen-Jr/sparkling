@@ -39,7 +39,6 @@ public protocol SPKContainerLifecycleProtocol {
     
     @objc optional func containerDidConstructJSRuntime(_ container: SPKContainerProtocol)
     
-    //MARK: - View Controller Event
     @objc optional func containerDidInit(_ container: SPKContainerProtocol)
     
     @objc optional func containerViewDidLoad(_ container: SPKContainerProtocol)
@@ -56,5 +55,4 @@ public protocol SPKContainerLifecycleProtocol {
     
     @objc optional func containerViewHandleAppDidBecomeActive(_ container: SPKContainerProtocol)
 }
-
 

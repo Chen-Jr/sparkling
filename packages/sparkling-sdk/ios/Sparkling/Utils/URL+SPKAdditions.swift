@@ -7,51 +7,12 @@ import Foundation
 extension URL: SPKKitCompatibleValue {}
 
 public extension SPKKitWrapper where Base == URL {
-    
-    /// Creates a URL from a string with optional relative URL support.
-    /// 
-    /// This method provides enhanced URL creation with automatic encoding and error recovery.
-    /// If the initial URL creation fails, it attempts to fix common issues like unencoded characters.
-    /// 
-    /// - Parameters:
-    ///   - string: The URL string to parse.
-    ///   - url: An optional base URL for relative URL resolution.
-    /// - Returns: A valid URL object, or `nil` if the string cannot be converted to a URL.
-    /// 
-    /// - Example:
-    ///   ```swift
-    ///   let baseURL = URL.spk.url(string: "https://example.com")
-    ///   let relativeURL = URL.spk.url(string: "/path/to/resource", relativeTo: baseURL)
-    ///   ```
     static func url(string: String, relativeTo url: URL? = nil) -> URL? {
         return _url(string: string, relativeTo: url)
     }
-
-    /// Creates a URL from a string with optional query parameters and fragment.
-    /// 
-    /// This method constructs a URL by combining a base string with query parameters and an optional fragment.
-    /// Query parameters are automatically URL-encoded for safety.
-    /// 
-    /// - Parameters:
-    ///   - string: The base URL string.
-    ///   - queryItems: Optional dictionary of query parameters to append.
-    ///   - fragment: Optional fragment identifier to append after '#'.
-    /// - Returns: A valid URL object with the specified components, or `nil` if construction fails.
-    /// 
-    /// - Example:
-    ///   ```swift
-    ///   let url = URL.spk.url(
-    ///       string: "https://example.com/search",
-    ///       queryItems: ["q": "swift programming", "page": 1],
-    ///       fragment: "results"
-    ///   )
-    ///   // Result: "https://example.com/search?q=swift%20programming&page=1#results"
-    ///   ```
     static func url(string: String, queryItems: [AnyHashable: Any]? = nil, fragment: String? = nil) -> URL? {
         return _url(string: string, queryItems: queryItems, fragment: fragment)
     }
-
-    /// A comprehensive character set that includes all valid URL characters.
     internal static let urlValid: CharacterSet = CharacterSet.urlUserAllowed
         .union(.urlPathAllowed)
         .union(.urlHostAllowed)
@@ -161,20 +122,6 @@ public extension SPKKitWrapper where Base == URL {
         let url = self.url(string: resultURL)
         return url
     }
-    
-    /// Returns the query parameters as a dictionary of key-value pairs.
-    /// 
-    /// This property extracts query parameters from the URL and returns them as a dictionary.
-    /// The values are returned as-is without URL decoding.
-    /// 
-    /// - Returns: A dictionary containing the query parameters, or `nil` if no query string exists.
-    /// 
-    /// - Example:
-    ///   ```swift
-    ///   let url = URL(string: "https://example.com?name=John&age=25")!
-    ///   let params = url.spk.queryItems
-    ///   // ["name": "John", "age": "25"]
-    ///   ```
     var queryItems: [String: String]? {
         guard let query = base.query, query.count > 0 else {
             return nil
@@ -191,20 +138,6 @@ public extension SPKKitWrapper where Base == URL {
         }
         return queries
     }
-    
-    /// Returns the query parameters as a dictionary with URL-decoded values.
-    /// 
-    /// This property extracts query parameters from the URL using URLComponents,
-    /// which automatically handles URL decoding of parameter values.
-    /// 
-    /// - Returns: A dictionary containing the decoded query parameters, or `nil` if no query string exists.
-    /// 
-    /// - Example:
-    ///   ```swift
-    ///   let url = URL(string: "https://example.com?name=John%20Doe&city=New%20York")!
-    ///   let params = url.spk.decodedQueryItems
-    ///   // ["name": "John Doe", "city": "New York"]
-    ///   ```
     var decodedQueryItems: [String: String]? {
         let components = URLComponents(string: base.absoluteString)
         guard let queryItems = components?.queryItems, queryItems.count > 0 else {
@@ -216,44 +149,9 @@ public extension SPKKitWrapper where Base == URL {
         }
         return queries
     }
-    
-    /// Creates a new URL by adding or updating a single query parameter.
-    /// 
-    /// This method merges a single key-value pair into the existing query parameters of the URL.
-    /// 
-    /// - Parameters:
-    ///   - key: The query parameter key to add or update.
-    ///   - value: The value for the query parameter.
-    ///   - encode: Whether to manually encode the query parameters. Default is `false`.
-    /// - Returns: A new URL with the merged query parameter.
-    /// 
-    /// - Example:
-    ///   ```swift
-    ///   let url = URL(string: "https://example.com?page=1")!
-    ///   let newURL = url.spk.merging(query: "sort", value: "name")
-    ///   // Result: "https://example.com?page=1&sort=name"
-    ///   ```
     func merging(query key: String, value: String, encode: Bool = false) -> URL {
         return merging(queries: [key: value], encode: encode)
     }
-
-    /// Creates a new URL by merging multiple query parameters with existing ones.
-    /// 
-    /// This method combines the provided query parameters with the existing ones in the URL.
-    /// If a parameter already exists, it will be updated with the new value.
-    /// The order of existing parameters is preserved, with new parameters appended at the end.
-    /// 
-    /// - Parameters:
-    ///   - queries: A dictionary of query parameters to merge.
-    ///   - encode: Whether to manually encode the query parameters. Default is `false`.
-    /// - Returns: A new URL with the merged query parameters.
-    /// 
-    /// - Example:
-    ///   ```swift
-    ///   let url = URL(string: "https://example.com?page=1&sort=date")!
-    ///   let newURL = url.spk.merging(queries: ["page": "2", "filter": "active"])
-    ///   // Result: "https://example.com?page=2&sort=date&filter=active"
-    ///   ```
     func merging(queries: [String: String], encode: Bool = false) -> URL {
         guard var components = URLComponents(string: base.absoluteString) else { return base }
         let oldPairs = decodedQueryItems ?? [:]

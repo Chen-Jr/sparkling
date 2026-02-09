@@ -14,32 +14,12 @@ import Foundation
 /// The enum is organized into logical groups using nested enums to provide
 /// clear categorization and avoid naming conflicts.
 public enum SPKEvent {
-    
-    // MARK: - Container Event
-    
-    /// Event name fired when the container mask is tapped.
-    /// 
-    /// This event is typically used to handle user interactions with overlay
-    /// or background areas of container views.
     static let containerTaskDidTap = "containerMaskTapped"
-    
-    // MARK: - Back Events
-    
-    /// Contains event names and parameter keys related to back navigation actions.
     enum Back {
-        /// Event name for standard page back navigation.
         static let pageBack = "sparkPageBackEvent"
-        
-        /// Event name for final back navigation that closes the container.
         static let finishBack = "pageFinishBackEvent"
-        
-        /// Parameter key indicating the source of the back action.
         static let actionFromKey = "actionFrom"
-        
-        /// Action type value for navigation bar back button press.
         static let actionTypeNavBarBackPress = "navBarBackPress"
-        
-        /// Action type value for swipe gesture back navigation.
         static let actionTypeSwipe = "swipe"
     }
 
@@ -50,10 +30,6 @@ public enum SPKEvent {
     /// This enum provides standardized key names for parameters that are
     /// frequently used across multiple event types within the framework.
     enum Common {
-        /// Parameter key for container identifier in event data.
-        /// 
-        /// This key is used to identify which container instance
-        /// an event is associated with.
         static let containerIdKey = "containerId"
     }
 
@@ -61,16 +37,9 @@ public enum SPKEvent {
     
     /// Contains event names and parameter keys related to theme changes.
     enum Theme {
-        /// Event name fired when the application theme changes.
         static let changed = "onThemeChanged"
-        
-        /// Parameter key for theme value in theme change events.
         static let valueKey = "theme"
-        
-        /// Theme value indicating light mode.
         static let valueLight = "light"
-        
-        /// Theme value indicating dark mode.
         static let valueDark = "dark"
     }
 }
