@@ -1,6 +1,6 @@
 {
   "name": "sparkling-method",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0-rc.2",
   "homepage": "",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@lynx-js/types": "3.6.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.3"
   },
   "license": "Apache-2.0"
 }

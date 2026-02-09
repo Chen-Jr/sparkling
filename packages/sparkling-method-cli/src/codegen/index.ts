@@ -74,7 +74,7 @@ export async function runCodegen(options: CodegenOptions = {}): Promise<void> {
 async function readModuleConfig(root: string): Promise<ModuleConfig> {
   const configPath = path.join(root, 'module.config.json');
   if (!await fs.pathExists(configPath)) {
-    throw new Error('module.config.json not found. Please run `sparkling-method init <name>` first.');
+    throw new Error('module.config.json not found. Please run `sparkling-method-cli init <name>` first.');
   }
   const config = await fs.readJson(configPath);
   if (!config.packageName || !config.moduleName) {

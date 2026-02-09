@@ -5,9 +5,6 @@
 
 package com.tiktok.sparkling.method.registry.core.annotation
 
-/**
- * Desc:
- */
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class IDLMethodName(

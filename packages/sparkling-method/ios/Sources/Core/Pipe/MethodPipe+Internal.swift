@@ -13,9 +13,7 @@ extension MethodPipe {
         
         let resultModelType = method.resultModelClass
         let resultBlk: PipeMethod.CompletionBlock = { status, result in
-            // Safely check result type
             if let result = result, type(of: result) != EmptyMethodModel.self {
-                // Using Swift type checking
                 let resultActualType = type(of: result)
                 if resultModelType != resultActualType && resultModelType != EmptyMethodModel.self {
                     completion?(.resultModelTypeWrong(message: "\(type(of: method).methodName()).Result type mismatch: expected \(resultModelType),got \(resultActualType)"), nil)
@@ -55,7 +53,6 @@ extension MethodPipe {
         
         var paramModel: MethodModel?
         do {
-            // Safely call from method
             if let methodModelType = paramsModelType as? MethodModel.Type {
                 paramModel = try methodModelType.from(dict: params)
             } else {

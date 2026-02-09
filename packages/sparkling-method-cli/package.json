@@ -1,6 +1,6 @@
 {
   "name": "sparkling-method-cli",
-  "version": "2.0.0-rc.0",
+  "version": "2.0.0-rc.2",
   "description": "CLI utilities for managing Sparkling method modules with cross-platform code generation",
   "homepage": "",
   "repository": {
@@ -15,7 +15,7 @@
     "templates"
   ],
   "bin": {
-    "sparkling-method": "./dist/index.js"
+    "sparkling-method-cli": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc && node ./scripts/copy-assets.js",

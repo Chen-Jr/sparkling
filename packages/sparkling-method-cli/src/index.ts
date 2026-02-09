@@ -13,7 +13,7 @@ import { enableVerboseLogging, isVerboseEnabled, verboseLog } from './verbose';
 const program = new Command();
 
 program
-  .name('sparkling-method')
+  .name('sparkling-method-cli')
   .description('Sparkling method utilities')
   .version(packageJson.version);
 program.option('-v, --verbose', 'Enable verbose logging for debugging');

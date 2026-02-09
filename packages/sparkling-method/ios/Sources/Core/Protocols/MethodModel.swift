@@ -66,7 +66,7 @@ open class SPKMethodModel: MTLModel, MTLJSONSerializing, MethodModel {
     }
     
     // Implement DictionaryCodable protocol
-    public func toDict() throws -> [String: Any]? {
+    open func toDict() throws -> [String: Any]? {
         return self.dictionaryValue as? [String: Any]
     }
     

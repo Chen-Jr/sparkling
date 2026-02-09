@@ -53,7 +53,7 @@ export async function createPackageJson(projectName: string, targetDir: string):
     private: true,
     scripts: {
       build: 'tsc',
-      codegen: 'npx sparkling-method codegen',
+      codegen: 'npx sparkling-method-cli codegen',
       test: 'echo "Add your tests"',
     },
     files: ['dist', 'android', 'ios', 'generated'],
