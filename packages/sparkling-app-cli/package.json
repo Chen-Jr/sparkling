@@ -1,15 +1,15 @@
 {
-  "name": "sparkling-cli",
-  "version": "2.0.0-rc.0",
+  "name": "sparkling-app-cli",
+  "version": "2.0.0-rc.2",
   "description": "Sparkling workspace helper CLI (build, copy-assets, autolink, run android/ios)",
   "homepage": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/tiktok/sparkling",
-    "directory": "packages/sparkling-cli"
+    "directory": "packages/sparkling-app-cli"
   },
   "bin": {
-    "sparkling-cli": "./bin.js",
+    "sparkling-app-cli": "./bin.js",
     "sparkling": "./bin.js"
   },
   "main": "dist/index.js",

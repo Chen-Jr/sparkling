@@ -15,7 +15,7 @@ import { enableVerboseLogging, isVerboseEnabled, verboseLog } from './utils/verb
 import type { AppConfig } from './types';
 
 const program = new Command();
-program.name('sparkling-cli').description('Sparkling workspace helper CLI');
+program.name('sparkling-app-cli').description('Sparkling workspace helper CLI');
 program.option('-v, --verbose', 'Enable verbose logging for debugging');
 program.hook('preAction', (thisCommand) => {
   const opts = thisCommand.optsWithGlobals<{ verbose?: boolean }>();

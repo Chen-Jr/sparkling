@@ -1,20 +1,20 @@
-# sparkling-cli
+# sparkling-app-cli
 
-[![npm version](https://img.shields.io/npm/v/sparkling-cli.svg)](https://npmjs.com/package/sparkling-cli)
+[![npm version](https://img.shields.io/npm/v/sparkling-app-cli.svg)](https://npmjs.com/package/sparkling-app-cli)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../LICENSE)
 
 Workspace helper CLI for building, running, and managing Sparkling applications on Android and iOS.
 
 ## Installation
 
-> **Note:** Projects created with `create-sparkling-app` already include `sparkling-cli` as a dependency. Manual installation is only needed for existing projects or global usage.
+> **Note:** Projects created with `create-sparkling-app` already include `sparkling-app-cli` as a dependency. Manual installation is only needed for existing projects or global usage.
 
 ```bash
 # Global installation
-npm install -g sparkling-cli@latest
+npm install -g sparkling-app-cli@latest
 
 # Or add to an existing project
-npm install sparkling-cli@latest --save-dev
+npm install sparkling-app-cli@latest --save-dev
 ```
 
 ## Usage
