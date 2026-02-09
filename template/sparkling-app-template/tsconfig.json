@@ -8,9 +8,9 @@
 
     "baseUrl": ".",
     "paths": {
-      "sparkling-router": [
-        "../node_modules/sparkling-router",
-        "../../packages/methods/sparkling-router"
+      "sparkling-navigation": [
+        "../node_modules/sparkling-navigation",
+        "../../packages/methods/sparkling-navigation"
       ]
     },
 

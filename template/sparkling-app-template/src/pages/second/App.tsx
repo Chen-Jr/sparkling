@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from '@lynx-js/react'
 
-import { close } from 'sparkling-router'
+import { close } from 'sparkling-navigation'
 
 import './App.css'
 

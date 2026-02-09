@@ -4,7 +4,7 @@ import { render, getQueriesForElement } from '@lynx-js/react/testing-library'
 
 import { App } from '../App.js'
 
-vi.mock('sparkling-router', () => ({ open: vi.fn() }))
+vi.mock('sparkling-navigation', () => ({ open: vi.fn() }))
 
 test('App renders hero content', async () => {
   const onMounted = vi.fn()

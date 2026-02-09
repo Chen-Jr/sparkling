@@ -47,6 +47,6 @@ export interface InputProps extends StandardProps {
 export type InputEvent = BaseEvent<'input', { value: string }>;
 
 // 在模板工程内为工作区包提供类型映射，解决编辑器无法解析新包名的问题
-declare module 'sparkling-router' {
-  export * from '../../../packages/methods/sparkling-router/dist';
+declare module 'sparkling-navigation' {
+  export * from '../../../packages/methods/sparkling-navigation/dist';
 }

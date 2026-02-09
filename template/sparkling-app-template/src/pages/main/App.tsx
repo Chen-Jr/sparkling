@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from '@lynx-js/react'
-import * as router from 'sparkling-router'
+import * as router from 'sparkling-navigation'
 
 import './App.css'
 import sparklingLogo from '../../assets/sparkling_icon.png'

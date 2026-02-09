@@ -74,7 +74,7 @@ android {
 
         // BEGIN SPARKLING AUTOLINK
         listOf(
-            project(":sparkling-router"),
+            project(":sparkling-navigation"),
         ).forEach { dep -> add("implementation", dep) }
         // END SPARKLING AUTOLINK
     }
