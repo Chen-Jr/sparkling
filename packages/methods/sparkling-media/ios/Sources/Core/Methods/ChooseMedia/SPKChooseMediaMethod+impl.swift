@@ -10,19 +10,15 @@ import AVFoundation
 
 extension SPKChooseMediaMethod {
     @objc public override func call(withParamModel paramModel: Any, completionHandler: CompletionHandlerProtocol) {
-        // Check parameter model type
         guard let typedParamModel = paramModel as? SPKChooseMediaMethodParamModel else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "Invalid parameter model type"), result: nil)
             return
         }
         
-        // Handle different source types
         switch SPKChooseMediaMediaSourceType(rawValue: typedParamModel.sourceType) {
         case .album:
-            // Check album permission
             checkAlbumPermission(with: typedParamModel) { [weak self] hasPermission in
                 guard let self = self else { return }
-                
                 if hasPermission {
                     self.openMediaPicker(with: typedParamModel, completionHandler: completionHandler)
                 } else {
@@ -30,10 +26,12 @@ extension SPKChooseMediaMethod {
                 }
             }
         case .camera:
-            // Check camera permission
+            guard AVCaptureDevice.default(for: .video) != nil else {
+                completionHandler.handleCompletion(status: .failed(message: "Camera is not available on this device."), result: nil)
+                return
+            }
             checkCameraPermission(with: typedParamModel) { [weak self] hasPermission in
                 guard let self = self else { return }
-                
                 if hasPermission {
                     self.openMediaPicker(with: typedParamModel, completionHandler: completionHandler)
                 } else {
@@ -45,7 +43,6 @@ extension SPKChooseMediaMethod {
         }
     }
     
-    // Check album permission
     private func checkAlbumPermission(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: @escaping (Bool) -> Void) {
         let authorizationStatus = PHPhotoLibrary.authorizationStatus()
         
@@ -67,7 +64,6 @@ extension SPKChooseMediaMethod {
         }
     }
     
-    // Check camera permission
     private func checkCameraPermission(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: @escaping (Bool) -> Void) {
         let authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
         
@@ -85,10 +81,8 @@ extension SPKChooseMediaMethod {
         }
     }
     
-    // Handle album permission deny action
     private func handleAlbumDenyAction(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: CompletionHandlerProtocol) {
         if paramModel.albumPermissionDenyAction == SPKChooseMediaPermissionDenyAction.default.rawValue {
-            // Show alert
             let alert = UIAlertController(title: "Photo library access required",
                                           message: "Please allow photo library access in Settings",
                                           preferredStyle: .alert)
@@ -109,20 +103,16 @@ extension SPKChooseMediaMethod {
             alert.addAction(cancelAction)
             alert.addAction(settingsAction)
             
-            // Present alert
             if let rootViewController = UIApplication.shared.keyWindow?.rootViewController {
                 rootViewController.present(alert, animated: true, completion: nil)
             }
         } else {
-            // No alert, just fail
             completionHandler.handleCompletion(status: .failed(message: "Photo library permission denied"), result: nil)
         }
     }
     
-    // Handle camera permission deny action
     private func handleCameraDenyAction(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: CompletionHandlerProtocol) {
         if paramModel.cameraPermissionDenyAction == SPKChooseMediaPermissionDenyAction.default.rawValue {
-            // Show alert
             let alert = UIAlertController(title: "Camera access required",
                                           message: "Please allow camera access in Settings",
                                           preferredStyle: .alert)
@@ -143,50 +133,86 @@ extension SPKChooseMediaMethod {
             alert.addAction(cancelAction)
             alert.addAction(settingsAction)
             
-            // Present alert
             if let rootViewController = UIApplication.shared.keyWindow?.rootViewController {
                 rootViewController.present(alert, animated: true, completion: nil)
             }
         } else {
-            // No alert, just fail
             completionHandler.handleCompletion(status: .failed(message: "Camera permission denied"), result: nil)
         }
     }
     
-    // Open media picker using SPKDefaultMediaPicker
+    // Retain the media picker so it (and its delegate) stay alive while the picker is presented
+    private static var _activeMediaPicker: SPKDefaultMediaPicker?
+
     private func openMediaPicker(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: CompletionHandlerProtocol) {
-        // Create default media picker
         let mediaPicker = SPKDefaultMediaPicker()
+        SPKChooseMediaMethod._activeMediaPicker = mediaPicker
         
-        // Call media picker with the parameter model
-        mediaPicker.mediaPicker(with: paramModel) { [weak self] resultModel, error in
-            guard let self = self else { return }
+        let pickerVC = mediaPicker.mediaPicker(with: paramModel) { [weak self] resultModel, error in
+            SPKChooseMediaMethod._activeMediaPicker = nil
+            guard self != nil else { return }
             
             if let error = error {
-                // Handle error
                 completionHandler.handleCompletion(status: .failed(message: error.message), result: nil)
             } else if let resultModel = resultModel {
-                // Success, use the returned result model
                 completionHandler.handleCompletion(status: .succeeded(), result: resultModel)
             } else {
-                // No files selected
                 completionHandler.handleCompletion(status: .failed(message: "No media file selected"), result: nil)
+            }
+        }
+        
+        if let pickerVC = pickerVC {
+            DispatchQueue.main.async {
+                var presentingVC: UIViewController?
+                
+                if let rootVC = UIApplication.shared.keyWindow?.rootViewController {
+                    presentingVC = rootVC
+                    while let presented = presentingVC?.presentedViewController {
+                        presentingVC = presented
+                    }
+                }
+                
+                if presentingVC == nil, #available(iOS 13.0, *) {
+                    let scene = UIApplication.shared.connectedScenes
+                        .filter { $0.activationState == .foregroundActive }
+                        .compactMap { $0 as? UIWindowScene }
+                        .first
+                    if let rootVC = scene?.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+                        presentingVC = rootVC
+                        while let presented = presentingVC?.presentedViewController {
+                            presentingVC = presented
+                        }
+                    }
+                }
+                
+                if presentingVC == nil {
+                    if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+                        presentingVC = rootVC
+                        while let presented = presentingVC?.presentedViewController {
+                            presentingVC = presented
+                        }
+                    }
+                }
+                
+                if let presentingVC = presentingVC {
+                    presentingVC.present(pickerVC, animated: true, completion: nil)
+                } else {
+                    completionHandler.handleCompletion(status: .failed(message: "No view controller available to present picker"), result: nil)
+                    SPKChooseMediaMethod._activeMediaPicker = nil
+                }
             }
         }
     }
     
-    // Helper method to get default media picker (similar to original code)
     private var defaultMediaPicker: SPKDefaultMediaPicker {
         return SPKDefaultMediaPicker()
     }
     
-    // Check if camera is denied
     private func isCameraDenied() -> Bool {
         let authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
         return authorizationStatus == .denied || authorizationStatus == .restricted
     }
     
-    // Check if album is denied
     private func isAlbumDenied() -> Bool {
         let authorizationStatus = PHPhotoLibrary.authorizationStatus()
         return authorizationStatus == .denied || authorizationStatus == .restricted

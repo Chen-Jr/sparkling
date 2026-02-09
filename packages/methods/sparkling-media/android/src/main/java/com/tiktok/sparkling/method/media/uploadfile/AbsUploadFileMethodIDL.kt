@@ -21,7 +21,7 @@ abstract class AbsUploadFileMethodIDL :
         params = ["url", "filePath", "params", "header", "paramsOption", "formDataBody"],
         results = ["url", "uri", "response", "clientCode"]
     )
-    final override val name: String = "x.uploadFile"
+    final override val name: String = "media.uploadFile"
 
     @IDLMethodParamModel
     interface UploadFileParamModel : IDLMethodBaseParamModel {

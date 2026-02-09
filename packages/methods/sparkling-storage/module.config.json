@@ -48,7 +48,7 @@
   "ios": {
     "moduleName": "SPKStorage",
     "className": "StorageMethod",
-    "podspecPath": "ios/Sparkling-SPKStorage.podspec",
+    "podspecPath": "ios/Sparkling-Storage.podspec",
     "swiftVersion": "5.0"
   },
   "web": {

@@ -3,7 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 import pipe from 'sparkling-method';
 import type { UploadImageRequest, UploadImageResponse } from './uploadImage.d';
-import { validateParams, validationRules, isValidCallback, logInvalidCallback } from '../utils/validation';
+import { validateParams, validationRules, isValidCallback, logInvalidCallback, mapPipeResponse } from '../utils/validation';
 
 /**
  * Upload an image to server
@@ -22,19 +22,15 @@ export function uploadImage(params: UploadImageRequest, callback: (result: Uploa
         return;
     }
 
-    pipe.call('media.uploadImage', {
+    const pipeParams = {
         url: params.url.trim(),
         filePath: params.filePath,
         params: params.params,
         header: params.header,
         paramsOption: params.paramsOption,
         formDataBody: params.formDataBody,
-    }, (v: unknown) => {
-        const response = v as UploadImageResponse;
-        callback({
-            code: response?.code ?? -1,
-            msg: response?.msg ?? 'Unknown error',
-            data: response?.data,
-        });
+    };
+    pipe.call('media.uploadImage', pipeParams, (v: unknown) => {
+        callback(mapPipeResponse<UploadImageResponse>(v));
     });
 }

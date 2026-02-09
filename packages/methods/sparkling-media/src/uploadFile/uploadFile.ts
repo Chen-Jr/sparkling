@@ -3,7 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 import pipe from 'sparkling-method';
 import type { UploadFileRequest, UploadFileResponse } from './uploadFile.d';
-import { validateParams, validationRules, isValidCallback, logInvalidCallback } from '../utils/validation';
+import { validateParams, validationRules, isValidCallback, logInvalidCallback, mapPipeResponse } from '../utils/validation';
 
 /**
  * Upload a file to server
@@ -22,19 +22,15 @@ export function uploadFile(params: UploadFileRequest, callback: (result: UploadF
         return;
     }
 
-    pipe.call('media.uploadFile', {
+    const pipeParams = {
         url: params.url.trim(),
         filePath: params.filePath,
         params: params.params,
         header: params.header,
         paramsOption: params.paramsOption,
         formDataBody: params.formDataBody,
-    }, (v: unknown) => {
-        const response = v as UploadFileResponse;
-        callback({
-            code: response?.code ?? -1,
-            msg: response?.msg ?? 'Unknown error',
-            data: response?.data,
-        });
+    };
+    pipe.call('media.uploadFile', pipeParams, (v: unknown) => {
+        callback(mapPipeResponse<UploadFileResponse>(v));
     });
 }

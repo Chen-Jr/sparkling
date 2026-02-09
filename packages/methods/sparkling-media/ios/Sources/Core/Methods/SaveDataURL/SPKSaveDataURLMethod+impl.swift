@@ -9,13 +9,11 @@ import SparklingMethod
 
 extension SPKSaveDataURLMethod {
     @objc public override func call(withParamModel paramModel: Any, completionHandler: CompletionHandlerProtocol) {
-        // Check parameter model type
         guard let typedParamModel = paramModel as? SPKSaveDataURLMethodParamModel else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "Invalid parameter model type"), result: nil)
             return
         }
         
-        // Validate required parameters
         guard let dataURL = typedParamModel.dataURL, !dataURL.isEmpty else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "The dataURL should not be empty."), result: nil)
             return
@@ -31,34 +29,28 @@ extension SPKSaveDataURLMethod {
             return
         }
         
-        // Parse base64 data from data URL
         var base64Data = dataURL
         
-        // Remove data URL prefix if present (e.g., "data:image/png;base64,")
         if let range = dataURL.range(of: ";base64,") {
             base64Data = String(dataURL[range.upperBound...])
         } else if let range = dataURL.range(of: "base64,") {
             base64Data = String(dataURL[range.upperBound...])
         }
         
-        // Decode base64 data
         guard let data = Data(base64Encoded: base64Data, options: .ignoreUnknownCharacters) else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "Invalid base64 data in dataURL."), result: nil)
             return
         }
         
-        // Create file path
         let fullFileName = "\(filename).\(fileExtension)"
         let tmpFilePath = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fullFileName)
         
         do {
-            // Write data to file
             try data.write(to: tmpFilePath, options: .atomic)
             
             let resultModel = SPKSaveDataURLMethodResultModel()
             resultModel.filePath = tmpFilePath.path.spk_stringByStrippingSandboxPath()
             
-            // Handle save to album if requested
             if let saveToAlbum = typedParamModel.saveToAlbum {
                 if saveToAlbum == "image" {
                     saveImageToAlbum(data: data, resultModel: resultModel, completionHandler: completionHandler)
@@ -76,7 +68,6 @@ extension SPKSaveDataURLMethod {
         }
     }
     
-    // Save image to album
     private func saveImageToAlbum(data: Data, resultModel: SPKSaveDataURLMethodResultModel, completionHandler: CompletionHandlerProtocol) {
         requestPHAuthorization { success in
             if success {
@@ -98,7 +89,6 @@ extension SPKSaveDataURLMethod {
         }
     }
     
-    // Save video to album
     private func saveVideoToAlbum(fileURL: URL, resultModel: SPKSaveDataURLMethodResultModel, completionHandler: CompletionHandlerProtocol) {
         requestPHAuthorization { success in
             if success {
@@ -121,7 +111,6 @@ extension SPKSaveDataURLMethod {
         }
     }
     
-    // Request photo permission
     private func requestPHAuthorization(_ completionHandler: @escaping (Bool) -> Void) {
         let authorizationStatus = PHPhotoLibrary.authorizationStatus()
         

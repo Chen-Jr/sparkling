@@ -5,7 +5,6 @@
 import Foundation
 import SparklingMethod
 
-// Temporary file model
 @objc(SPKChooseMediaMethodResultTempFileModel)
 class SPKChooseMediaMethodResultTempFileModel: NSObject {
     @objc public var tempFilePath: String?
@@ -33,14 +32,12 @@ class SPKChooseMediaMethodResultTempFileModel: NSObject {
     }
 }
 
-// Parameter model
 @objc(SPKChooseMediaMethodParamModel) 
 public class SPKChooseMediaMethodParamModel: SPKMethodModel {
     @objc public override static func requiredKeyPaths() -> Set<String>? {
         return nil
     }
     
-    // Media selection properties
     @objc public var mediaTypes: [Int]?
     @objc public var sourceType: Int = SPKChooseMediaMediaSourceType.album.rawValue
     @objc public var cameraType: Int = SPKChooseMediaCameraType.back.rawValue
@@ -50,27 +47,22 @@ public class SPKChooseMediaMethodParamModel: SPKMethodModel {
     @objc public var compressOption: Int = SPKChooseMediaCompressOption.default.rawValue
     @objc public var needPreview: Bool = true
     
-    // Permission handling properties
     @objc public var cameraPermissionDenyAction: Int = SPKChooseMediaPermissionDenyAction.default.rawValue
     @objc public var albumPermissionDenyAction: Int = SPKChooseMediaPermissionDenyAction.default.rawValue
     
-    // Compression parameters (added from SPKDefaultMediaPicker)
     @objc public var compressWidth: CGFloat = 0
     @objc public var compressHeight: CGFloat = 0
     @objc public var compressionQuality: CGFloat = 0.8
     @objc public var type: String? = nil
     
-    // Result format properties
     @objc public var needTempFilePath: Bool = true
     @objc public var needBase64: Bool = false
     @objc public var needSaveToAlbum: Bool = false
     
-    // Additional properties used by SPKDefaultMediaPicker
     @objc public var compressImage: Bool = false
     @objc public var needBase64Data: Bool = false
     @objc public var saveToPhotoAlbum: Bool = false
     
-    // UI properties
     @objc public var showTakePhotoButton: Bool = true
     @objc public var showCameraRoll: Bool = true
     @objc public var showPhotoLibrary: Bool = true
@@ -101,7 +93,6 @@ public class SPKChooseMediaMethodParamModel: SPKMethodModel {
     }
 }
 
-// Result model
 @objc(SPKChooseMediaMethodResultModel) 
 class SPKChooseMediaMethodResultModel: SPKMethodModel {
     @objc public var tempFiles: [SPKChooseMediaMethodResultTempFileModel]?
@@ -113,7 +104,6 @@ class SPKChooseMediaMethodResultModel: SPKMethodModel {
     }
 }
 
-// Main method class
 @objc(SPKChooseMediaMethod) 
 public class SPKChooseMediaMethod: PipeMethod {
     @objc public override var paramsModelClass: AnyClass {

@@ -9,7 +9,6 @@ import SparklingMethod
 
 extension SPKDownloadFileMethod {
     @objc public override func call(withParamModel paramModel: Any, completionHandler: CompletionHandlerProtocol) {
-        // Check URL parameter
         guard let typedParamModel = paramModel as? SPKDownloadFileMethodParamModel else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "Invalid parameter model type"), result: nil)
             return
@@ -20,38 +19,34 @@ extension SPKDownloadFileMethod {
             return
         }
         
-        // Generate temporary file path
         let fileName = UUID().uuidString
         let fileExtension = typedParamModel.extensions ?? ""
         let fullFileName = fileExtension.isEmpty ? fileName : "\(fileName).\(fileExtension)"
         let tmpFilePath = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fullFileName).path
         let tmpFileURL = URL(fileURLWithPath: tmpFilePath)
         
-        // Wrapped completion handler
         let wrappedCompletionHandler: SPKBridgeDownloadFileCompletionHandler = { [weak self] response, fileURL, error in
             guard let self = self else { return }
             
             let httpResponse = response as? SPKHttpResponseChromium
             let resultModel = SPKDownloadFileMethodResultModel()
-            resultModel.clientCode = 0 // Using Int type
+            resultModel.clientCode = 0
             var status: SPKBridgeStatus?
             
             if let httpResponse = httpResponse {
-                 resultModel.httpCode = httpResponse.statusCode // Using Int type directly
+                 resultModel.httpCode = httpResponse.statusCode
                  resultModel.header = httpResponse.allHeaderFields as? [String: String]
               }
             
             if let error = error {
-                resultModel.clientCode = error._code // Using Int type directly
+                resultModel.clientCode = error._code
                 status = SPKBridgeStatus(statusCode: .failed, message: error.localizedDescription)
             } else if httpResponse == nil {
                 status = SPKBridgeStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
             } else if let filePath = fileURL?.path {
-                // Using our implemented extension method
                 resultModel.filePath = filePath.spk_stringByStrippingSandboxPath()
             }
             
-            // Convert to SparklingMethod required format
             if let status = status {
                 let errorInfo: [String: Any] = [
                     "code": status.statusCode.rawValue,
@@ -63,7 +58,6 @@ extension SPKDownloadFileMethod {
             }
         }
         
-        // Download task
         let task = TTNetworkManager.shared.downloadTaskWithRequest(url,
                                                               parameters: typedParamModel.params,
                                                               headerField: typedParamModel.header as? [String: Any],
@@ -83,7 +77,6 @@ extension SPKDownloadFileMethod {
                 return
             }
             
-            // Handle save to album
             if typedParamModel.saveToAlbum == "image" {
                 self.saveImageToAlbumWithURL(fileURL, response: response, spkBridgeDownloadFileCompletionHandler: wrappedCompletionHandler)
             } else if typedParamModel.saveToAlbum == "video" {
@@ -93,7 +86,6 @@ extension SPKDownloadFileMethod {
             }
         }
         
-        // Set timeout
         if typedParamModel.timeoutInterval > 0 {
             task.timeoutInterval = typedParamModel.timeoutInterval
             task.protectTimeout = typedParamModel.timeoutInterval
@@ -104,7 +96,6 @@ extension SPKDownloadFileMethod {
     
 
     
-    // Save image to album
     private func saveImageToAlbumWithURL(_ fileURL: URL, response: SPKHttpResponse?, spkBridgeDownloadFileCompletionHandler: @escaping SPKBridgeDownloadFileCompletionHandler) {
         requestPHAuthorization { [weak self] success in
             guard let self = self else { return }
@@ -114,7 +105,6 @@ extension SPKDownloadFileMethod {
                     let imageData = try Data(contentsOf: fileURL)
                     if let image = UIImage(data: imageData) {
                         UIImageWriteToSavedPhotosAlbum(image, self, #selector(self.image(_:didFinishSavingWithError:contextInfo:)), nil)
-                        // For simplification, directly return success here
                         DispatchQueue.main.async {
                             spkBridgeDownloadFileCompletionHandler(response, fileURL, nil)
                         }
@@ -130,7 +120,6 @@ extension SPKDownloadFileMethod {
         }
     }
     
-    // Save video to album
     private func saveVideoToAlbumWithURL(_ fileURL: URL, response: SPKHttpResponse?, spkBridgeDownloadFileCompletionHandler: @escaping SPKBridgeDownloadFileCompletionHandler) {
         requestPHAuthorization { [weak self] success in
             guard let self = self else { return }
@@ -153,7 +142,6 @@ extension SPKDownloadFileMethod {
         }
     }
     
-    // Request photo permission
     private func requestPHAuthorization(_ completionHandler: @escaping (Bool) -> Void) {
         let authorizationStatus = PHPhotoLibrary.authorizationStatus()
         
@@ -180,7 +168,6 @@ extension SPKDownloadFileMethod {
         // Additional handling logic can be added here
     }
     
-    // Error handling
     private func failedHandlerWithURL(_ fileURL: URL, response: SPKHttpResponse?, completionHandler: @escaping SPKBridgeDownloadFileCompletionHandler, message: String) {
         let error = NSError(domain: "SPKDownloadFileErrorDomain", code: 0, userInfo: [NSLocalizedDescriptionKey: message])
         completionHandler(response, fileURL, error)

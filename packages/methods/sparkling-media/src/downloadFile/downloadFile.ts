@@ -3,7 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 import pipe from 'sparkling-method';
 import type { DownloadFileRequest, DownloadFileResponse } from './downloadFile.d';
-import { validateParams, validationRules, isValidCallback, logInvalidCallback } from '../utils/validation';
+import { validateParams, validationRules, isValidCallback, logInvalidCallback, mapPipeResponse } from '../utils/validation';
 
 /**
  * Download a file from server
@@ -23,7 +23,7 @@ export function downloadFile(params: DownloadFileRequest, callback: (result: Dow
         return;
     }
 
-    pipe.call('media.downloadFile', {
+    const pipeParams = {
         url: params.url.trim(),
         params: params.params,
         header: params.header,
@@ -31,12 +31,8 @@ export function downloadFile(params: DownloadFileRequest, callback: (result: Dow
         saveToAlbum: params.saveToAlbum,
         needCommonParams: params.needCommonParams ?? true,
         timeoutInterval: params.timeoutInterval,
-    }, (v: unknown) => {
-        const response = v as DownloadFileResponse;
-        callback({
-            code: response?.code ?? -1,
-            msg: response?.msg ?? 'Unknown error',
-            data: response?.data,
-        });
+    };
+    pipe.call('media.downloadFile', pipeParams, (v: unknown) => {
+        callback(mapPipeResponse<DownloadFileResponse>(v));
     });
 }

@@ -11,7 +11,7 @@ Media handling methods for Sparkling applications, enabling image/video selectio
 npm install sparkling-media@latest
 ```
 
-After installing, run `sparkling-cli autolink` to automatically link the native modules:
+After installing, run `sparkling-app-cli autolink` to automatically link the native modules:
 
 ```bash
 npx sparkling autolink

@@ -9,26 +9,22 @@ import Photos
 import MobileCoreServices
 import CoreServices
 
-// Media type enumeration
 enum SPKChooseMediaMediaType: Int {
     case image = 1
     case video = 2
 }
 
-// Media source type enumeration
 enum SPKChooseMediaMediaSourceType: Int {
     case album = 1
     case camera = 2
     case unknown = 0
 }
 
-// Camera type enumeration
 enum SPKChooseMediaCameraType: Int {
     case front = 1
     case back = 2
 }
 
-// Compression option enumeration
 enum SPKChooseMediaCompressOption: Int {
     case `default` = 0
     case both = 1
@@ -37,13 +33,11 @@ enum SPKChooseMediaCompressOption: Int {
     case none = 4
 }
 
-// Permission denial behavior enumeration
 enum SPKChooseMediaPermissionDenyAction: Int {
     case `default` = 0
     case noAlert = 1
 }
 
-// Completion handler typealias
 typealias SPKChooseMediaCompletionHandler = (SPKChooseMediaMethodResultModel?, SPKStatus?) -> Void
 
 protocol SPKChooseMediaPicker {
@@ -57,15 +51,12 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
     private var completionHandler: SPKChooseMediaCompletionHandler?
     private weak var imagePicker: UIImagePickerController?
     
-    // MARK: - SPKChooseMediaPicker
-    
     func supported(with paramModel: SPKChooseMediaMethodParamModel) -> Bool {
         return true
     }
     
     func mediaPicker(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: @escaping SPKChooseMediaCompletionHandler) -> UIViewController? {
         self.params = paramModel
-        // Set default compressOption if not provided
         if params?.compressOption == nil {
             params?.compressOption = SPKChooseMediaCompressOption.default.rawValue
         }
@@ -75,13 +66,17 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
             sourceType = .photoLibrary
         }
         
+        if !UIImagePickerController.isSourceTypeAvailable(sourceType) {
+            completionHandler(nil, SPKStatus(code: SPKStatusCode.invalidParameter, message: "Source type \(sourceType.rawValue) is not available on this device."))
+            return nil
+        }
+        
         if sourceType == .camera && isCameraDenied() {
             let message = "Cannot access camera. Please go to Settings > Privacy and grant the permission for \(UIApplication.shared.btd_appDisplayName ?? "")"
             
             let alertView = UIAlertController(title: "tip", message: message, preferredStyle: .alert)
             alertView.addAction(UIAlertAction(title: "cancel", style: .cancel, handler: nil))
             alertView.addAction(UIAlertAction(title: "go_to_settings", style: .default, handler: { _ in
-                // Open Settings
                 UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
             }))
             
@@ -89,9 +84,6 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
             UIApplication.shared.keyWindow?.topViewController()?.present(alertView, animated: true, completion: nil)
             return nil
         } else {
-            let mediaTypes = paramModel.mediaTypes
-            let cameraType = paramModel.cameraType
-
             var mappedMediaTypes: [String] = []
             if let mediaTypes = paramModel.mediaTypes {
                 if mediaTypes.contains(SPKChooseMediaMediaType.image.rawValue) {
@@ -104,22 +96,7 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
                     mappedMediaTypes.append(kUTTypeImage as String)
                 }
             } else {
-                // Default to image if no media types specified
                 mappedMediaTypes.append(kUTTypeImage as String)
-            }
-            
-            // Set camera type based on paramModel
-            let cameraDevice: UIImagePickerController.CameraDevice
-            if let cameraTypeEnum = SPKChooseMediaCameraType(rawValue: cameraType) {
-                switch cameraTypeEnum {
-                case .front:
-                    cameraDevice = .front
-                case .back:
-                    cameraDevice = .rear
-                }
-            } else {
-                finish(with: nil, status: SPKStatus(code: SPKStatusCode.invalidParameter, message: "Unknown camera type: \(cameraType)"))
-                return nil
             }
             
             let imagePicker = UIImagePickerController()
@@ -128,10 +105,22 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
             imagePicker.mediaTypes = mappedMediaTypes
             
             if sourceType == .camera {
+                let cameraType = paramModel.cameraType
+                let cameraDevice: UIImagePickerController.CameraDevice
+                if let cameraTypeEnum = SPKChooseMediaCameraType(rawValue: cameraType) {
+                    switch cameraTypeEnum {
+                    case .front:
+                        cameraDevice = .front
+                    case .back:
+                        cameraDevice = .rear
+                    }
+                } else {
+                    finish(with: nil, status: SPKStatus(code: SPKStatusCode.invalidParameter, message: "Unknown camera type: \(cameraType)"))
+                    return nil
+                }
                 imagePicker.cameraDevice = cameraDevice
             }
             
-            // Check if video type is included in mediaTypes
             if let mediaTypes = paramModel.mediaTypes, mediaTypes.contains(SPKChooseMediaMediaType.video.rawValue) {
                 imagePicker.videoQuality = .typeHigh
             }
@@ -145,8 +134,6 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
         }
     }
     
-    // MARK: - UIImagePickerControllerDelegate
-    
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         finish(with: nil, status: SPKStatus(code: SPKStatusCode.operationCancelled, message: "The user has cancelled the operation."))
     }
@@ -154,17 +141,14 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         let tempFileModel = SPKChooseMediaMethodResultTempFileModel()
         
-        // Get media type
             if let mediaType = info[.mediaType] as? String {
                 if UTTypeConformsTo(mediaType as CFString, kUTTypeMovie as CFString) {
                     if let mediaURL = info[.mediaURL] as? URL {
                     tempFileModel.mediaType = SPKChooseMediaMediaType.video.rawValue
                     
-                    // Retrieve file path
                     tempFileModel.tempFilePath = mediaURL.path.spk_stringByStrippingSandboxPath()
                     tempFileModel.tempFileAbsolutePath = tempFileModel.tempFilePath?.spk_stringFromProcessFile()
                     
-                    // Retrieve file size
                     do {
                         let resourceValues = try mediaURL.resourceValues(forKeys: [.fileSizeKey])
                         if let fileSize = resourceValues.fileSize {
@@ -175,7 +159,6 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
                         return
                     }
                     
-                    // Save to photo album
                     if params?.saveToPhotoAlbum ?? false {
                         if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(mediaURL.path) {
                             UISaveVideoAtPathToSavedPhotosAlbum(mediaURL.path, nil, nil, nil)
@@ -192,7 +175,6 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
                 if let image = info[.originalImage] as? UIImage {
                     tempFileModel.mediaType = SPKChooseMediaMediaType.image.rawValue
                     
-                    // Save to disk
                     if let imageData = imageDataForImage(image) {
                         if let filePath = writeImageDataToDisk(imageData) {
                             tempFileModel.tempFilePath = filePath.spk_stringByStrippingSandboxPath()
@@ -204,7 +186,6 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
                                 tempFileModel.base64Data = imageData.base64EncodedString(options: .lineLength64Characters)
                             }
                             
-                            // Save to photo album
                             if params?.saveToPhotoAlbum ?? false {
                                 UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
                             }
@@ -231,8 +212,6 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
         finish(with: resultModel, status: nil)
     }
     
-    // MARK: - Helpers
-    
     func isCameraDenied() -> Bool {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         return status == .restricted || status == .denied
@@ -241,12 +220,10 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
     func imageDataForImage(_ image: UIImage) -> Data? {
         guard let params = params else { return nil }
         
-        // Use compressOption instead of compressImage for better control
         if params.compressOption == SPKChooseMediaCompressOption.none.rawValue {
             return image.jpegData(compressionQuality: 1.0)
         }
         
-        // Handle image compression based on compressOption
         if params.compressOption == SPKChooseMediaCompressOption.both.rawValue || 
            params.compressOption == SPKChooseMediaCompressOption.onlyImage.rawValue || 
            params.compressOption == SPKChooseMediaCompressOption.default.rawValue {
@@ -313,7 +290,6 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
     }
 }
 
-// UIApplication extension for app display name
 fileprivate extension UIApplication {
     var btd_appDisplayName: String? {
         return Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? 
@@ -321,7 +297,6 @@ fileprivate extension UIApplication {
     }
 }
 
-// UIWindow extension to get the top ViewController
 fileprivate extension UIWindow {
     func topViewController() -> UIViewController? {
         var topViewController: UIViewController? = rootViewController
@@ -334,7 +309,6 @@ fileprivate extension UIWindow {
     }
 }
 
-// SPKStatus class
 enum SPKStatusCode: Int {
     case success = 0
     case invalidParameter = 1

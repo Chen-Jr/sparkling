@@ -11,7 +11,7 @@ Persistent storage methods for Sparkling applications, providing key-value data 
 npm install sparkling-storage@latest
 ```
 
-After installing, run `sparkling-cli autolink` to automatically link the native modules:
+After installing, run `sparkling-app-cli autolink` to automatically link the native modules:
 
 ```bash
 npx sparkling autolink

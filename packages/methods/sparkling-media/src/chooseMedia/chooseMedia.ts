@@ -3,7 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 import pipe from 'sparkling-method';
 import type { ChooseMediaRequest, ChooseMediaResponse } from './chooseMedia.d';
-import { validateParams, validationRules, isValidCallback, logInvalidCallback } from '../utils/validation';
+import { validateParams, validationRules, isValidCallback, logInvalidCallback, mapPipeResponse } from '../utils/validation';
 
 /**
  * Choose media from album or camera
@@ -30,7 +30,7 @@ export function chooseMedia(params: ChooseMediaRequest, callback: (result: Choos
         return;
     }
 
-    pipe.call('media.chooseMedia', {
+    const pipeParams = {
         mediaTypes: params.mediaTypes,
         sourceType: params.sourceType,
         maxCount: params.maxCount ?? 1,
@@ -49,12 +49,8 @@ export function chooseMedia(params: ChooseMediaRequest, callback: (result: Choos
         useNewCompressSolution: params.useNewCompressSolution ?? false,
         shouldKeepOriginalFormat: params.shouldKeepOriginalFormat,
         compressQuality: params.compressQuality ?? 100,
-    }, (v: unknown) => {
-        const response = v as ChooseMediaResponse;
-        callback({
-            code: response?.code ?? -1,
-            msg: response?.msg ?? 'Unknown error',
-            data: response?.data,
-        });
+    };
+    pipe.call('media.chooseMedia', pipeParams, (v: unknown) => {
+        callback(mapPipeResponse<ChooseMediaResponse>(v));
     });
 }

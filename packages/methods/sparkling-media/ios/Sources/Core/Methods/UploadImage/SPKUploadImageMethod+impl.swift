@@ -5,7 +5,6 @@
 import Foundation
 import SparklingMethod
 
-// Status code enumeration for upload image
 enum SPKUploadImageStatusCode: Int {
     case succeeded = 0
     case failed = -1
@@ -13,7 +12,6 @@ enum SPKUploadImageStatusCode: Int {
     case malformedResponse = -3
 }
 
-// Status model for upload image
 class SPKUploadImageStatus: NSObject {
     var statusCode: SPKUploadImageStatusCode = .succeeded
     var message: String?
@@ -24,18 +22,15 @@ class SPKUploadImageStatus: NSObject {
     }
 }
 
-// Completion handler type for upload image
 typealias SPKUploadImageCompletionHandler = (SPKHttpResponse?, Any?, Error?) -> Void
 
 extension SPKUploadImageMethod {
     @objc public override func call(withParamModel paramModel: Any, completionHandler: CompletionHandlerProtocol) {
-        // Check parameter model type
         guard let typedParamModel = paramModel as? SPKUploadImageMethodParamModel else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "Invalid parameter model type"), result: nil)
             return
         }
         
-        // Validate required parameters
         guard let url = typedParamModel.url, !url.isEmpty else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "The URL should not be empty."), result: nil)
             return
@@ -46,14 +41,12 @@ extension SPKUploadImageMethod {
             return
         }
         
-        // Check if file exists
         let fileURL = URL(fileURLWithPath: filePath)
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "The file does not exist at the specified path."), result: nil)
             return
         }
         
-        // Wrapped completion handler
         let wrappedCompletionHandler: SPKUploadImageCompletionHandler = { [weak self] response, responseData, error in
             guard let self = self else { return }
             
@@ -73,17 +66,14 @@ extension SPKUploadImageMethod {
             } else if httpResponse == nil {
                 status = SPKUploadImageStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
             } else {
-                // Set response data if available
                 resultModel.responseData = responseData as? [String: Any]
                 
-                // Extract URL/URI from response if available
                 if let responseDict = responseData as? [String: Any] {
                     resultModel.url = responseDict["url"] as? String
                     resultModel.uri = responseDict["uri"] as? String
                 }
             }
             
-            // Convert to SparklingMethod required format
             if let status = status {
                 completionHandler.handleCompletion(status: .failed(message: status.message), result: resultModel)
             } else {
@@ -91,12 +81,10 @@ extension SPKUploadImageMethod {
             }
         }
         
-        // Set default values for upload parameters
         let uploadName = typedParamModel.name ?? "file"
         let uploadFileName = typedParamModel.fileName ?? fileURL.lastPathComponent
         let uploadMimeType = guessMimeType(for: fileURL)
         
-        // Create upload task
         let task = TTNetworkManager.shared.uploadTaskWithRequest(url,
                                                            fileURL: fileURL,
                                                            name: uploadName,
@@ -109,7 +97,6 @@ extension SPKUploadImageMethod {
             wrappedCompletionHandler(response, responseObject, error)
         }
         
-        // Set timeout if specified
         if typedParamModel.timeoutInterval > 0 {
             task.timeoutInterval = typedParamModel.timeoutInterval
             task.protectTimeout = typedParamModel.timeoutInterval
@@ -118,7 +105,6 @@ extension SPKUploadImageMethod {
         task.resume()
     }
     
-    // Helper method to guess MIME type for images
     private func guessMimeType(for fileURL: URL) -> String {
         let pathExtension = fileURL.pathExtension.lowercased()
         
@@ -142,7 +128,7 @@ extension SPKUploadImageMethod {
         case "svg":
             return "image/svg+xml"
         default:
-            return "image/jpeg"  // Default to JPEG for images
+            return "image/jpeg"
         }
     }
 }

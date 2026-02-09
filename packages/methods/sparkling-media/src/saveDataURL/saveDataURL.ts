@@ -3,7 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 import pipe from 'sparkling-method';
 import type { SaveDataURLRequest, SaveDataURLResponse } from './saveDataURL.d';
-import { validateParams, validationRules, isValidCallback, logInvalidCallback } from '../utils/validation';
+import { validateParams, validationRules, isValidCallback, logInvalidCallback, mapPipeResponse } from '../utils/validation';
 
 /**
  * Save a base64 data URL to local file
@@ -24,17 +24,13 @@ export function saveDataURL(params: SaveDataURLRequest, callback: (result: SaveD
         return;
     }
 
-    pipe.call('media.saveDataURL', {
+    const pipeParams = {
         dataURL: params.dataURL.trim(),
         filename: params.filename.trim(),
         extension: params.extension.trim(),
         saveToAlbum: params.saveToAlbum,
-    }, (v: unknown) => {
-        const response = v as SaveDataURLResponse;
-        callback({
-            code: response?.code ?? -1,
-            msg: response?.msg ?? 'Unknown error',
-            data: response?.data,
-        });
+    };
+    pipe.call('media.saveDataURL', pipeParams, (v: unknown) => {
+        callback(mapPipeResponse<SaveDataURLResponse>(v));
     });
 }

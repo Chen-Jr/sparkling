@@ -7,13 +7,11 @@ import SparklingMethod
 
 extension SPKUploadFileMethod {
     @objc public override func call(withParamModel paramModel: Any, completionHandler: CompletionHandlerProtocol) {
-        // Check parameter model type
         guard let typedParamModel = paramModel as? SPKUploadFileMethodParamModel else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "Invalid parameter model type"), result: nil)
             return
         }
         
-        // Validate required parameters
         guard let url = typedParamModel.url, !url.isEmpty else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "The URL should not be empty."), result: nil)
             return
@@ -24,14 +22,12 @@ extension SPKUploadFileMethod {
             return
         }
         
-        // Check if file exists
         let fileURL = URL(fileURLWithPath: filePath)
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "The file does not exist at the specified path."), result: nil)
             return
         }
         
-        // Wrapped completion handler
         let wrappedCompletionHandler: SPKUploadFileCompletionHandler = { [weak self] response, responseData, error in
             guard let self = self else { return }
             
@@ -51,11 +47,9 @@ extension SPKUploadFileMethod {
             } else if httpResponse == nil {
                 status = SPKUploadStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
             } else {
-                // Set response data if available
                 resultModel.responseData = responseData as? [String: Any]
             }
             
-            // Convert to SparklingMethod required format
             if let status = status {
                 let errorInfo: [String: Any] = [
                     "code": status.statusCode.rawValue,
@@ -67,12 +61,10 @@ extension SPKUploadFileMethod {
             }
         }
         
-        // Set default values for upload parameters
         let uploadName = typedParamModel.name ?? "file"
         let uploadFileName = typedParamModel.fileName ?? fileURL.lastPathComponent
         let uploadMimeType = typedParamModel.mimeType ?? self.guessMimeType(for: fileURL)
         
-        // Create upload task
         let task = TTNetworkManager.shared.uploadTaskWithRequest(url,
                                                            fileURL: fileURL,
                                                            name: uploadName,
@@ -85,7 +77,6 @@ extension SPKUploadFileMethod {
             wrappedCompletionHandler(response, responseObject, error)
         }
         
-        // Set timeout if specified
         if typedParamModel.timeoutInterval > 0 {
             task.timeoutInterval = typedParamModel.timeoutInterval
             task.protectTimeout = typedParamModel.timeoutInterval
@@ -94,7 +85,6 @@ extension SPKUploadFileMethod {
         task.resume()
     }
     
-    // Helper method to guess MIME type based on file extension
     private func guessMimeType(for fileURL: URL) -> String {
         let pathExtension = fileURL.pathExtension.lowercased()
         

@@ -51,4 +51,12 @@ public class GetStorageItemMethodResultModel: SPKMethodModel {
             "data": "data"
         ]
     }
+    
+    public override func toDict() throws -> [String: Any]? {
+        var dict = try super.toDict() ?? [:]
+        if let data = self.data {
+            dict["data"] = data.anyValue
+        }
+        return dict
+    }
 }
