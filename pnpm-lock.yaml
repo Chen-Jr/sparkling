@@ -62,10 +62,10 @@ importers:
         specifier: ^29.1.2
         version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@22.19.9)(ts-node@10.9.2(@types/node@22.19.9)(typescript@5.8.3)))(typescript@5.8.3)
       typescript:
-        specifier: ^5.0.0
+        specifier: ^5.8.3
         version: 5.8.3
 
-  packages/methods/sparkling-router:
+  packages/methods/sparkling-navigation:
     dependencies:
       sparkling-method:
         specifier: workspace:*
@@ -81,7 +81,7 @@ importers:
         specifier: ^29.1.2
         version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@22.19.9)(ts-node@10.9.2(@types/node@22.19.9)(typescript@5.8.3)))(typescript@5.8.3)
       typescript:
-        specifier: ^5.0.0
+        specifier: ^5.8.3
         version: 5.8.3
 
   packages/methods/sparkling-storage:
@@ -100,7 +100,7 @@ importers:
         specifier: ^29.1.2
         version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@22.19.9)(ts-node@10.9.2(@types/node@22.19.9)(typescript@5.8.3)))(typescript@5.8.3)
       typescript:
-        specifier: ^5.0.0
+        specifier: ^5.8.3
         version: 5.8.3
 
   packages/playground:
@@ -111,9 +111,9 @@ importers:
       sparkling-media:
         specifier: workspace:*
         version: link:../methods/sparkling-media
-      sparkling-router:
+      sparkling-navigation:
         specifier: workspace:*
-        version: link:../methods/sparkling-router
+        version: link:../methods/sparkling-navigation
       sparkling-storage:
         specifier: workspace:*
         version: link:../methods/sparkling-storage
@@ -146,13 +146,13 @@ importers:
         specifier: ^3.5.3
         version: 3.8.1
       typescript:
-        specifier: ~5.8.3
+        specifier: ^5.8.3
         version: 5.8.3
       vitest:
         specifier: ^3.1.2
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.9)(jiti@2.6.1)(jsdom@26.1.0)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)
 
-  packages/sparkling-cli:
+  packages/sparkling-app-cli:
     dependencies:
       '@lynx-js/rspeedy':
         specifier: ^0.13.3
@@ -195,7 +195,7 @@ importers:
         specifier: 3.6.0
         version: 3.6.0
       typescript:
-        specifier: ^5.0.0
+        specifier: ^5.8.3
         version: 5.8.3
 
   packages/sparkling-method-cli:
@@ -269,9 +269,9 @@ importers:
       '@lynx-js/react':
         specifier: ^0.116.2
         version: 0.116.2(@lynx-js/types@3.6.0)(@types/react@18.3.28)
-      sparkling-router:
+      sparkling-navigation:
         specifier: rc
-        version: link:../../packages/methods/sparkling-router
+        version: link:../../packages/methods/sparkling-navigation
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.4
@@ -300,11 +300,11 @@ importers:
       prettier:
         specifier: ^3.5.3
         version: 3.8.1
-      sparkling-cli:
+      sparkling-app-cli:
         specifier: rc
-        version: link:../../packages/sparkling-cli
+        version: link:../../packages/sparkling-app-cli
       typescript:
-        specifier: ~5.8.3
+        specifier: ^5.8.3
         version: 5.8.3
       vitest:
         specifier: ^3.1.2

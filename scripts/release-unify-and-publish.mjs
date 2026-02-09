@@ -29,6 +29,7 @@ function usage() {
     "  --tag <dist-tag>            npm dist-tag for publish (default: rc, unless --release)",
     "  --no-auto-rc                For rc publishes, do not auto-generate/increment -rc.N (requires --version to already be an rc prerelease)",
     "  --skip <names>              Skip publishing certain packages (comma-separated list of package names)",
+    "  --publish-last <names>      Publish these packages last, after all others (comma-separated list of package names)",
     "  --registry <url>            npm registry to use (default: https://registry.npmjs.org/)",
     "  --dry-run                   Do everything except the actual publish",
     "  --no-git-checks             Skip pnpm git checks during publish (default: enabled)",
@@ -37,7 +38,7 @@ function usage() {
     "",
     "Env var equivalents (useful for pnpm scripts to avoid `--` arg forwarding):",
     "  SPARKLING_VERSION, SPARKLING_EXPECTED_NPM_USER, SPARKLING_RELEASE=1, SPARKLING_TAG,",
-    "  SPARKLING_SKIP, SPARKLING_REGISTRY, SPARKLING_DRY_RUN=1,",
+    "  SPARKLING_SKIP, SPARKLING_PUBLISH_LAST, SPARKLING_REGISTRY, SPARKLING_DRY_RUN=1,",
     "  SPARKLING_GIT_CHECKS=1, SPARKLING_INCLUDE_PRIVATE=1, SPARKLING_NO_AUTO_RC=1",
     "",
     "Examples:",
@@ -63,6 +64,7 @@ function parseArgs(argv) {
     release: false,
     autoRc: true,
     skip: [],
+    publishLast: [],
     registry: NPMJS_REGISTRY,
     dryRun: false,
     noGitChecks: true,
@@ -102,6 +104,15 @@ function parseArgs(argv) {
           .map((s) => s.trim())
           .filter(Boolean);
         args.skip.push(...names);
+        break;
+      }
+      case "--publish-last": {
+        const raw = argv[++i] ?? "";
+        const names = raw
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        args.publishLast.push(...names);
         break;
       }
       case "--registry":
@@ -153,6 +164,9 @@ function parseArgs(argv) {
   }
   if (args.skip.length === 0 && env.SPARKLING_SKIP) {
     args.skip = env.SPARKLING_SKIP.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  if (args.publishLast.length === 0 && env.SPARKLING_PUBLISH_LAST) {
+    args.publishLast = env.SPARKLING_PUBLISH_LAST.split(",").map((s) => s.trim()).filter(Boolean);
   }
 
   return args;
@@ -531,12 +545,24 @@ async function main() {
   const internalNames = new Set(publishable.map((p) => p.name));
   const ordered = topoSortPackages(publishable, (p) => internalDeps(p.json, internalNames));
 
+  // Move --publish-last packages to the end, preserving their relative order.
+  const publishLastSet = new Set(args.publishLast);
+  const orderedMain = ordered.filter((p) => !publishLastSet.has(p.name));
+  const orderedLast = args.publishLast
+    .map((name) => ordered.find((p) => p.name === name))
+    .filter(Boolean);
+  const finalOrder = [...orderedMain, ...orderedLast];
+
   const pnpmArgsBase = ["publish", "--registry", args.registry, "--access", "public", "--tag", distTag];
   if (args.dryRun) pnpmArgsBase.push("--dry-run");
   if (args.noGitChecks) pnpmArgsBase.push("--no-git-checks");
 
-  for (const p of ordered) {
-    process.stdout.write(`\n==> Publishing ${p.name}@${targetVersion}\n`);
+  for (const p of finalOrder) {
+    if (publishLastSet.has(p.name)) {
+      process.stdout.write(`\n==> Publishing ${p.name}@${targetVersion} (publish-last)\n`);
+    } else {
+      process.stdout.write(`\n==> Publishing ${p.name}@${targetVersion}\n`);
+    }
     run("pnpm", pnpmArgsBase, { cwd: p.dir });
   }
 }

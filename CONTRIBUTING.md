@@ -16,10 +16,10 @@ Thanks for your interest in Sparkling! This guide explains how contributors can 
 ### Your First Code Contribution
 - Start with small, contained changes so you can validate your setup end-to-end.
 - Look for issues labeled “good first issue” (when available) or ask maintainers to confirm scope.
-- Prefer to touch one package at a time (for example, `packages/sparkling-cli` or `template/sparkling-app-template`) so reviews stay focused.
+- Prefer to touch one package at a time (for example, `packages/sparkling-sdk` or `template/sparkling-app-template`) so reviews stay focused.
 
 ## Development Environment
-- Install Node.js 18+ and pnpm `7.33.6` (matches the workspace lockfile).
+- Install Node.js 22+ and pnpm `10.26.0` (matches the workspace lockfile).
 - Install dependencies once: `pnpm install`.
 - The workspace uses recursive scripts. Running commands from the repo root will target each package unless you filter them (e.g., `pnpm --filter sparkling-method build`).
 
@@ -65,7 +65,7 @@ Labels (pick the first from this set): `[Feature]`, `[BugFix]`, `[Refactor]`, `[
   - `pnpm exec eslint .` to catch lint and license-header issues. See `docs/code-style/style-configs.md` for formatter locations and platform-specific configs.
 - Targeted commands:
   - `pnpm --filter sparkling-method test` for the method CLI.
-  - `pnpm --filter sparkling-cli build` to validate the CLI build.
+  - `pnpm --filter sparkling-app-cli build` to validate the CLI build.
 - Application templates and the playground do not ship unit tests; validate changes by building/running flows instead.
 - Template changes: generate a fresh app with `npx create-sparkling-app <dir> --ts`, then run the paths you touched (for example, `npx sparkling build` and `npx sparkling run:android --copy` or `run:ios --copy`).
 
