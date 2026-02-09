@@ -16,20 +16,12 @@ import {
 } from './checks';
 import type { CheckResult } from './types';
 
-// ---------------------------------------------------------------------------
-// Status icons
-// ---------------------------------------------------------------------------
-
 const STATUS_ICON: Record<string, string> = {
   pass: chalk.green('✓'),
   fail: chalk.red('✗'),
   warn: chalk.yellow('!'),
   skip: chalk.dim('-'),
 };
-
-// ---------------------------------------------------------------------------
-// Formatting helpers
-// ---------------------------------------------------------------------------
 
 function formatCheckLine(result: CheckResult): string {
   const icon = STATUS_ICON[result.status] ?? '?';
@@ -66,10 +58,6 @@ function buildAgentPrompt(failed: CheckResult[]): string {
   return lines.join('\n');
 }
 
-// ---------------------------------------------------------------------------
-// Main doctor function
-// ---------------------------------------------------------------------------
-
 export interface DoctorOptions {
   platform: 'android' | 'ios' | 'all';
 }
@@ -81,7 +69,6 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
   console.log(ui.headline('Sparkling Doctor'));
   console.log(ui.headline('================'));
 
-  // -- General checks -------------------------------------------------------
   const generalResults: CheckResult[] = [];
   generalResults.push(checkNodeVersion());
 
@@ -91,7 +78,6 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
     console.log(formatCheckLine(r));
   }
 
-  // -- Android checks -------------------------------------------------------
   const androidResults: CheckResult[] = [];
   if (platform === 'android' || platform === 'all') {
     androidResults.push(checkJdk());
@@ -105,7 +91,6 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
     }
   }
 
-  // -- iOS checks -----------------------------------------------------------
   const iosResults: CheckResult[] = [];
   if (platform === 'ios' || platform === 'all') {
     iosResults.push(checkXcode());
@@ -119,7 +104,6 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
     }
   }
 
-  // -- Summary --------------------------------------------------------------
   const allResults = [...generalResults, ...androidResults, ...iosResults];
   const failed = allResults.filter((r) => r.status === 'fail');
   const warned = allResults.filter((r) => r.status === 'warn');
@@ -135,7 +119,6 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
       ui.warn(`${issueCount} issue${issueCount > 1 ? 's' : ''} found.`),
     );
 
-    // Build and display the Coding Agent prompt
     const promptItems = [...failed, ...warned];
     const prompt = buildAgentPrompt(promptItems);
 
@@ -145,7 +128,6 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
     );
     console.log('');
 
-    // Draw a box around the prompt
     const promptLines = prompt.split('\n');
     const maxLen = Math.max(...promptLines.map((l) => l.length));
     const boxWidth = maxLen + 4;

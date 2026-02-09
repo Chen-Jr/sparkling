@@ -26,9 +26,15 @@ include(":sparkling")
 project(":sparkling").projectDir = file("../../../packages/sparkling-sdk/android/sparkling")
 include(":sparkling-method")
 project(":sparkling-method").projectDir = file("../../../packages/sparkling-method/android")
-include(":sparkling-router")
-project(":sparkling-router").projectDir = file("../../../packages/methods/sparkling-router/android")
-include(":sparkling-storage")
-project(":sparkling-storage").projectDir = file("../../../packages/methods/sparkling-storage/android")
-include(":sparkling-media")
-project(":sparkling-media").projectDir = file("../../../packages/methods/sparkling-media/android")
+
+// BEGIN SPARKLING AUTOLINK
+val sparklingAutolinkProjects = listOf<Pair<String, java.io.File>>(
+  "sparkling-media" to file("../../methods/sparkling-media/android"),
+  "sparkling-navigation" to file("../../methods/sparkling-navigation/android"),
+  "sparkling-storage" to file("../../methods/sparkling-storage/android")
+)
+sparklingAutolinkProjects.forEach { (name, dir) ->
+    include(":$name")
+    project(":$name").projectDir = dir
+}
+// END SPARKLING AUTOLINK

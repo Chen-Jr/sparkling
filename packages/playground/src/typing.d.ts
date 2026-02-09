@@ -47,8 +47,8 @@ export interface InputProps extends StandardProps {
 export type InputEvent = BaseEvent<'input', { value: string }>;
 
 // 提供工作区内包到新命名包的类型声明映射，避免编辑器无法解析模块名
-declare module 'sparkling-router' {
-  export * from '../../methods/sparkling-router/dist';
+declare module 'sparkling-navigation' {
+  export * from '../../methods/sparkling-navigation/dist';
 }
 
 declare module 'sparkling-storage' {

@@ -64,14 +64,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(project(":sparkling"))
-    implementation(project(":sparkling-router"))
-    implementation(project(":sparkling-storage"))
-    implementation(project(":sparkling-media"))
-
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp.logging)
-
 
     implementation(libs.fresco)
     implementation(libs.fresco.animated.gif)
@@ -80,8 +75,15 @@ dependencies {
     implementation(libs.fresco.animated.base)
 
     kapt(libs.lynx.processor)
-}
 
+    // BEGIN SPARKLING AUTOLINK
+    listOf(
+        project(":sparkling-media"),
+        project(":sparkling-navigation"),
+        project(":sparkling-storage")
+    ).forEach { dep -> add("implementation", dep) }
+    // END SPARKLING AUTOLINK
+}
 
 tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.named("testDebugUnitTest"))

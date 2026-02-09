@@ -4,8 +4,8 @@
 
 import XCTest
 import SparklingMethod
-import Sparkling_SPKStorage
-import Sparkling_SPKRouter
+import Sparkling_Storage
+import Sparkling_Router
 
 class SPKRouterTest: XCTestCase {
     

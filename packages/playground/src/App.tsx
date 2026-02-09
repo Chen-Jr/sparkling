@@ -3,8 +3,8 @@ import SwitchButton from './components/SwitchButton.js';
 
 import './App.css'
 import sparklingLogo from './assets/sparkling_icon.png';
-import type { NavigateResponse } from 'sparkling-router';
-import * as router from 'sparkling-router';
+import type { NavigateResponse } from 'sparkling-navigation';
+import * as router from 'sparkling-navigation';
 import * as storage from 'sparkling-storage';
 import * as media from 'sparkling-media';
 import type { InputEvent } from './typing.js';
@@ -94,13 +94,25 @@ export function App(props: {
     );
   };
 
+  const openMediaTest = () => {
+    router.navigate(
+      {
+        path: 'media-test.lynx.bundle',
+        options: { params: { title: 'Media Test' } },
+      },
+      (v: router.NavigateResponse) => {
+        console.log('Media test opened:', v);
+        setApiResponse(`Media Test Opened: ${JSON.stringify(v)}`);
+      }
+    );
+  };
+
   const chooseImage = () => {
     media.chooseMedia({
       mediaTypes: ['image'],
       sourceType: 'album',
       maxCount: 1,
     }, (v: media.ChooseMediaResponse) => {
-      console.log('Choose image result:', v);
       setApiResponse(`Choose Image: ${JSON.stringify(v)}`);
     });
   };
@@ -111,7 +123,6 @@ export function App(props: {
       sourceType: 'album',
       maxCount: 1,
     }, (v: media.ChooseMediaResponse) => {
-      console.log('Choose video result:', v);
       setApiResponse(`Choose Video: ${JSON.stringify(v)}`);
     });
   };
@@ -123,7 +134,6 @@ export function App(props: {
       cameraType: 'back',
       maxCount: 1,
     }, (v: media.ChooseMediaResponse) => {
-      console.log('Take photo result:', v);
       setApiResponse(`Take Photo: ${JSON.stringify(v)}`);
     });
   };
@@ -133,9 +143,10 @@ export function App(props: {
     { id: 2, title: 'setStorage', api: setStorageItem},
     { id: 3, title: 'getStorage', api: getStorageItem },
     { id: 4, title: 'cardView', api: openCardView },
-    { id: 5, title: 'chooseImage', api: chooseImage },
-    { id: 6, title: 'chooseVideo', api: chooseVideo },
-    { id: 7, title: 'takePhoto', api: takePhoto },
+    { id: 5, title: 'mediaTest', api: openMediaTest },
+    { id: 6, title: 'chooseImage', api: chooseImage },
+    { id: 7, title: 'chooseVideo', api: chooseVideo },
+    { id: 8, title: 'takePhoto', api: takePhoto },
   ];
 
   return (
@@ -149,16 +160,13 @@ export function App(props: {
         </view>
         <view className='Content'>
           <view className='custom-list-container'>
-            <list
-              style={{ width: '100%', height: '200px' }}
-              list-type='single'
-              span-count={1}
+            <scroll-view
               scroll-orientation='vertical'
+              style={{ width: '100%', height: '240px' }}
             >
-              {listItems.map((item, index) => (
-                <list-item
+              {listItems.map((item) => (
+                <view
                   key={item.id}
-                  item-key={item.id.toString()}
                   style={{ padding: '10px' }}
                 >
                   <view
@@ -167,9 +175,9 @@ export function App(props: {
                   >
                     <text style={{ color: '#ffffff' }}>{item.title}</text>
                   </view>
-                </list-item>
+                </view>
               ))}
-            </list>
+            </scroll-view>
           </view>
           <view className='input-card-url'>
             <text className='bold-text'>Bundle Path</text>

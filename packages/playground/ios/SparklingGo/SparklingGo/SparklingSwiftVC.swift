@@ -25,12 +25,13 @@ struct SPKSwiftVC: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> some UIViewController {
-        let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_status_bar=1"
+        let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_nav_bar=1&hide_status_bar=1"
         let context = SPKContext()
         let elements = SparklingLynxElement(lynxElementName: "input", lynxElementClassName: LynxInput.self)
         context.customUIElements = [elements]
         let vc = SPKRouter.create(withURL: url, context: context, frame: self.state_frame)
         let naviVC = UINavigationController(rootViewController: vc)
+        naviVC.isNavigationBarHidden = true
         return naviVC
     }
     

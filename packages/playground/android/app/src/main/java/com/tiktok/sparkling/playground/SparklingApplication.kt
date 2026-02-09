@@ -24,6 +24,13 @@ import com.tiktok.sparkling.method.runtime.depend.CommonDependsProvider
 import com.tiktok.sparkling.method.storage.getItem.StorageGetItemMethod
 import com.tiktok.sparkling.method.storage.removeItem.StorageRemoveItemMethod
 import com.tiktok.sparkling.method.storage.setItem.StorageSetItemMethod
+import com.tiktok.sparkling.method.media.choosemedia.ChooseMediaMethod
+import com.tiktok.sparkling.method.media.downloadfile.DownloadFileMethod
+import com.tiktok.sparkling.method.media.savedataurl.SaveDataURLMethod
+import com.tiktok.sparkling.method.media.uploadfile.UploadFileMethod
+import com.tiktok.sparkling.method.media.uploadimage.UploadImageMethod
+import com.tiktok.sparkling.method.media.utils.MediaProvider
+import com.tiktok.sparkling.playground.depend.AppMediaDepend
 import com.tiktok.sparkling.playground.input.LynxInputComponent
 import com.tiktok.sparkling.playground.provider.BuiltinTemplateProvider
 import com.tiktok.sparkling.playground.depend.AppNetworkDepend
@@ -80,6 +87,13 @@ class SparklingApplication : Application() {
         SparklingBridgeManager.registerIDLMethod(StorageSetItemMethod::class.java)
         SparklingBridgeManager.registerIDLMethod(StorageGetItemMethod::class.java)
         SparklingBridgeManager.registerIDLMethod(StorageRemoveItemMethod::class.java)
+
+        SparklingBridgeManager.registerIDLMethod(ChooseMediaMethod::class.java)
+        SparklingBridgeManager.registerIDLMethod(DownloadFileMethod::class.java)
+        SparklingBridgeManager.registerIDLMethod(SaveDataURLMethod::class.java)
+        SparklingBridgeManager.registerIDLMethod(UploadFileMethod::class.java)
+        SparklingBridgeManager.registerIDLMethod(UploadImageMethod::class.java)
+        MediaProvider.hostMediaDepend = AppMediaDepend.register(this)
     }
 
     private fun initDepends() {

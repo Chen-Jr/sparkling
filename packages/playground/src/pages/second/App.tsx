@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from '@lynx-js/react'
 
 import './App.css'
 
-import { close } from 'sparkling-router';
+import { close } from 'sparkling-navigation';
 import * as storage from 'sparkling-storage';
 
 export function App(props: {

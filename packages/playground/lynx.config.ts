@@ -10,7 +10,8 @@ export default defineConfig({
     entry: {
       main: './src/index.tsx',           // Main app entry
       second: './src/pages/second/index.tsx',  // Second page entry
-      'card-view': './src/pages/card-view/index.tsx'  // Card view demo entry
+      'card-view': './src/pages/card-view/index.tsx',  // Card view demo entry
+      'media-test': './src/pages/media-test/index.tsx'  // Media test page entry
     }
   },
   output: {

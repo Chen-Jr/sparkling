@@ -9,10 +9,6 @@ import semver from 'semver';
 import { verboseLog } from '../../utils/verbose';
 import type { CheckResult } from './types';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 /**
  * Run a command and return its stdout (trimmed).
  * Returns `null` if the command is not found or fails.
@@ -81,10 +77,6 @@ function getJavaVersionOutput(): string | null {
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// General checks
-// ---------------------------------------------------------------------------
-
 const NODE_REQUIRED = '^22 || ^24';
 
 export function checkNodeVersion(): CheckResult {
@@ -129,10 +121,6 @@ export function checkNodeVersion(): CheckResult {
 
   return { ...base, status: 'pass', version };
 }
-
-// ---------------------------------------------------------------------------
-// Android checks
-// ---------------------------------------------------------------------------
 
 const JDK_MIN_MAJOR = 11;
 
@@ -260,7 +248,6 @@ export function checkAdb(): CheckResult {
     };
   }
 
-  // Parse "Android Debug Bridge version X.Y.Z"
   const match = output.match(/(\d+\.\d+\.\d+)/);
   const version = match ? match[1] : undefined;
 
@@ -268,10 +255,6 @@ export function checkAdb(): CheckResult {
 
   return { ...base, status: 'pass', version };
 }
-
-// ---------------------------------------------------------------------------
-// iOS checks (macOS only)
-// ---------------------------------------------------------------------------
 
 const XCODE_MIN_MAJOR = 26;
 

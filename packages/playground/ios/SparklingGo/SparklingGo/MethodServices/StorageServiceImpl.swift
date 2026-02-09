@@ -4,7 +4,7 @@
 
 import Foundation
 import SparklingMethod
-import Sparkling_SPKStorage
+import Sparkling_Storage
 
 let sampleSuiteName = "com.SPK.custom.userdefault"
 

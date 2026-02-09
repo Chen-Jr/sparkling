@@ -250,36 +250,35 @@ class AppNetworkDepend : IHostNetworkDepend {
     }
 
     private fun executeStream(call: Call<ResponseBody>?): AbsStreamConnection {
-        var response: Response<ResponseBody>? = null
         return try {
             if (call == null) return errorStream("call is null", null)
-            response = call.execute()
+            val response = call.execute()
             val headers = LinkedHashMap<String, String>().apply {
-                response?.headers()?.forEach { pair -> put(pair.first, pair.second) }
+                response.headers().forEach { pair -> put(pair.first, pair.second) }
             }
-            val code = response?.code() ?: -1
-            val stream = response?.body()?.byteStream()
+            val code = response.code()
+            val stream = response.body()?.byteStream()
             object : AbsStreamConnection() {
                 override fun getResponseHeader(): LinkedHashMap<String, String> = headers
                 override fun getResponseCode(): Int = code
                 override fun getInputStreamResponseBody(): InputStream? = stream
+                override fun getErrorMsg(): String = ""
                 override fun cancel() {
                     try {
                         stream?.close()
+                    } catch (_: Throwable) {}
+                    try {
+                        response.body()?.close()
                     } catch (_: Throwable) {}
                     try {
                         call.cancel()
                     } catch (_: Throwable) {}
                 }
             }
+            // NOTE: Do NOT close the response body here - the caller needs
+            // to read from the stream first. The cancel() method handles cleanup.
         } catch (e: Throwable) {
             errorStream(e.message ?: "request error", e)
-        } finally {
-            if (response == null) {
-                try { call?.cancel() } catch (_: Throwable) {}
-            } else {
-                try { response?.body()?.close() } catch (_: Throwable) {}
-            }
         }
     }
 

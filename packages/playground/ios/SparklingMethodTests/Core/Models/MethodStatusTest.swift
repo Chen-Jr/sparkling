@@ -245,20 +245,23 @@ struct MethodStatusTest {
     @Test func testDescriptionFormat() {
         let status = MethodStatus.succeeded()
         let description = status.description
-        #expect(description.contains("<MethodStatus - code: 1, message: \"JSB_SUCCESS\">"))
+        let expected = "<MethodStatus - code: \(MethodStatusCode.succeeded), message: \"\">"
+        #expect(description == expected)
     }
     
     @Test func testDescriptionWithCustomMessage() {
         let customMessage = "Custom error"
         let status = MethodStatus.failed(message: customMessage)
         let description = status.description
-        #expect(description.contains("<MethodStatus - code: 0, message: \"\(customMessage)\">"))
+        let expected = "<MethodStatus - code: \(MethodStatusCode.failed), message: \"\(customMessage)\">"
+        #expect(description == expected)
     }
     
     @Test func testDescriptionWithNilMessage() {
         let status = MethodStatus.invalidResult()
         let description = status.description
-        #expect(description.contains("<MethodStatus - code: -5, message: \"JSB_UNKNOW_ERROR\">"))
+        let expected = "<MethodStatus - code: \(MethodStatusCode.invalidResult), message: \"\">"
+        #expect(description == expected)
     }
     
     // MARK: - Constants Tests
@@ -326,6 +329,7 @@ struct MethodStatusTest {
             (.notFound(), -9),
             (.notImplemented(), -10),
             (.alreadyExists(), -11),
+            (.paramModelTypeWrong(), -800),
             (.resultModelTypeWrong(), -801),
             (.unknown(), -1000),
             (.networkUnreachable(), -1001),
@@ -338,22 +342,13 @@ struct MethodStatusTest {
         }
     }
     
-    @Test func testAllStatusesHaveValidMessages() {
-        let testCases: [(MethodStatus, String)] = [
-            (.succeeded(), "JSB_SUCCESS"),
-            (.failed(), "JSB_FAILED"),
-            (.invalidParameter(), "JSB_PARAM_ERROR"),
-            (.unregisteredMethod(), "The pipe method is not found, please register"),
-            (.invalidNamespace(), "JSB_NAMESPACE_ERROR"),
-            (.unknown(), "JSB_UNKNOW_ERROR")
-        ]
-        
-        for (status, expectedMessage) in testCases {
-            #expect(status.message == expectedMessage)
-        }
-        
-        // Test statuses that default to "JSB_UNKNOW_ERROR"
-        let unknownErrorStatuses: [MethodStatus] = [
+    @Test func testAllStatusesDefaultToNilMessage() {
+        let statuses: [MethodStatus] = [
+            .succeeded(),
+            .failed(),
+            .unregisteredMethod(),
+            .invalidParameter(),
+            .invalidNamespace(),
             .invalidResult(),
             .unauthorizedAccess(),
             .operationCancelled(),
@@ -361,14 +356,16 @@ struct MethodStatusTest {
             .notFound(),
             .notImplemented(),
             .alreadyExists(),
+            .paramModelTypeWrong(),
             .resultModelTypeWrong(),
+            .unknown(),
             .networkUnreachable(),
             .networkTimeout(),
             .malformedResponse()
         ]
         
-        for status in unknownErrorStatuses {
-            #expect(status.message == "JSB_UNKNOW_ERROR")
+        for status in statuses {
+            #expect(status.message == nil)
         }
     }
 }
