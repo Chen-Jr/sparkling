@@ -15,7 +15,7 @@ Options:
 Quick start:
   npx create-sparkling-app my-app
 
-After creating your project, use sparkling-cli to build and run:
+After creating your project, use sparkling-app-cli to build and run:
   npx sparkling run:android
   npx sparkling run:ios`);
 };
