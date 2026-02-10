@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
     :ios => '12.0'
   }
   s.swift_version  = '5.7'
-  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }
+  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s, path: 'packages/methods/sparkling-media/ios' }
   s.static_framework = true
 
   s.pod_target_xcconfig = {

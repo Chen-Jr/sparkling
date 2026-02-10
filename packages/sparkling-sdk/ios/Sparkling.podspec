@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
   source_root      = 'packages/sparkling-sdk/ios'
   source_globs     = ->(patterns) { patterns.flat_map { |pattern| [pattern, "#{source_root}/#{pattern}"] } }
   s.name           = 'Sparkling'
-  s.version        = "2.0.0-rc.4"
+  s.version        = "2.0.0-rc.5"
   s.summary        = "iOS SDK for Sparkling Framework"
   s.description    = "Main iOS framework for Sparkling, including app container, services, and Lynx integration."
   s.license        = "Apache 2.0"
@@ -46,7 +46,7 @@ Pod::Spec.new do |s|
     service.dependency 'SparklingMethod/Core', s.version.to_s
     
     service.subspec 'LynxService' do |lynx|
-      lynx.dependency 'Lynx/Framework'
+      lynx.dependency 'Lynx/Framework', '3.6.0'
       lynx.dependency 'SparklingMethod/Lynx', s.version.to_s
       lynx.source_files = source_globs.call([
         'Sparkling/Service/{Base,Protocols}/**/*.{swift,m,h}',
