@@ -2,7 +2,7 @@ require 'json'
 
 Pod::Spec.new do |s|
   s.name           = 'SparklingMethod'
-  s.version        = "2.0.0-rc.2"
+  s.version        = "2.0.0-rc.3"
   s.summary        = "iOS SDK for Sparkling Method"
   s.description    = "iOS SDK for Sparkling Method"
   s.license        = "Apache 2.0"
@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
     :ios => '12.0'
   }
   s.swift_version  = '5.10'
-  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }
+  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s, path: 'packages/sparkling-method/ios' }
   s.static_framework = true
 
   s.pod_target_xcconfig = {

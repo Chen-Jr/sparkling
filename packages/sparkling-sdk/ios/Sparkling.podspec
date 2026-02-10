@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name           = 'Sparkling'
-  s.version        = "2.0.0-rc.2"
+  s.version        = "2.0.0-rc.3"
   s.summary        = "iOS SDK for Sparkling Framework"
   s.description    = "iOS SDK for Sparkling Framework"
   s.license        = "Apache 2.0"
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
     :ios => '12.0'
   }
   s.swift_version  = '5.10'
-  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }
+  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s, path: 'packages/sparkling-sdk/ios' }
   s.static_framework = true
   
   s.source_files = 'macro/SparklingMarcoMacros'
