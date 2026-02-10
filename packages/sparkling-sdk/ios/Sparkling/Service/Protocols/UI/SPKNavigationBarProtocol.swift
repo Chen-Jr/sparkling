@@ -2,7 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import Foundation
+import UIKit
 
 @objc
 public protocol SPKNavigationBarProtocol {
@@ -30,7 +30,7 @@ public protocol SPKNavigationBarProtocol {
     func set(navigationBarBackButtonEnable enable: Bool)
     
     @objc optional
-    func attachToContainer(_ params: (SPKHybridSchemeParam & SPKSchemeParamProtocol))
+    func attachToContainer(_ params: SPKHybridSchemeParam)
     
     @objc optional
     func show(backButton isShow: Bool)

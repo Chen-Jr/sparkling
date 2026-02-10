@@ -363,7 +363,7 @@ extension SPKNavigationBar: SPKNavigationBarProtocol {
         return navibar
     }
     
-    func attachToContainer(_ params: (any SPKHybridParams & SPKSchemeParamProtocol)) {
+    public func attachToContainer(_ params: SPKHybridSchemeParam) {
         guard let container =  self.container as? SPKViewController,
               let params = params as? SPKSchemeParam else {
             return

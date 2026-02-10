@@ -4,5 +4,7 @@
 
 import Foundation
 
+#if canImport(SparklingMarcoMacros)
 @freestanding(declaration)
 public macro spk_register(class: String) = #externalMacro(module: "SparklingMarcoMacros", type: "SparklingSectionMacro")
+#endif

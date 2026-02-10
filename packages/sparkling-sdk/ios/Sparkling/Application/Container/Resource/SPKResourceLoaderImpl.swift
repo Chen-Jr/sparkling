@@ -41,7 +41,10 @@ open class SPKResourceProvider: SPKResourceProtocol {
     }
 }
 
-#spk_register(class: "SPKResourceLoaderImpl")
+@_used
+@_section("__DATA, SPK_PRE_SVC")
+nonisolated(unsafe)
+private let spkRegisterSPKResourceLoaderImpl: UnsafePointer<CChar>? = UnsafeRawPointer(("SPKResourceLoaderImpl\0" as StaticString).utf8Start).assumingMemoryBound(to: CChar.self)
 
 /// Implementation of the SPKResourceLoaderProtocol for loading resources.
 /// 

@@ -5,8 +5,10 @@
 import Foundation
 import Lynx
 
-
-#spk_register(class: "SPKLynxService")
+@_used
+@_section("__DATA, SPK_PRE_SVC")
+nonisolated(unsafe)
+private let spkRegisterSPKLynxService: UnsafePointer<CChar>? = UnsafeRawPointer(("SPKLynxService\0" as StaticString).utf8Start).assumingMemoryBound(to: CChar.self)
 
 /// Service class responsible for creating and managing Lynx-based views.
 /// 
