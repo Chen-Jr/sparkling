@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name           = 'Sparkling'
-  s.version        = "2.0.0"
+  s.version        = "2.0.0-rc.2"
   s.summary        = "iOS SDK for Sparkling Framework"
   s.description    = "iOS SDK for Sparkling Framework"
   s.license        = "Apache 2.0"

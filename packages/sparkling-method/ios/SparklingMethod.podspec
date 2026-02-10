@@ -2,7 +2,7 @@ require 'json'
 
 Pod::Spec.new do |s|
   s.name           = 'SparklingMethod'
-  s.version        = "2.0.0"
+  s.version        = "2.0.0-rc.2"
   s.summary        = "iOS SDK for Sparkling Method"
   s.description    = "iOS SDK for Sparkling Method"
   s.license        = "Apache 2.0"
