@@ -41,7 +41,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    api(project(":sparkling-method"))
+    val sparklingVersion = (findProperty("SPARKLING_ANDROID_SDK_VERSION") as? String)
+        ?: System.getenv("SPARKLING_ANDROID_SDK_VERSION")
+        ?: "2.0.0"
+    api("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {

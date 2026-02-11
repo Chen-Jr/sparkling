@@ -4,12 +4,13 @@ Pod::Spec.new do |s|
   source_root      = 'packages/sparkling-method/ios'
   source_globs     = ->(patterns) { patterns.flat_map { |pattern| [pattern, "#{source_root}/#{pattern}"] } }
   s.name           = 'SparklingMethod'
-  s.version        = "2.0.0-rc.5"
+  s.version        = "2.0.0-rc.6"
   s.summary        = "iOS SDK for Sparkling Method"
   s.description    = "Core iOS method runtime for Sparkling, with Lynx integration, dependency injection support, and debug helpers."
   s.license        = "Apache 2.0"
   s.author         = "zhangyujie"
   s.homepage       = 'https://github.com/tiktok/sparkling.git'
+  s.readme         = 'packages/sparkling-method/README.md'
   s.platforms      = {
     :ios => '12.0'
   }

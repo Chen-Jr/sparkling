@@ -45,6 +45,6 @@ After creating your project, you can run:
 | Script | Description |
 |--------|-------------|
 | `npm run build` | Build the Lynx bundle |
-| `npm run android` | Build and run on Android |
-| `npm run ios` | Build and run on iOS |
+| `npm run run:android` | Build and run on Android |
+| `npm run run:ios` | Build and run on iOS |
 | `npm test` | Run tests |

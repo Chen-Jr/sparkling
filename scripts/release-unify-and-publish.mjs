@@ -503,7 +503,7 @@ async function main() {
   }
 
   // Hard exclusions: these packages should not be published to npm.
-  const excludedNames = new Set(["sparkling-playground", "sparkling-sdk", ...args.skip]);
+  const excludedNames = new Set(["sparkling-playground", "sparkling-sdk", "sparkling-app-template", ...args.skip]);
 
   const publishable = pkgs.filter((p) => {
     if (excludedNames.has(p.name)) return false;

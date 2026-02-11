@@ -39,7 +39,3 @@ struct DemoView: View {
         }
     }
 }
-
-#Preview {
-    DemoView()
-}

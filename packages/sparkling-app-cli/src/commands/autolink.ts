@@ -506,6 +506,27 @@ function injectAndroidDependencies(appGradlePath: string, modules: MethodModuleC
   fs.writeFileSync(appGradlePath, finalContent);
 }
 
+function resolvePodName(module: MethodModuleConfig): string {
+  // Derive the pod name from the podspec file when available, since the
+  // podspec `s.name` is the authoritative CocoaPods identifier.
+  if (module.ios?.podspecPath) {
+    const podspecFile = module.ios.podspecPath;
+    if (fs.existsSync(podspecFile)) {
+      try {
+        const content = fs.readFileSync(podspecFile, 'utf8');
+        const nameMatch = content.match(/\.name\s*=\s*['"]([^'"]+)['"]/);
+        if (nameMatch?.[1]) return nameMatch[1];
+      } catch {
+        // fall through to heuristic
+      }
+    }
+    // Fallback: derive from the podspec filename (e.g. Sparkling-Router.podspec → Sparkling-Router)
+    const basename = path.basename(podspecFile, '.podspec');
+    if (basename) return basename;
+  }
+  return module.ios?.moduleName ? `Sparkling-${module.ios.moduleName}` : module.name;
+}
+
 function injectPodfile(podfilePath: string, modules: MethodModuleConfig[], projectDir: string) {
   if (!fs.existsSync(podfilePath)) {
     console.warn(ui.warn(`Podfile not found at ${podfilePath}, skipping iOS autolink`));
@@ -528,7 +549,7 @@ function injectPodfile(podfilePath: string, modules: MethodModuleConfig[], proje
   const podLines = modules.map(module => {
     const podspecDir = module.ios?.podspecPath ? path.dirname(module.ios.podspecPath) : module.root;
     const rel = relativeTo(path.dirname(podfilePath), podspecDir);
-    const podName = module.ios?.moduleName ? `Sparkling-${module.ios.moduleName}` : module.name;
+    const podName = resolvePodName(module);
     return `  pod '${podName}', :path => '${toPosixPath(rel)}'`;
   }).join('\n');
 

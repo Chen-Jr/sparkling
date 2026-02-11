@@ -45,7 +45,79 @@ function findNearestGemfile(startDir: string): string | null {
   return null;
 }
 
+function getRequiredBundlerVersion(gemfileDir: string): string | null {
+  const lockfilePath = path.join(gemfileDir, 'Gemfile.lock');
+  if (!fs.existsSync(lockfilePath)) return null;
+  const content = fs.readFileSync(lockfilePath, 'utf8');
+  const match = content.match(/BUNDLED WITH\s+(\S+)/);
+  return match?.[1] ?? null;
+}
+
+function isBundlerVersionInstalled(version: string): boolean {
+  try {
+    const output = execSync('gem list bundler --exact --versions', { stdio: 'pipe' }).toString('utf8');
+    // Output looks like: bundler (2.5.6, 2.3.27, default: 2.3.26)
+    return output.includes(version);
+  } catch {
+    return false;
+  }
+}
+
+async function ensureRequiredBundler(gemfileDir: string): Promise<void> {
+  const requiredVersion = getRequiredBundlerVersion(gemfileDir);
+  if (!requiredVersion) {
+    verboseLog('No BUNDLED WITH version found in Gemfile.lock, skipping bundler version check.');
+    return;
+  }
+
+  if (isBundlerVersionInstalled(requiredVersion)) {
+    verboseLog(`Bundler ${requiredVersion} is already installed.`);
+    return;
+  }
+
+  console.log(ui.info(`Installing required Bundler version ${requiredVersion}...`));
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/6802e160-a55d-4751-84f7-c7cc9d523b20',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'run-ios.ts:ensureRequiredBundler',message:'Ruby env info before gem install',data:{whichRuby:(() => { try { return execSync('which ruby', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),whichGem:(() => { try { return execSync('which gem', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),gemEnv:(() => { try { return execSync('gem environment home', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),rubyVersion:(() => { try { return execSync('ruby --version', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),requiredVersion},timestamp:Date.now(),runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+  // #endregion
+
+  // First try with --user-install to avoid permission issues with system Ruby
+  try {
+    await runCommand('gem', ['install', '--user-install', `bundler:${requiredVersion}`], { cwd: gemfileDir });
+  } catch {
+    // Fall back to normal install (may work with Homebrew Ruby or rbenv)
+    try {
+      await runCommand('gem', ['install', `bundler:${requiredVersion}`], { cwd: gemfileDir });
+    } catch (error) {
+      console.warn(
+        ui.warn(
+          `Failed to install Bundler ${requiredVersion}: ${String(error)}. ` +
+            `You may need to run \`gem install bundler:${requiredVersion}\` manually (possibly with sudo).`,
+        ),
+      );
+    }
+  }
+
+  // After install, the user gem bin may not be in PATH. Ensure bundle can find it.
+  if (!isBundlerVersionInstalled(requiredVersion)) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/6802e160-a55d-4751-84f7-c7cc9d523b20',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'run-ios.ts:ensureRequiredBundler:postInstall',message:'Bundler still not found after install attempt',data:{gemList:(() => { try { return execSync('gem list bundler --exact --versions', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),userGemDir:(() => { try { return execSync('ruby -e "puts Gem.user_dir"', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })()},timestamp:Date.now(),runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+    // #endregion
+    console.warn(
+      ui.warn(
+        `Bundler ${requiredVersion} could not be verified after install. Proceeding anyway...`,
+      ),
+    );
+  } else {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/6802e160-a55d-4751-84f7-c7cc9d523b20',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'run-ios.ts:ensureRequiredBundler:success',message:'Bundler installed successfully',data:{requiredVersion,gemList:(() => { try { return execSync('gem list bundler --exact --versions', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })()},timestamp:Date.now(),runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+    // #endregion
+  }
+}
+
 async function ensureBundleInstall(gemfileDir: string): Promise<boolean> {
+  await ensureRequiredBundler(gemfileDir);
+
   console.log(ui.info('Installing Ruby gems via bundle install...'));
   try {
     await runCommand('bundle', ['install'], { cwd: gemfileDir });
@@ -166,7 +238,7 @@ export async function runIos(options: RunIosOptions): Promise<void> {
   }
   console.log(ui.headline(`Using simulator: ${device.name} (${device.udid})${device.runtime ? ` [${device.runtime}]` : ''}`));
 
-  const bundleId = process.env.SPARKLING_IOS_BUNDLE_ID ?? 'com.example.sparkling.go';
+  const bundleId = process.env.SPARKLING_IOS_BUNDLE_ID ?? 'com.sparkling.app.SparklingGo';
   const podfilePath = path.resolve(options.cwd, 'ios', 'Podfile');
   const hasPodfile = fs.existsSync(podfilePath);
   if (isVerboseEnabled()) {
@@ -239,6 +311,7 @@ export async function runIos(options: RunIosOptions): Promise<void> {
   await runCommand('open', ['-a', 'Simulator', '--args', '-CurrentDeviceUDID', device.udid], { cwd: options.cwd, ignoreFailure: true });
 
   const destination = `id=${device.udid}`;
+  const derivedDataPath = path.resolve(options.cwd, 'ios/build');
   await runCommand('xcodebuild', [
     '-workspace',
     workspacePath,
@@ -248,6 +321,8 @@ export async function runIos(options: RunIosOptions): Promise<void> {
     'Debug',
     '-sdk',
     'iphonesimulator',
+    '-derivedDataPath',
+    derivedDataPath,
     '-destination',
     destination,
     'CODE_SIGN_IDENTITY=',
