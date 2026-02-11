@@ -1,17 +1,28 @@
 # Scheme
 
-Sparkling pages are opened by a `hybrid://...` URL. This document defines the **unified scheme**
+Sparkling pages/containers are opened by a `hybrid://...` URL. This document defines the **unified scheme**
 format and parameters that are **applied on both Android and iOS**.
+
+## Hosts (container types)
+
+Sparkling supports multiple `hybrid://` hosts:
+
+- `hybrid://lynxview_page`: Lynx **page** container (**recommended**)
+- `hybrid://lynxview`: legacy alias of `lynxview_page` (still supported)
+- `hybrid://lynxview_card`: Lynx **card** container (currently Android)
+- `hybrid://webview`: WebView container
+
+Unless otherwise noted, examples below use `lynxview_page`.
 
 ## Format
 
 ### Bundle style (recommended)
 
 ```
-hybrid://lynxview?bundle=<bundlePath>[&title=<title>][&hide_nav_bar=1][&title_color=<color>][&container_bg_color=<color>][&force_theme_style=light|dark]
+hybrid://lynxview_page?bundle=<bundlePath>[&title=<title>][&hide_nav_bar=1][&title_color=<color>][&container_bg_color=<color>][&force_theme_style=light|dark]
 ```
 
-- `hybrid://lynxview`: host type for Sparkling Lynx containers (recommended canonical host).
+- `hybrid://lynxview_page`: host type for Sparkling Lynx **page** containers (recommended).
 - `bundle`: points to the `.lynx.bundle` you ship inside the app.
 
 ## Encoding rules
@@ -24,7 +35,7 @@ hybrid://lynxview?bundle=<bundlePath>[&title=<title>][&hide_nav_bar=1][&title_co
 Example with encoded colors:
 
 ```
-hybrid://lynxview?bundle=main.lynx.bundle&title=Home&title_color=%23000000&container_bg_color=%23ffffff
+hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home&title_color=%23000000&container_bg_color=%23ffffff
 ```
 
 ## Parameters (cross-platform)
@@ -39,6 +50,12 @@ Only the following parameters are guaranteed to have an effect on **both Android
 | `title_color` | `#RRGGBB` (encoded) | platform default | Title text color. Use 6-digit RGB only; see “Color format”. |
 | `container_bg_color` | `#RRGGBB` (encoded) | platform default | Container background color. Use 6-digit RGB only; see “Color format”. |
 | `force_theme_style` | `light` \| `dark` | system default | Force light/dark theme for container-level theming and theme-dependent props. |
+| `nav_bar_color` | `#RRGGBB` (encoded) | platform default | Navigation bar background color. Use 6-digit RGB only. |
+| `hide_status_bar` | `0`/`1` | `0` | Hide the status bar when set to `1`. |
+| `trans_status_bar` | `0`/`1` | `0` | Use transparent status bar when set to `1`. |
+| `hide_loading` | `0`/`1` | `0` | Hide the loading view when set to `1`. |
+| `loading_bg_color` | `#RRGGBB` (encoded) | platform default | Loading view background color. Use 6-digit RGB only. |
+| `hide_error` | `0`/`1` | `0` | Hide the error view when set to `1`. |
 
 ### Color format (cross-platform)
 
@@ -52,25 +69,25 @@ hex differently).
 Minimal:
 
 ```
-hybrid://lynxview?bundle=main.lynx.bundle
+hybrid://lynxview_page?bundle=main.lynx.bundle
 ```
 
 With title:
 
 ```
-hybrid://lynxview?bundle=main.lynx.bundle&title=Home
+hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home
 ```
 
 Hide navigation bar:
 
 ```
-hybrid://lynxview?bundle=main.lynx.bundle&hide_nav_bar=1
+hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1
 ```
 
 Force dark theme:
 
 ```
-hybrid://lynxview?bundle=main.lynx.bundle&force_theme_style=dark
+hybrid://lynxview_page?bundle=main.lynx.bundle&force_theme_style=dark
 ```
 
 

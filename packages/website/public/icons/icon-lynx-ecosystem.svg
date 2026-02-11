@@ -1,0 +1,14 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Top circle (head) -->
+  <circle cx="16" cy="6.5" r="4.5" stroke="#FE2C55" stroke-width="2"/>
+  <!-- Bottom-left circle -->
+  <circle cx="9" cy="22.5" r="6.5" stroke="#FE2C55" stroke-width="2"/>
+  <!-- Bottom-right circle -->
+  <circle cx="23" cy="22.5" r="6.5" stroke="#FE2C55" stroke-width="2"/>
+  <!-- Connecting line: top to bottom-left -->
+  <line x1="13" y1="10" x2="10.5" y2="16.5" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <!-- Connecting line: top to bottom-right -->
+  <line x1="19" y1="10" x2="21.5" y2="16.5" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <!-- Connecting line: bottom-left to bottom-right -->
+  <line x1="15" y1="22.5" x2="17" y2="22.5" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+</svg>

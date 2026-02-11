@@ -1,0 +1,22 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Inner chip -->
+  <rect x="11" y="11" width="10" height="10" rx="2" stroke="#FE2C55" stroke-width="2"/>
+  <!-- Outer chip -->
+  <rect x="5.5" y="5.5" width="21" height="21" rx="4" stroke="#FE2C55" stroke-width="2"/>
+  <!-- Top pins -->
+  <line x1="10" y1="1" x2="10" y2="5.5" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <line x1="16" y1="1" x2="16" y2="5.5" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <line x1="22" y1="1" x2="22" y2="5.5" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <!-- Bottom pins -->
+  <line x1="10" y1="26.5" x2="10" y2="31" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <line x1="16" y1="26.5" x2="16" y2="31" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <line x1="22" y1="26.5" x2="22" y2="31" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <!-- Left pins -->
+  <line x1="1" y1="10" x2="5.5" y2="10" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <line x1="1" y1="16" x2="5.5" y2="16" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <line x1="1" y1="22" x2="5.5" y2="22" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <!-- Right pins -->
+  <line x1="26.5" y1="10" x2="31" y2="10" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <line x1="26.5" y1="16" x2="31" y2="16" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+  <line x1="26.5" y1="22" x2="31" y2="22" stroke="#FE2C55" stroke-width="2" stroke-linecap="round"/>
+</svg>

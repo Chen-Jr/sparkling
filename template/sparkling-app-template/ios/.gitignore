@@ -48,6 +48,9 @@ Pods/
 # Keep Podfile.lock tracked
 #!Podfile.lock
 
+# Symlink to dist folder
+SparklingGo/SparklingGo/Resources/Assets
+
 # Carthage
 Carthage/Build/
 Carthage/Checkouts/

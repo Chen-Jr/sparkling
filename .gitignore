@@ -11,6 +11,8 @@ output/
 output_resource/
 **/doc_build
 
+docs/**/*.html
+
 # IDE
 .vscode/*
 !.vscode/extensions.json

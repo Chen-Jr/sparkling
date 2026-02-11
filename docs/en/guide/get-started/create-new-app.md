@@ -7,29 +7,30 @@ Lynx bundles and run the native shells.
 
 If you want a runnable project in minutes:
 
+1) Create a new project:
+
 ```bash
 npm create sparkling-app@latest my-app
 cd my-app
 ```
-Run native targets:
+
+2) Run native targets:
 
 ```bash
 # Android
 npm run run:android
 
-
 # iOS
 npm run run:ios
 ```
 
-4) Add built-in methods as needed:
+3) Add Sparkling methods as needed:
 
 ```bash
-# npm
 npm install sparkling-storage
 ```
 
-5) Build bundles for release (same command regardless of package manager):
+4) Build bundles for release (same command regardless of package manager):
 
 ```bash
 npx sparkling build
@@ -47,13 +48,13 @@ Key folders/files created by the default template:
 
 - `src/`: Lynx/React entry points and assets
 - `android/`, `ios/`: native shells wired to Sparkling SDK
-- `app.config.ts`: build + routing config consumed by `sparkling-cli`
+- `app.config.ts`: build + routing config consumed by `sparkling-app-cli`
 - `package.json`: scripts (`dev`, `build`, `run:android`, `run:ios`)
 
 ### Prerequisites
 
-- Node.js **>= 18** (repo requirement)
+- Node.js **22** or **24** (required by Sparkling tools)
 - A Node package manager of your choice (`pnpm`, `npm`, `yarn`, or `bun`)
 - For running native shells:
   - Android Studio / Android SDK (Android) / JDK 11
-  - Xcode 26 + iOS Simulator (iOS)
+  - Xcode 16+ + iOS Simulator (iOS)

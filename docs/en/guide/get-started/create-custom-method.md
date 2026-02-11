@@ -1,0 +1,264 @@
+# Create a Custom Sparkling Method
+
+A Sparkling Method is a typed JS ↔ native bridge package that works on both Android and iOS. You define the API in TypeScript, generate native code with the CLI, then implement business logic in Kotlin and Swift.
+
+## 1. Create a method package
+
+Use the `sparkling-method-cli` to scaffold a new method module:
+
+```bash
+npx sparkling-method-cli init my-greeting
+```
+
+This creates a `sparkling-my-greeting/` directory:
+
+```
+sparkling-my-greeting/
+├── package.json
+├── module.config.json        # Module metadata (package name, module name, etc.)
+├── tsconfig.json
+├── index.ts                  # Main exports
+├── src/
+│   └── my-greeting/
+│       └── my-greeting.d.ts  # TypeScript declarations (you edit this)
+├── android/
+│   └── ...                   # Android project structure (generated later)
+└── ios/
+    └── ...                   # iOS project structure (generated later)
+```
+
+The `module.config.json` defines module metadata used by both codegen and autolink:
+
+```json
+{
+  "name": "sparkling-my-greeting",
+  "packageName": "com.tiktok.sparkling.methods.mygreeting",
+  "moduleName": "MyGreeting",
+  "androidDsl": "kts"
+}
+```
+
+## 2. Write TypeScript function declarations
+
+Edit the `.d.ts` file under `src/` to declare your method's API.
+You only write **function declarations** and **interfaces** — no implementation.
+
+```ts
+// src/my-greeting/my-greeting.d.ts
+
+export interface HelloRequest {
+  /** The name to greet */
+  name: string;
+  /**
+   * Greeting style
+   * @default "formal"
+   */
+  style?: 'formal' | 'casual';
+}
+
+export interface HelloResponse {
+  code: number;
+  msg: string;
+  data?: {
+    greeting: string;
+  };
+}
+
+/**
+ * Send a name to native and receive a greeting.
+ * @param params - Request parameters
+ * @param callback - Response callback
+ */
+declare function hello(
+  params: HelloRequest,
+  callback: (result: HelloResponse) => void,
+): void;
+```
+
+Key rules for declarations:
+
+- Use `declare function` syntax (not `export function`)
+- The last parameter can be a callback `(result: ResponseType) => void`
+- Use `@default` JSDoc tags for default values
+- Literal union types (e.g. `'formal' | 'casual'`) become enum constants in native code
+- Interfaces can be nested — they'll generate nested model classes
+
+## 3. Run codegen
+
+Generate all platform code from your declarations:
+
+```bash
+cd sparkling-my-greeting
+npx sparkling-method-cli codegen
+```
+
+This reads all `.d.ts` files under `src/` and generates:
+
+| Generated file | Description |
+| --- | --- |
+| `android/.../AbsMyGreetingHelloMethodIDL.kt` | Abstract Kotlin class with typed input/output models |
+| `ios/.../SPKMyGreetingHelloMethodIDL.swift` | Swift class with typed parameter/result models |
+| `src/my-greeting/my-greeting.ts` | TypeScript implementation (calls `pipe.call(...)`) |
+| `generated/metadata/my-greeting.json` | Metadata for tooling |
+| `index.ts` | Updated exports |
+
+**Do NOT manually edit generated files.** If you need to change the API,
+update the `.d.ts` declarations and re-run codegen.
+
+## 4. Implement native business logic
+
+The generated native code contains abstract classes / stubs that handle parameter
+parsing and response serialization. You extend them with actual business logic.
+
+### Android (Kotlin)
+
+Create a concrete implementation extending the generated abstract class:
+
+```kotlin
+// android/src/main/java/com/.../MyGreetingHelloMethod.kt
+package com.tiktok.sparkling.methods.mygreeting
+
+class MyGreetingHelloMethod : AbsMyGreetingHelloMethodIDL() {
+
+    override fun execute(
+        input: IDLMethodMyGreetingHelloInputModel,
+        callback: IDLMethodCallback<IDLMethodMyGreetingHelloResultModel>
+    ) {
+        val name = input.name
+        val style = input.style ?: "formal"
+
+        val greeting = when (style) {
+            "casual" -> "Hey $name!"
+            else -> "Hello, $name. How do you do?"
+        }
+
+        callback.onSuccess(
+            IDLMethodMyGreetingHelloResultModel(greeting = greeting)
+        )
+    }
+}
+```
+
+### iOS (Swift)
+
+Create a concrete implementation extending the generated class:
+
+```swift
+// ios/Sources/Core/MyGreetingHelloMethod.swift
+import SparklingMethod
+
+class MyGreetingHelloMethod: SPKMyGreetingHelloMethodIDL {
+
+    override func execute(
+        params: SPKMyGreetingHelloParamModel,
+        callback: MethodCallback?
+    ) {
+        let name = params.name
+        let style = params.style ?? "formal"
+
+        let greeting: String
+        switch style {
+        case "casual":
+            greeting = "Hey \(name)!"
+        default:
+            greeting = "Hello, \(name). How do you do?"
+        }
+
+        callback?.success(data: ["greeting": greeting])
+    }
+}
+```
+
+## 5. Build and test with autolink
+
+### Build the package
+
+Compile the TypeScript:
+
+```bash
+npm run build
+```
+
+### Integrate into your Sparkling app
+
+In your Sparkling app project, install the method package:
+
+```bash
+npm install ../path/to/sparkling-my-greeting
+```
+
+Then run autolink to wire up the native dependencies:
+
+```bash
+npx sparkling autolink
+```
+
+Autolink automatically:
+- **Android**: updates `settings.gradle.kts` and `app/build.gradle.kts` to include
+  the method module, and generates `SparklingAutolink.kt` registry
+- **iOS**: updates the `Podfile` with the pod dependency, and generates
+  `SparklingAutolink.swift` registry
+
+### Run and test
+
+```bash
+npm run run:android
+npm run run:ios
+```
+
+Call the method from your Lynx/JS code:
+
+```ts
+import { hello } from 'sparkling-my-greeting';
+
+hello({ name: 'Sparkling', style: 'casual' }, (res) => {
+  if (res.code === 0) {
+    console.log(res.data?.greeting); // "Hey Sparkling!"
+  }
+});
+```
+
+## 6. Publish
+
+When the method is ready for distribution:
+
+1. Update `package.json` version and metadata
+2. Verify `files` field includes all necessary artifacts:
+
+```json
+{
+  "files": [
+    "index.ts",
+    "src",
+    "dist",
+    "android/src",
+    "android/build.gradle.kts",
+    "ios",
+    "module.config.json"
+  ]
+}
+```
+
+3. Publish to npm:
+
+```bash
+npm publish
+```
+
+Consumers then install and autolink:
+
+```bash
+npm install sparkling-my-greeting
+npx sparkling autolink
+```
+
+## Best practices
+
+- **Naming convention**: package name should follow `sparkling-<module>` format.
+  Method names use `<module>.<action>` (e.g. `mygreeting.hello`).
+- **Single source of truth**: always edit `.d.ts` declarations and re-run codegen —
+  never edit generated files directly.
+- **Platform parity**: implement the same behavior on both Android and iOS.
+- **Error handling**: return `code: 0` for success and non-zero codes for errors,
+  with a descriptive `msg`.
+- **Testing**: test on both platforms before publishing.

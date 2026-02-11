@@ -1,0 +1,19 @@
+{
+  "name": "sparkling-website",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rspress dev",
+    "build": "rspress build",
+    "preview": "rspress preview"
+  },
+  "devDependencies": {
+    "@rspack/core": "2.0.0-alpha.1",
+    "@rspress/core": "^2.0.2",
+    "playwright": "^1.58.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

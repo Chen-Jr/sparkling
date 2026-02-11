@@ -1,11 +1,11 @@
-# `sparkling-router`
+# `sparkling-navigation`
 
 Router helper APIs for opening/closing Sparkling pages from Lynx/JS.
 
 ## Install
 
 ```bash
-npm install sparkling-router
+npm install sparkling-navigation
 ```
 
 ## Exports
@@ -20,10 +20,10 @@ Open a page/route by `scheme`.
 Example:
 
 ```ts
-import { open } from 'sparkling-router';
+import { open } from 'sparkling-navigation';
 
 open(
-  { scheme: 'hybrid://lynxview?bundle=main.lynx.bundle&title=Home' },
+  { scheme: 'hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home' },
   (res) => {
     console.log(res.code, res.msg);
   }
@@ -41,7 +41,7 @@ Close the current page (or a specific container by ID).
 Example:
 
 ```ts
-import { close } from 'sparkling-router';
+import { close } from 'sparkling-navigation';
 
 close(); // close current
 ```
@@ -57,7 +57,7 @@ Build a `hybrid://...` scheme from a bundle path and optional params, then open 
 Example:
 
 ```ts
-import { navigate } from 'sparkling-router';
+import { navigate } from 'sparkling-navigation';
 
 navigate(
   {
@@ -75,17 +75,12 @@ navigate(
 );
 ```
 
-Notes:
-- `navigate(...).options.params` supports many keys (e.g. `title`, `hide_nav_bar`, `container_bg_color`, ...).
-  Whether a key has an effect depends on native support. For the cross-platform subset, see [Scheme](../scheme.md).
+`NavigateOptions`:
+- `params?: object` – query params merged into the scheme
+- `replace?: boolean`
+- `replaceType?: 'alwaysCloseAfterOpen' | 'alwaysCloseBeforeOpen' | 'onlyCloseAfterOpenSucceed'`
+- `interceptor?: string`
+- `extra?: object`
 
-## Native method names
-
-This package calls:
-- `router.open`
-- `router.close`
-
-Your host app must register native implementations for these methods. See
-[Sparkling Method SDK](../sparkling-method.md).
-
-
+See also:
+- [sparkling-method](../sparkling-method-ts.md) – underlying pipe SDK

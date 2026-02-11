@@ -1,0 +1,264 @@
+# 创建自定义 Sparkling Method
+
+Sparkling Method 是一个在 Android 和 iOS 上都能工作的类型化 JS 与原生桥接包。你在 TypeScript 中定义 API，使用 CLI 生成原生代码，然后在 Kotlin 和 Swift 中实现业务逻辑。
+
+## 1. 创建 Method 包
+
+使用 `sparkling-method-cli` 创建新的 Method 模块：
+
+```bash
+npx sparkling-method-cli init my-greeting
+```
+
+这会创建一个 `sparkling-my-greeting/` 目录：
+
+```
+sparkling-my-greeting/
+├── package.json
+├── module.config.json        # 模块元数据（包名、模块名等）
+├── tsconfig.json
+├── index.ts                  # 主入口导出
+├── src/
+│   └── my-greeting/
+│       └── my-greeting.d.ts  # TypeScript 声明文件（需要你编辑）
+├── android/
+│   └── ...                   # Android 工程结构（稍后生成）
+└── ios/
+    └── ...                   # iOS 工程结构（稍后生成）
+```
+
+`module.config.json` 定义了模块元数据，代码生成和 autolink 都会使用：
+
+```json
+{
+  "name": "sparkling-my-greeting",
+  "packageName": "com.tiktok.sparkling.methods.mygreeting",
+  "moduleName": "MyGreeting",
+  "androidDsl": "kts"
+}
+```
+
+## 2. 编写 TypeScript 函数声明
+
+编辑 `src/` 下的 `.d.ts` 文件来声明你的方法 API。
+你只需编写**函数声明**和**接口** —— 不需要写实现。
+
+```ts
+// src/my-greeting/my-greeting.d.ts
+
+export interface HelloRequest {
+  /** 要问候的名称 */
+  name: string;
+  /**
+   * 问候风格
+   * @default "formal"
+   */
+  style?: 'formal' | 'casual';
+}
+
+export interface HelloResponse {
+  code: number;
+  msg: string;
+  data?: {
+    greeting: string;
+  };
+}
+
+/**
+ * 向原生端发送名称并接收问候。
+ * @param params - 请求参数
+ * @param callback - 响应回调
+ */
+declare function hello(
+  params: HelloRequest,
+  callback: (result: HelloResponse) => void,
+): void;
+```
+
+声明文件的关键规则：
+
+- 使用 `declare function` 语法（而非 `export function`）
+- 最后一个参数可以是回调 `(result: ResponseType) => void`
+- 使用 `@default` JSDoc 标签指定默认值
+- 字面量联合类型（如 `'formal' | 'casual'`）在原生代码中会变为枚举常量
+- 接口可以嵌套 —— 它们会生成嵌套的模型类
+
+## 3. 运行代码生成
+
+从声明文件生成所有平台代码：
+
+```bash
+cd sparkling-my-greeting
+npx sparkling-method-cli codegen
+```
+
+这会读取 `src/` 下的所有 `.d.ts` 文件并生成：
+
+| 生成文件 | 描述 |
+| --- | --- |
+| `android/.../AbsMyGreetingHelloMethodIDL.kt` | 带有类型化输入/输出模型的抽象 Kotlin 类 |
+| `ios/.../SPKMyGreetingHelloMethodIDL.swift` | 带有类型化参数/结果模型的 Swift 类 |
+| `src/my-greeting/my-greeting.ts` | TypeScript 实现（调用 `pipe.call(...)`） |
+| `generated/metadata/my-greeting.json` | 工具链使用的元数据 |
+| `index.ts` | 更新后的导出 |
+
+**不应手动编辑生成的文件。** 如果需要更改 API，
+请修改 `.d.ts` 声明文件并重新运行 codegen。
+
+## 4. 实现原生业务逻辑
+
+生成的原生代码包含抽象类/桩代码，已处理好参数解析和响应序列化。
+你需要继承它们并填写实际的业务逻辑。
+
+### Android（Kotlin）
+
+创建继承生成的抽象类的具体实现：
+
+```kotlin
+// android/src/main/java/com/.../MyGreetingHelloMethod.kt
+package com.tiktok.sparkling.methods.mygreeting
+
+class MyGreetingHelloMethod : AbsMyGreetingHelloMethodIDL() {
+
+    override fun execute(
+        input: IDLMethodMyGreetingHelloInputModel,
+        callback: IDLMethodCallback<IDLMethodMyGreetingHelloResultModel>
+    ) {
+        val name = input.name
+        val style = input.style ?: "formal"
+
+        val greeting = when (style) {
+            "casual" -> "Hey $name!"
+            else -> "Hello, $name. How do you do?"
+        }
+
+        callback.onSuccess(
+            IDLMethodMyGreetingHelloResultModel(greeting = greeting)
+        )
+    }
+}
+```
+
+### iOS（Swift）
+
+创建继承生成类的具体实现：
+
+```swift
+// ios/Sources/Core/MyGreetingHelloMethod.swift
+import SparklingMethod
+
+class MyGreetingHelloMethod: SPKMyGreetingHelloMethodIDL {
+
+    override func execute(
+        params: SPKMyGreetingHelloParamModel,
+        callback: MethodCallback?
+    ) {
+        let name = params.name
+        let style = params.style ?? "formal"
+
+        let greeting: String
+        switch style {
+        case "casual":
+            greeting = "Hey \(name)!"
+        default:
+            greeting = "Hello, \(name). How do you do?"
+        }
+
+        callback?.success(data: ["greeting": greeting])
+    }
+}
+```
+
+## 5. 构建并通过 autolink 测试
+
+### 构建包
+
+编译 TypeScript：
+
+```bash
+npm run build
+```
+
+### 集成到你的 Sparkling 应用
+
+在你的 Sparkling 应用项目中安装 Method 包：
+
+```bash
+npm install ../path/to/sparkling-my-greeting
+```
+
+然后运行 autolink 来自动配置原生依赖：
+
+```bash
+npx sparkling autolink
+```
+
+autolink 会自动完成：
+- **Android**：更新 `settings.gradle.kts` 和 `app/build.gradle.kts` 以引入
+  Method 模块，并生成 `SparklingAutolink.kt` 注册文件
+- **iOS**：更新 `Podfile` 添加 Pod 依赖，并生成
+  `SparklingAutolink.swift` 注册文件
+
+### 运行并测试
+
+```bash
+npm run run:android
+npm run run:ios
+```
+
+在 Lynx/JS 代码中调用该方法：
+
+```ts
+import { hello } from 'sparkling-my-greeting';
+
+hello({ name: 'Sparkling', style: 'casual' }, (res) => {
+  if (res.code === 0) {
+    console.log(res.data?.greeting); // "Hey Sparkling!"
+  }
+});
+```
+
+## 6. 发布
+
+当 Method 准备好发布时：
+
+1. 更新 `package.json` 中的版本号和元数据
+2. 确认 `files` 字段包含所有必要的产物：
+
+```json
+{
+  "files": [
+    "index.ts",
+    "src",
+    "dist",
+    "android/src",
+    "android/build.gradle.kts",
+    "ios",
+    "module.config.json"
+  ]
+}
+```
+
+3. 发布到 npm：
+
+```bash
+npm publish
+```
+
+使用者只需安装并执行 autolink：
+
+```bash
+npm install sparkling-my-greeting
+npx sparkling autolink
+```
+
+## 最佳实践
+
+- **命名规范**：包名遵循 `sparkling-<module>` 格式。
+  方法名使用 `<module>.<action>`（如 `mygreeting.hello`）。
+- **单一数据源**：始终编辑 `.d.ts` 声明文件并重新运行 codegen ——
+  不要直接编辑生成的文件。
+- **平台一致性**：在 Android 和 iOS 上实现相同的行为。
+- **错误处理**：成功时返回 `code: 0`，错误时返回非零值，
+  并附带描述性的 `msg`。
+- **测试**：发布前在两个平台上测试。

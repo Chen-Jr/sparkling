@@ -26,7 +26,7 @@ from a template.
 
    ```kotlin
    val ctx = SparklingContext().apply {
-       scheme = "hybrid://lynxview?bundle=main.lynx.bundle"
+       scheme = "hybrid://lynxview_page?bundle=main.lynx.bundle"
    }
    Sparkling.build(applicationContext, ctx).navigate()
    ```
@@ -45,7 +45,7 @@ from a template.
 3) Open a page:
 
    ```swift
-   let url = "hybrid://lynxview?bundle=main.lynx.bundle&title=Home"
+   let url = "hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home"
    SPKRouter.open(withURL: url, context: nil)
    ```
 
@@ -120,7 +120,7 @@ The Android SDK provides `SparklingContext` and `Sparkling.build(...).navigate()
 
 ```kotlin
 val context = SparklingContext()
-context.scheme = "hybrid://lynxview?bundle=main.lynx.bundle&title=Home&hide_nav_bar=1"
+context.scheme = "hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home&hide_nav_bar=1"
 context.withInitData("{\"initial_data\":{}}")
 
 Sparkling.build(this, context).navigate()
@@ -161,7 +161,7 @@ Two common hosting styles:
 - **Push a Sparkling container controller** (router):
 
 ```swift
-let url = "hybrid://lynxview?bundle=main.lynx.bundle"
+let url = "hybrid://lynxview_page?bundle=main.lynx.bundle"
 let context = SPKContext()
 let vc = SPKRouter.create(withURL: url, context: context, frame: UIScreen.main.bounds)
 let naviVC = UINavigationController(rootViewController: vc)
@@ -172,7 +172,7 @@ let naviVC = UINavigationController(rootViewController: vc)
 ```swift
 let view = SPKContainerView(frame: UIScreen.main.bounds)
 let context = SPKContext()
-view.load(withURL: "hybrid://lynxview?bundle=main.lynx.bundle", context)
+view.load(withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle", context)
 ```
 
 ### 4) Provide bundle assets

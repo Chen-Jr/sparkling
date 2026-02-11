@@ -1,0 +1,59 @@
+# 创建新的 Sparkling 应用
+
+使用官方脚手架创建 Sparkling 应用，然后使用内置的工作流 CLI 构建 Lynx bundle 并运行原生 Shell。
+
+## 快速开始
+
+如果你想在几分钟内拥有一个可运行的项目：
+
+1) 创建项目：
+
+```bash
+npm create sparkling-app@latest my-app
+cd my-app
+```
+
+2) 运行原生目标：
+
+```bash
+# Android
+npm run run:android
+
+# iOS
+npm run run:ios
+```
+
+3) 根据需要添加 Sparkling 方法：
+
+```bash
+npm install sparkling-storage
+```
+
+4) 构建发布用 bundle（不论使用哪个包管理器，命令相同）：
+
+```bash
+npx sparkling build
+```
+
+
+### 你将获得
+
+- 一个 Lynx 应用项目（基于默认模板）
+- 已为 Sparkling 配置好的 Android 和 iOS 原生 Shell
+- 一个可用的 JS 与原生管道方法示例（路由）
+- 开发工作流命令（build / autolink / run）
+
+默认模板创建的关键目录/文件：
+
+- `src/`：Lynx/React 入口和资源文件
+- `android/`、`ios/`：已接入 Sparkling SDK 的原生 Shell
+- `app.config.ts`：由 `sparkling-app-cli` 使用的构建和路由配置
+- `package.json`：脚本（`dev`、`build`、`run:android`、`run:ios`）
+
+### 前置条件
+
+- Node.js **22** 或 **24**（Sparkling 工具链要求）
+- 任意 Node 包管理器（`pnpm`、`npm`、`yarn` 或 `bun`）
+- 运行原生 Shell 需要：
+  - Android Studio / Android SDK (Android) / JDK 11
+  - Xcode 16+ + iOS Simulator (iOS)

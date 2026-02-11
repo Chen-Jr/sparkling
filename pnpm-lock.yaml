@@ -128,7 +128,7 @@ importers:
         specifier: ^0.13.3
         version: 0.13.3(@rspack/core@1.7.5(@swc/helpers@0.5.18))(typescript@5.8.3)(webpack@5.105.0)
       '@lynx-js/types':
-        specifier: 3.6.0
+        specifier: ^3.6.0
         version: 3.6.0
       '@rsbuild/core':
         specifier: 1.7.2
@@ -270,7 +270,7 @@ importers:
         specifier: ^0.116.2
         version: 0.116.2(@lynx-js/types@3.6.0)(@types/react@18.3.28)
       sparkling-navigation:
-        specifier: ^2.0.0-rc.4
+        specifier: ^2.0.0-rc.5
         version: link:../../packages/methods/sparkling-navigation
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
@@ -301,7 +301,7 @@ importers:
         specifier: ^3.5.3
         version: 3.8.1
       sparkling-app-cli:
-        specifier: workspace:*
+        specifier: ~2.0.0-rc.5
         version: link:../../packages/sparkling-app-cli
       typescript:
         specifier: ^5.8.3
