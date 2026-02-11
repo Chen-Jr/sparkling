@@ -4,7 +4,7 @@
 
 import Testing
 @testable import SparklingMethod
-import Sparkling_SPKRouter
+import Sparkling_Router
 
 // MARK: - Test Models
 

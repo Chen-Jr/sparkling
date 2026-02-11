@@ -5,10 +5,10 @@
 import Foundation
 import Sparkling
 import SparklingMethod
-import Sparkling_SPKRouter
+import Sparkling_Router
 
 class RouterServiceImpl: RouterService {
-    func closeContainer(withParams params: Sparkling_SPKRouter.CloseMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
+    func closeContainer(withParams params: Sparkling_Router.CloseMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
         if SPKRouter.close(container: params.context?.pipeContainer) {
             completion(.succeeded(), nil)
         } else {
@@ -16,7 +16,7 @@ class RouterServiceImpl: RouterService {
         }
     }
     
-    func openScheme(withParams params: Sparkling_SPKRouter.OpenMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
+    func openScheme(withParams params: Sparkling_Router.OpenMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
         let urlString = params.scheme
         let context = SPKContext()
         

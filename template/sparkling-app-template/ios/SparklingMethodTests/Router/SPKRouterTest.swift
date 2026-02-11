@@ -4,7 +4,7 @@
 
 import XCTest
 import SparklingMethod
-import Sparkling_SPKRouter
+import Sparkling_Router
 
 class SPKRouterTest: XCTestCase {
     

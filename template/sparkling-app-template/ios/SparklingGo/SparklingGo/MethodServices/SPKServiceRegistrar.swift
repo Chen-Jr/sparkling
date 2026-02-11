@@ -4,7 +4,7 @@
 
 import Foundation
 import SparklingMethod
-import Sparkling_SPKRouter
+import Sparkling_Router
 
 enum SPKServiceRegister {
     static func registerAll() {

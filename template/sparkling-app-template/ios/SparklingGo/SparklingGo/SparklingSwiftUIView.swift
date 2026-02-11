@@ -22,8 +22,8 @@ struct SPKSwiftUIView: UIViewRepresentable {
         
         let view = SPKContainerView(frame: rect)
         
-        let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle"
-//        let url = "hybrid://lynxview?bundle=.%2Fsecond.lynx.bundle"
+        let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_nav_bar=true&hide_status_bar=true"
+//        let url = "hybrid://lynxview?bundle=.%2Fsecond.lynx.bundle&hide_nav_bar=true&hide_status_bar=true"
         
         view.load(withURL: url, context)
         return view
@@ -39,9 +39,9 @@ struct DemoView: View {
         GeometryReader { geo in
             SPKSwiftUIView(rect: geo.frame(in: .global))
         }
+        .navigationBarHidden(true)
+        .statusBar(hidden: true)
     }
 }
 
-#Preview {
-    DemoView()
-}
+

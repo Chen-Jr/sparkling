@@ -9,8 +9,7 @@
     "baseUrl": ".",
     "paths": {
       "sparkling-navigation": [
-        "../node_modules/sparkling-navigation",
-        "../../packages/methods/sparkling-navigation"
+        "node_modules/sparkling-navigation"
       ]
     },
 

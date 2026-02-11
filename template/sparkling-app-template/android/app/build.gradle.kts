@@ -37,7 +37,6 @@ android {
             jvmTarget = "11"
         }
 
-
         // Default integrate assets from dist; switch to native assets when env is set
         val useNativeAssets =
             System.getenv("SPARKLING_USE_NATIVE_ASSETS")?.equals("true", ignoreCase = true) ?: false
@@ -61,7 +60,8 @@ android {
         androidTestImplementation(libs.androidx.junit)
         androidTestImplementation(libs.androidx.espresso.core)
 
-        implementation("com.tiktok.sparkling:sparkling:2.0.0")
+        implementation("com.tiktok.sparkling:sparkling:2.0.0-rc.5")
+        implementation("com.tiktok.sparkling:sparkling-method:2.0.0-rc.5")
         implementation("com.squareup.okhttp3:okhttp:4.9.0")
 
         implementation(libs.fresco)
@@ -74,7 +74,7 @@ android {
 
         // BEGIN SPARKLING AUTOLINK
         listOf(
-            project(":sparkling-navigation"),
+            project(":sparkling-navigation")
         ).forEach { dep -> add("implementation", dep) }
         // END SPARKLING AUTOLINK
     }

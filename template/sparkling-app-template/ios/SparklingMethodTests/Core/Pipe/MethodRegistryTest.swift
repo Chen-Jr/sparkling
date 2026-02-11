@@ -5,7 +5,7 @@
 import Testing
 
 import SparklingMethod
-import Sparkling_SPKRouter
+import Sparkling_Router
 
 @Suite(.serialized)
 struct MethodRegistryTest {
