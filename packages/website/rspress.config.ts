@@ -153,10 +153,10 @@ export default defineConfig({
   title: 'Sparkling',
   description:
     "Sparkling is TikTok\u2019s hybrid container spanning Android, iOS, and Lynx.",
-  icon: '/sparkling_logo_144.png',
+  icon: '/sparkling/sparkling_logo_144.png',
   logo: {
-    light: '/sparkling_logo_144_light.png',
-    dark: '/sparkling_logo_144.png',
+    light: '/sparkling/sparkling_logo_144_light.png',
+    dark: '/sparkling/sparkling_logo_144.png',
   },
   logoText: 'Sparkling',
   themeConfig: {
