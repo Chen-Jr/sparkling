@@ -11,6 +11,10 @@ import SparklingMethod
 @MainActor
 struct SPKRouterTests {
     
+    init() {
+        DefaultDIContainerProvider.inject()
+    }
+  
     @Test func createWithValidURL() {
         let url = "hybrid://example.com/path"
         let frame = CGRect(x: 0, y: 0, width: 320, height: 568)
