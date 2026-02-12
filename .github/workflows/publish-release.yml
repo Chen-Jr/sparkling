@@ -147,10 +147,10 @@ jobs:
           echo "   Provenance: enabled"
           if [ "${{ needs.prepare.outputs.is_rc }}" == "true" ]; then
             echo "   Tag: rc"
-            node scripts/release-unify-and-publish.mjs publish --version ${{ needs.prepare.outputs.version }} --tag rc
+            node scripts/release-unify-and-publish.mjs publish --version ${{ needs.prepare.outputs.version }} --tag rc --trusted-publishing
           else
             echo "   Tag: latest"
-            node scripts/release-unify-and-publish.mjs publish --version ${{ needs.prepare.outputs.version }} --release
+            node scripts/release-unify-and-publish.mjs publish --version ${{ needs.prepare.outputs.version }} --release --trusted-publishing
           fi
           echo "✅ TypeScript packages published successfully"
 

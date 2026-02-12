@@ -69,6 +69,7 @@ function parseArgs(argv) {
     dryRun: false,
     noGitChecks: true,
     includePrivate: false,
+    trustedPublishing: false,
   };
 
   const positional = [];
@@ -130,6 +131,9 @@ function parseArgs(argv) {
       case "--include-private":
         args.includePrivate = true;
         break;
+      case "--trusted-publishing":
+        args.trustedPublishing = true;
+        break;
       default:
         fail(`Unknown flag: ${a}\n\n${usage()}`);
     }
@@ -161,6 +165,9 @@ function parseArgs(argv) {
   }
   if (env.SPARKLING_NO_AUTO_RC === "1" || env.SPARKLING_NO_AUTO_RC === "true") {
     args.autoRc = false;
+  }
+  if (!args.trustedPublishing && (env.SPARKLING_TRUSTED_PUBLISHING === "1" || env.SPARKLING_TRUSTED_PUBLISHING === "true")) {
+    args.trustedPublishing = true;
   }
   if (args.skip.length === 0 && env.SPARKLING_SKIP) {
     args.skip = env.SPARKLING_SKIP.split(",").map((s) => s.trim()).filter(Boolean);
@@ -520,23 +527,28 @@ async function main() {
   });
 
   // Verify `npm whoami` against expected account on the target registry.
-  const who = runCapture("npm", ["whoami", "--registry", args.registry], {
-    stdio: "pipe",
-    timeout: NPM_CMD_TIMEOUT_MS,
-  });
-  if (!who.ok) {
-    fail(
-      "Failed to run `npm whoami` against npmjs.org. Make sure you are logged in:\n" +
-        `  npm login --registry ${args.registry}\n` +
-        (who.stderr ? `\n${who.stderr}` : "")
-    );
-  }
-  const npmUser = who.stdout.trim();
-  if (args.expectedNpmUser && npmUser !== args.expectedNpmUser) {
-    fail(
-      `npm user mismatch: expected ${args.expectedNpmUser}, got ${npmUser}\n` +
-        "Refusing to publish with an unexpected account."
-    );
+  // Skip when using Trusted Publishing (OIDC) — npm whoami does not work with OIDC tokens.
+  if (args.trustedPublishing) {
+    process.stdout.write("Trusted Publishing (OIDC) enabled — skipping npm whoami check.\n");
+  } else {
+    const who = runCapture("npm", ["whoami", "--registry", args.registry], {
+      stdio: "pipe",
+      timeout: NPM_CMD_TIMEOUT_MS,
+    });
+    if (!who.ok) {
+      fail(
+        "Failed to run `npm whoami` against npmjs.org. Make sure you are logged in:\n" +
+          `  npm login --registry ${args.registry}\n` +
+          (who.stderr ? `\n${who.stderr}` : "")
+      );
+    }
+    const npmUser = who.stdout.trim();
+    if (args.expectedNpmUser && npmUser !== args.expectedNpmUser) {
+      fail(
+        `npm user mismatch: expected ${args.expectedNpmUser}, got ${npmUser}\n` +
+          "Refusing to publish with an unexpected account."
+      );
+    }
   }
 
   // Ensure workspace versions match the resolved publish version.
