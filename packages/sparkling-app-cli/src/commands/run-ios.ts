@@ -293,13 +293,15 @@ export async function runIos(options: RunIosOptions): Promise<void> {
 
   await buildProject({ cwd: options.cwd, skipCopy: options.skipCopy });
 
-  // If skipping copy, ensure Resources/Assets is a symlink to dist
+  // If buildProject skipped the copy, we still need real files for iOS because
+  // symlinks are not valid inside iOS app bundles – the simulator installer
+  // (installd) rejects them with "invalid symlink" errors.
   if (options.skipCopy) {
     const distPath = path.resolve(options.cwd, 'dist');
     const assetsDir = path.resolve(options.cwd, 'ios/LynxResources/Assets');
     const assetsParent = path.dirname(assetsDir);
     if (isVerboseEnabled()) {
-      verboseLog(`Ensuring Assets symlink points to ${distPath}`);
+      verboseLog(`Copying Assets from ${distPath} to ${assetsDir} (iOS requires real files, not symlinks)`);
     }
     try {
       fs.mkdirSync(distPath, { recursive: true });
@@ -307,22 +309,15 @@ export async function runIos(options: RunIosOptions): Promise<void> {
       if (fs.existsSync(assetsDir)) {
         const stat = fs.lstatSync(assetsDir);
         if (stat.isSymbolicLink()) {
-          const target = fs.readlinkSync(assetsDir);
-          const resolved = path.resolve(path.dirname(assetsDir), target);
-          if (resolved !== distPath) {
-            fs.unlinkSync(assetsDir);
-            fs.symlinkSync(distPath, assetsDir);
-          }
+          // Remove stale symlink left by a previous run
+          fs.unlinkSync(assetsDir);
         } else {
-          // remove real directory to avoid duplicate assets; .gitignore already excludes it
           fs.rmSync(assetsDir, { recursive: true, force: true });
-          fs.symlinkSync(distPath, assetsDir);
         }
-      } else {
-        fs.symlinkSync(distPath, assetsDir);
       }
+      fs.cpSync(distPath, assetsDir, { recursive: true, force: true, dereference: true });
     } catch (error) {
-      console.warn(ui.warn(`Failed to link iOS Assets directory to dist: ${String(error)}`));
+      console.warn(ui.warn(`Failed to copy iOS Assets from dist: ${String(error)}`));
     }
   }
 
