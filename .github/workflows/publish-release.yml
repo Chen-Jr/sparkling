@@ -6,14 +6,17 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+*'
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  # Extract version from tag
+  # ──────────────────────────────────────────────────────────────
+  # Step 0: Extract version from tag
+  # ──────────────────────────────────────────────────────────────
   prepare:
     name: Prepare Release
     runs-on: ubuntu-latest
@@ -27,30 +30,57 @@ jobs:
       - name: Extract version from tag
         id: get_version
         run: |
+          echo "========================================="
+          echo "  Step 0: Extracting version from tag"
+          echo "========================================="
           VERSION=${GITHUB_REF#refs/tags/}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Extracted version: $VERSION"
+          echo "✅ Extracted version: $VERSION"
+          echo "   Git ref: $GITHUB_REF"
+          echo "   SHA: $GITHUB_SHA"
 
-          # Check if it's an RC version
           if [[ "$VERSION" =~ -rc\.[0-9]+$ ]]; then
             echo "is_rc=true" >> $GITHUB_OUTPUT
-            echo "Detected RC version"
+            echo "✅ Detected RC (release candidate) version"
           else
             echo "is_rc=false" >> $GITHUB_OUTPUT
-            echo "Detected stable version"
+            echo "✅ Detected stable release version"
           fi
+          echo "========================================="
 
-  # Publish TypeScript packages to npm
+  # ──────────────────────────────────────────────────────────────
+  # Step 1: Align all versions (Android/iOS/TS)
+  # This is done inside each publish job since they run on
+  # different runners. The prepare job provides the version.
+  # ──────────────────────────────────────────────────────────────
+
+  # ──────────────────────────────────────────────────────────────
+  # Step 2: Publish Android, iOS, and npm packages in parallel
+  #         (playground, sparkling-sdk, sparkling-app-template
+  #          are NOT published here)
+  # ──────────────────────────────────────────────────────────────
+
+  # 2a. Publish TypeScript packages to npm
   publish-typescript:
     name: Publish TypeScript Packages
     runs-on: ubuntu-latest
     needs: prepare
     environment:
-      name: npm
+      name: package releasement
       url: https://www.npmjs.com/package/sparkling-sdk
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Log job start
+        run: |
+          echo "========================================="
+          echo "  Step 2a: Publish TypeScript Packages"
+          echo "========================================="
+          echo "  Version: ${{ needs.prepare.outputs.version }}"
+          echo "  Is RC:   ${{ needs.prepare.outputs.is_rc }}"
+          echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
+          echo "========================================="
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -64,20 +94,35 @@ jobs:
           version: 10.26.0
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          echo "📦 Installing dependencies with frozen lockfile..."
+          pnpm install --frozen-lockfile
+          echo "✅ Dependencies installed successfully"
 
       - name: Build packages
-        run: pnpm -r build
-
-      - name: Align versions
         run: |
+          echo "🔨 Building all packages..."
+          pnpm -r build
+          echo "✅ All packages built successfully"
+
+      - name: Update versions
+        run: |
+          echo "📝 Updating all versions to ${{ needs.prepare.outputs.version }}..."
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
+          echo "✅ Versions updated successfully"
 
       - name: Configure npm authentication
         run: |
+          echo "🔑 Configuring npm authentication..."
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm whoami
+          NPM_USER=$(npm whoami 2>&1) || {
+            echo "❌ npm authentication failed!"
+            echo "::error::npm whoami failed. Check that NPM_TOKEN secret is valid."
+            echo "   Output: $NPM_USER"
+            exit 1
+          }
+          echo "✅ Authenticated as npm user: $NPM_USER"
 
       - name: Publish to npm
         env:
@@ -85,29 +130,50 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           SPARKLING_VERSION: ${{ needs.prepare.outputs.version }}
         run: |
+          echo "🚀 Publishing TypeScript packages to npm..."
+          echo "   Version: ${{ needs.prepare.outputs.version }}"
+          echo "   Is RC: ${{ needs.prepare.outputs.is_rc }}"
           if [ "${{ needs.prepare.outputs.is_rc }}" == "true" ]; then
+            echo "   Tag: rc"
             node scripts/release-unify-and-publish.mjs publish --version ${{ needs.prepare.outputs.version }} --tag rc
           else
+            echo "   Tag: latest"
             node scripts/release-unify-and-publish.mjs publish --version ${{ needs.prepare.outputs.version }} --release
           fi
+          echo "✅ TypeScript packages published successfully"
 
-  # Publish Android to Maven Central
+  # 2b. Publish Android to Maven Central
   publish-android:
     name: Publish Android to Maven Central
     runs-on: ubuntu-latest
     needs: prepare
     environment:
-      name: maven-central
+      name: package releasement
       url: https://central.sonatype.com/artifact/com.tiktok.sparkling/sparkling-sdk
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Log job start
+        run: |
+          echo "========================================="
+          echo "  Step 2b: Publish Android to Maven Central"
+          echo "========================================="
+          echo "  Version: ${{ needs.prepare.outputs.version }}"
+          echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
+          echo "========================================="
 
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Log JDK info
+        run: |
+          echo "☕ JDK version:"
+          java -version 2>&1
+          echo "✅ JDK setup complete"
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -122,10 +188,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Align versions
+      - name: Update versions
         run: |
+          echo "📝 Updating all versions to ${{ needs.prepare.outputs.version }}..."
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
+          echo "✅ Versions updated successfully"
+
+      - name: Verify Maven Central credentials
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: |
+          echo "🔑 Verifying Maven Central credentials..."
+          MISSING=""
+          [ -z "$MAVEN_CENTRAL_USERNAME" ] && MISSING="$MISSING MAVEN_CENTRAL_USERNAME"
+          [ -z "$MAVEN_CENTRAL_PASSWORD" ] && MISSING="$MISSING MAVEN_CENTRAL_PASSWORD"
+          [ -z "$SIGNING_KEY_ID" ] && MISSING="$MISSING SIGNING_KEY_ID"
+          [ -z "$SIGNING_PASSWORD" ] && MISSING="$MISSING SIGNING_PASSWORD"
+          [ -z "$SIGNING_KEY" ] && MISSING="$MISSING SIGNING_KEY"
+          if [ -n "$MISSING" ]; then
+            echo "❌ Missing secrets:$MISSING"
+            echo "::error::Missing Maven Central secrets:$MISSING"
+            exit 1
+          fi
+          echo "✅ All Maven Central credentials are present"
+          echo "   Username length: ${#MAVEN_CENTRAL_USERNAME} chars"
+          echo "   Signing Key ID: ${SIGNING_KEY_ID}"
 
       - name: Publish to Maven Central
         env:
@@ -135,19 +227,31 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
         run: |
+          echo "🚀 Publishing Android SDK to Maven Central..."
+          echo "   Version: ${{ needs.prepare.outputs.version }}"
           chmod +x scripts/publish-android-maven.sh
           ./scripts/publish-android-maven.sh ${{ needs.prepare.outputs.version }} --skip-tests
+          echo "✅ Android SDK published to Maven Central successfully"
 
-  # Publish iOS to CocoaPods - Step 1: SparklingMethod
+  # 2c. Publish iOS SparklingMethod to CocoaPods
   publish-ios-method:
     name: Publish iOS SparklingMethod
     runs-on: macos-latest
     needs: prepare
     environment:
-      name: cocoapods
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Log job start
+        run: |
+          echo "========================================="
+          echo "  Step 2c: Publish iOS SparklingMethod"
+          echo "========================================="
+          echo "  Version: ${{ needs.prepare.outputs.version }}"
+          echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
+          echo "========================================="
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -157,32 +261,68 @@ jobs:
 
       - name: Install CocoaPods
         run: |
+          echo "📦 Installing CocoaPods..."
           gem install cocoapods
           pod setup
+          echo "✅ CocoaPods version: $(pod --version)"
 
-      - name: Align versions
+      - name: Update versions
         run: |
+          echo "📝 Updating all versions to ${{ needs.prepare.outputs.version }}..."
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
+          echo "✅ Versions updated successfully"
+
+      - name: Verify CocoaPods credentials
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          echo "🔑 Verifying CocoaPods trunk token..."
+          if [ -z "$COCOAPODS_TRUNK_TOKEN" ]; then
+            echo "❌ COCOAPODS_TRUNK_TOKEN is empty!"
+            echo "::error::COCOAPODS_TRUNK_TOKEN secret is missing or empty."
+            exit 1
+          fi
+          TRUNK_INFO=$(COCOAPODS_TRUNK_TOKEN=$COCOAPODS_TRUNK_TOKEN pod trunk me 2>&1) || {
+            echo "❌ CocoaPods trunk authentication failed!"
+            echo "::error::pod trunk me failed. Check that COCOAPODS_TRUNK_TOKEN is valid."
+            echo "   Output: $TRUNK_INFO"
+            exit 1
+          }
+          echo "✅ CocoaPods trunk authentication successful:"
+          echo "$TRUNK_INFO"
 
       - name: Publish SparklingMethod to CocoaPods
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
+          echo "🚀 Publishing SparklingMethod to CocoaPods..."
+          echo "   Version: ${{ needs.prepare.outputs.version }}"
           chmod +x scripts/publish-ios-sparkling-method.sh
           ./scripts/publish-ios-sparkling-method.sh ${{ needs.prepare.outputs.version }} --skip-git
+          echo "✅ SparklingMethod published to CocoaPods successfully"
 
-  # Publish iOS to CocoaPods - Step 2: Sparkling
+  # 2d. Publish iOS Sparkling SDK to CocoaPods (depends on SparklingMethod)
   publish-ios-sdk:
     name: Publish iOS Sparkling SDK
     runs-on: macos-latest
     needs: [prepare, publish-ios-method]
     environment:
-      name: cocoapods
+      name: package releasement
       url: https://cocoapods.org/pods/Sparkling
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Log job start
+        run: |
+          echo "========================================="
+          echo "  Step 2d: Publish iOS Sparkling SDK"
+          echo "========================================="
+          echo "  Version: ${{ needs.prepare.outputs.version }}"
+          echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
+          echo "  Depends: publish-ios-method (SparklingMethod)"
+          echo "========================================="
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -192,38 +332,423 @@ jobs:
 
       - name: Install CocoaPods
         run: |
+          echo "📦 Installing CocoaPods..."
           gem install cocoapods
           pod setup
+          echo "✅ CocoaPods version: $(pod --version)"
 
-      - name: Align versions
+      - name: Update versions
         run: |
+          echo "📝 Updating all versions to ${{ needs.prepare.outputs.version }}..."
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
+          echo "✅ Versions updated successfully"
 
       - name: Wait for SparklingMethod CDN sync
         run: |
-          echo "Waiting for SparklingMethod to be available on CDN..."
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "⏳ Waiting for SparklingMethod $VERSION to be available on CDN..."
+          FOUND=false
           for i in {1..30}; do
-            if pod trunk info SparklingMethod 2>/dev/null | grep -q "${{ needs.prepare.outputs.version }}"; then
-              echo "SparklingMethod ${{ needs.prepare.outputs.version }} is available on CDN"
+            if pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
+              echo "✅ SparklingMethod $VERSION is available on CDN (after $i checks)"
+              FOUND=true
               break
             fi
-            echo "Waiting... ($i/30)"
+            echo "   Waiting... ($i/30, next check in 10s)"
             sleep 10
           done
+          if [ "$FOUND" != "true" ]; then
+            echo "❌ SparklingMethod $VERSION was NOT found on CDN after 30 attempts (5 minutes)"
+            echo "::error::SparklingMethod $VERSION not available on CocoaPods CDN after 5 minutes"
+            exit 1
+          fi
 
       - name: Publish Sparkling to CocoaPods
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
+          echo "🚀 Publishing Sparkling SDK to CocoaPods..."
+          echo "   Version: ${{ needs.prepare.outputs.version }}"
           chmod +x scripts/publish-ios-sparkling.sh
           ./scripts/publish-ios-sparkling.sh ${{ needs.prepare.outputs.version }} --skip-wait --skip-git
+          echo "✅ Sparkling SDK published to CocoaPods successfully"
 
-  # Create GitHub Release
+  # ──────────────────────────────────────────────────────────────
+  # Step 3: Update sparkling-app-template dependencies and
+  #         verify build succeeds
+  # Step 4: Publish sparkling-app-template to npm
+  # ──────────────────────────────────────────────────────────────
+  publish-template:
+    name: Update & Publish App Template
+    runs-on: macos-latest
+    needs: [prepare, publish-typescript, publish-android, publish-ios-sdk]
+    environment:
+      name: package releasement
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log job start
+        run: |
+          echo "========================================="
+          echo "  Step 3+4: Update & Publish App Template"
+          echo "========================================="
+          echo "  Version: ${{ needs.prepare.outputs.version }}"
+          echo "  Is RC:   ${{ needs.prepare.outputs.is_rc }}"
+          echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
+          echo "  Depends: publish-typescript, publish-android, publish-ios-sdk"
+          echo "========================================="
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.26.0
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install CocoaPods
+        run: |
+          echo "📦 Installing CocoaPods..."
+          gem install cocoapods
+          pod setup
+          echo "✅ CocoaPods version: $(pod --version)"
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: |
+          echo "📦 Installing workspace dependencies..."
+          pnpm install --frozen-lockfile
+          echo "✅ Dependencies installed successfully"
+
+      - name: Build packages
+        run: |
+          echo "🔨 Building all packages..."
+          pnpm -r build
+          echo "✅ All packages built successfully"
+
+      # Step 3a: Update template version
+      - name: Update all versions
+        run: |
+          echo "📝 [Step 3a] Updating all versions to ${{ needs.prepare.outputs.version }}..."
+          chmod +x scripts/update-all-version.sh
+          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
+          echo "✅ Versions updated successfully"
+
+      # Step 3b: Update TS dependencies in template package.json
+      - name: Update template TS dependencies
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          TEMPLATE_PKG="template/sparkling-app-template/package.json"
+
+          echo "📝 [Step 3b] Updating template TS dependencies..."
+          echo "   File: $TEMPLATE_PKG"
+
+          echo "   Updating sparkling-navigation -> ^${VERSION}"
+          sed -i '' "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$TEMPLATE_PKG"
+
+          echo "   Updating sparkling-app-cli -> ~${VERSION}"
+          sed -i '' "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$TEMPLATE_PKG"
+
+          echo ""
+          echo "✅ Updated template package.json:"
+          cat "$TEMPLATE_PKG"
+
+      # Step 3c: Update Android dependencies in build.gradle.kts
+      - name: Update template Android dependencies
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          GRADLE_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
+
+          echo "📝 [Step 3c] Updating template Android dependencies..."
+          echo "   File: $GRADLE_FILE"
+
+          echo "   Updating com.tiktok.sparkling:sparkling -> ${VERSION}"
+          sed -i '' "s|com.tiktok.sparkling:sparkling:[^\"]*|com.tiktok.sparkling:sparkling:${VERSION}|" "$GRADLE_FILE"
+
+          echo "   Updating com.tiktok.sparkling:sparkling-method -> ${VERSION}"
+          sed -i '' "s|com.tiktok.sparkling:sparkling-method:[^\"]*|com.tiktok.sparkling:sparkling-method:${VERSION}|" "$GRADLE_FILE"
+
+          echo ""
+          echo "✅ Updated build.gradle.kts:"
+          cat "$GRADLE_FILE"
+
+      # Step 3d: Update iOS dependencies in Podfile
+      - name: Update template iOS dependencies
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          PODFILE="template/sparkling-app-template/ios/Podfile"
+
+          echo "📝 [Step 3d] Updating template iOS dependencies..."
+          echo "   File: $PODFILE"
+
+          echo "   Updating SPARKLING_VERSION -> '${VERSION}'"
+          sed -i '' "s|SPARKLING_VERSION = '[^']*'|SPARKLING_VERSION = '${VERSION}'|" "$PODFILE"
+
+          echo ""
+          echo "✅ Updated Podfile:"
+          cat "$PODFILE"
+
+      # Step 3e: Wait for npm packages to be available
+      - name: Wait for npm packages availability
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "⏳ [Step 3e] Waiting for npm packages to be available..."
+          ALL_FOUND=true
+          for pkg in sparkling-navigation sparkling-app-cli; do
+            echo ""
+            echo "   Checking $pkg@$VERSION..."
+            FOUND=false
+            for i in {1..30}; do
+              if npm view "$pkg@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
+                echo "   ✅ $pkg@$VERSION is available on npm (after $i checks)"
+                FOUND=true
+                break
+              fi
+              echo "   Waiting for $pkg... ($i/30, next check in 10s)"
+              sleep 10
+            done
+            if [ "$FOUND" != "true" ]; then
+              echo "   ❌ $pkg@$VERSION was NOT found on npm after 30 attempts (5 minutes)"
+              echo "::error::$pkg@$VERSION not available on npm after 5 minutes"
+              ALL_FOUND=false
+            fi
+          done
+          if [ "$ALL_FOUND" != "true" ]; then
+            echo ""
+            echo "❌ Some npm packages are not available. Aborting."
+            exit 1
+          fi
+          echo ""
+          echo "✅ All npm packages are available"
+
+      # Step 3f: Verify TS build
+      - name: Verify template TS build
+        working-directory: template/sparkling-app-template
+        run: |
+          echo "🔨 [Step 3f] Verifying template TS build..."
+          echo "   Working directory: $(pwd)"
+          echo ""
+          echo "   Installing template dependencies..."
+          pnpm install --no-frozen-lockfile
+          echo ""
+          echo "   Running build..."
+          pnpm build
+          echo ""
+          echo "✅ Template TS build succeeded!"
+
+      # Step 3g: Verify Android build
+      - name: Verify template Android build
+        working-directory: template/sparkling-app-template/android
+        run: |
+          echo "🔨 [Step 3g] Verifying template Android build..."
+          echo "   Working directory: $(pwd)"
+          echo ""
+          chmod +x ./gradlew 2>/dev/null || true
+          if ./gradlew assembleDebug --no-daemon; then
+            echo ""
+            echo "✅ Template Android build succeeded!"
+          else
+            echo ""
+            echo "⚠️ Template Android build failed!"
+            echo "::warning::Android build verification failed - this may indicate dependency issues"
+          fi
+
+      # Step 3h: Verify iOS pod install
+      - name: Wait for CocoaPods CDN sync
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "⏳ [Step 3h] Waiting for Sparkling pods to be available on CDN..."
+          ALL_FOUND=true
+          for pod_name in SparklingMethod Sparkling; do
+            echo ""
+            echo "   Checking $pod_name@$VERSION..."
+            FOUND=false
+            for i in {1..30}; do
+              if pod trunk info "$pod_name" 2>/dev/null | grep -q "$VERSION"; then
+                echo "   ✅ $pod_name $VERSION is available on CDN (after $i checks)"
+                FOUND=true
+                break
+              fi
+              echo "   Waiting for $pod_name... ($i/30, next check in 10s)"
+              sleep 10
+            done
+            if [ "$FOUND" != "true" ]; then
+              echo "   ❌ $pod_name $VERSION was NOT found on CDN after 30 attempts (5 minutes)"
+              echo "::warning::$pod_name $VERSION not available on CocoaPods CDN after 5 minutes"
+              ALL_FOUND=false
+            fi
+          done
+          if [ "$ALL_FOUND" == "true" ]; then
+            echo ""
+            echo "✅ All CocoaPods are available on CDN"
+          else
+            echo ""
+            echo "⚠️ Some pods are not yet available on CDN, proceeding anyway..."
+          fi
+
+      - name: Verify template iOS pod install
+        working-directory: template/sparkling-app-template/ios
+        run: |
+          echo "🔨 [Step 3h] Verifying template iOS pod install..."
+          echo "   Working directory: $(pwd)"
+          echo ""
+          if pod install; then
+            echo ""
+            echo "✅ Template iOS pod install succeeded!"
+          else
+            echo ""
+            echo "⚠️ Template iOS pod install failed!"
+            echo "::warning::iOS pod install verification failed - this may indicate dependency issues"
+          fi
+
+      # Step 4: Publish sparkling-app-template to npm
+      - name: Configure npm authentication
+        run: |
+          echo "🔑 [Step 4] Configuring npm authentication..."
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          NPM_USER=$(npm whoami 2>&1) || {
+            echo "❌ npm authentication failed!"
+            echo "::error::npm whoami failed. Check that NPM_TOKEN secret is valid."
+            echo "   Output: $NPM_USER"
+            exit 1
+          }
+          echo "✅ Authenticated as npm user: $NPM_USER"
+
+      - name: Publish template to npm
+        working-directory: template/sparkling-app-template
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "🚀 [Step 4] Publishing sparkling-app-template to npm..."
+          echo "   Version: ${{ needs.prepare.outputs.version }}"
+          echo "   Working directory: $(pwd)"
+          echo ""
+          if [ "${{ needs.prepare.outputs.is_rc }}" == "true" ]; then
+            echo "   Tag: rc"
+            pnpm publish --registry https://registry.npmjs.org --access public --tag rc --no-git-checks
+          else
+            echo "   Tag: latest"
+            pnpm publish --registry https://registry.npmjs.org --access public --tag latest --no-git-checks
+          fi
+          echo ""
+          echo "✅ sparkling-app-template published to npm successfully"
+
+      # Step 4b: Create PR to update template dependencies in main branch
+      - name: Create branch and commit template updates
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          BRANCH="chore/update-template-deps-${VERSION}"
+
+          echo "📝 [Step 4b] Creating PR to update template dependencies..."
+          echo "   Branch: $BRANCH"
+          echo "   Version: $VERSION"
+          echo ""
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create a new branch from the current tag
+          git checkout -b "$BRANCH"
+
+          # Re-apply the template dependency changes (they were done in working tree earlier)
+          # Update template package.json
+          TEMPLATE_PKG="template/sparkling-app-template/package.json"
+          sed -i '' "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$TEMPLATE_PKG"
+          sed -i '' "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$TEMPLATE_PKG"
+
+          # Update Android build.gradle.kts
+          GRADLE_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
+          sed -i '' "s|com.tiktok.sparkling:sparkling:[^\"]*|com.tiktok.sparkling:sparkling:${VERSION}|" "$GRADLE_FILE"
+          sed -i '' "s|com.tiktok.sparkling:sparkling-method:[^\"]*|com.tiktok.sparkling:sparkling-method:${VERSION}|" "$GRADLE_FILE"
+
+          # Update iOS Podfile
+          PODFILE="template/sparkling-app-template/ios/Podfile"
+          sed -i '' "s|SPARKLING_VERSION = '[^']*'|SPARKLING_VERSION = '${VERSION}'|" "$PODFILE"
+
+          # Also update root and SDK package.json versions via the version script
+          chmod +x scripts/update-all-version.sh
+          ./scripts/update-all-version.sh "$VERSION"
+
+          # Stage and commit
+          git add -A
+          if git diff --cached --quiet; then
+            echo "⚠️ No changes to commit - template dependencies may already be up to date"
+          else
+            git commit -m "chore: update template dependencies to ${VERSION}"
+            echo "✅ Changes committed"
+
+            echo ""
+            echo "   Pushing branch to origin..."
+            git push origin "$BRANCH"
+            echo "✅ Branch pushed to origin"
+
+            echo ""
+            echo "   Creating pull request..."
+            PR_BODY=$(cat <<'PREOF'
+          ## Summary
+
+          Auto-generated by the publish workflow after releasing version.
+
+          Updates `sparkling-app-template` dependencies to match the published versions:
+
+          - **TypeScript** (`template/sparkling-app-template/package.json`):
+            - `sparkling-navigation`
+            - `sparkling-app-cli`
+          - **Android** (`template/sparkling-app-template/android/app/build.gradle.kts`):
+            - `com.tiktok.sparkling:sparkling`
+            - `com.tiktok.sparkling:sparkling-method`
+          - **iOS** (`template/sparkling-app-template/ios/Podfile`):
+            - `SPARKLING_VERSION`
+          - **Root & SDK versions** aligned
+
+          > This PR was created automatically by GitHub Actions.
+          PREOF
+          )
+            # Replace generic text with actual version
+            PR_BODY="${PR_BODY//releasing version/releasing version \`${VERSION}\`}"
+
+            PR_URL=$(gh pr create \
+              --title "chore: update template dependencies to ${VERSION}" \
+              --body "$PR_BODY" \
+              --base main \
+              --head "$BRANCH" 2>&1) || {
+              echo "❌ Failed to create PR!"
+              echo "::error::Failed to create pull request for template dependency updates"
+              echo "   Output: $PR_URL"
+              exit 0  # Don't fail the whole job just because PR creation failed
+            }
+            echo "✅ Pull request created: $PR_URL"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────
+  # Step 5: Create GitHub Release
+  # ──────────────────────────────────────────────────────────────
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [prepare, publish-typescript, publish-android, publish-ios-sdk]
+    needs: [prepare, publish-template]
     if: always() && needs.prepare.result == 'success'
     permissions:
       contents: write
@@ -231,25 +756,80 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Log job start
+        run: |
+          echo "========================================="
+          echo "  Step 5: Create GitHub Release"
+          echo "========================================="
+          echo "  Version: ${{ needs.prepare.outputs.version }}"
+          echo "  Is RC:   ${{ needs.prepare.outputs.is_rc }}"
+          echo "========================================="
+
+      - name: Determine release status
+        id: status
+        run: |
+          echo "📋 Checking publish job results..."
+          TEMPLATE_RESULT="${{ needs.publish-template.result }}"
+          echo "   publish-template: $TEMPLATE_RESULT"
+
+          if [ "$TEMPLATE_RESULT" == "success" ]; then
+            echo "all_success=true" >> $GITHUB_OUTPUT
+            echo "✅ All publish jobs succeeded - creating release"
+          else
+            echo "all_success=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Some publish jobs failed - creating draft release"
+            echo "::warning::Not all publish jobs succeeded. Release will be created as draft."
+          fi
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           name: Release ${{ needs.prepare.outputs.version }}
-          draft: ${{ needs.prepare.outputs.is_rc == 'true' }}
+          draft: ${{ needs.prepare.outputs.is_rc == 'true' || steps.status.outputs.all_success != 'true' }}
           prerelease: ${{ needs.prepare.outputs.is_rc == 'true' }}
           generate_release_notes: true
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Log release result
+        run: |
+          echo "========================================="
+          if [ "${{ needs.prepare.outputs.is_rc }}" == "true" ]; then
+            echo "✅ Draft pre-release created for ${{ needs.prepare.outputs.version }}"
+          elif [ "${{ steps.status.outputs.all_success }}" == "true" ]; then
+            echo "✅ Release created for ${{ needs.prepare.outputs.version }}"
+          else
+            echo "⚠️ Draft release created for ${{ needs.prepare.outputs.version }} (some jobs failed)"
+          fi
+          echo "========================================="
+
+  # ──────────────────────────────────────────────────────────────
   # Notify on failure
+  # ──────────────────────────────────────────────────────────────
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [publish-typescript, publish-android, publish-ios-sdk]
+    needs: [prepare, publish-typescript, publish-android, publish-ios-method, publish-ios-sdk, publish-template]
     if: failure()
     steps:
-      - name: Notify failure
+      - name: Report failure details
         run: |
-          echo "::error::Publishing failed for version ${{ needs.prepare.outputs.version }}"
-          echo "Please check the workflow logs for details."
+          echo "========================================="
+          echo "  ❌ PUBLISH WORKFLOW FAILED"
+          echo "========================================="
+          echo ""
+          echo "  Version: ${{ needs.prepare.outputs.version }}"
+          echo ""
+          echo "  Job Results:"
+          echo "    prepare:            ${{ needs.prepare.result }}"
+          echo "    publish-typescript: ${{ needs.publish-typescript.result }}"
+          echo "    publish-android:    ${{ needs.publish-android.result }}"
+          echo "    publish-ios-method: ${{ needs.publish-ios-method.result }}"
+          echo "    publish-ios-sdk:    ${{ needs.publish-ios-sdk.result }}"
+          echo "    publish-template:   ${{ needs.publish-template.result }}"
+          echo ""
+          echo "  Please check the individual job logs above for details."
+          echo "========================================="
+          echo ""
+          echo "::error::Publishing failed for version ${{ needs.prepare.outputs.version }}. See job results above."
