@@ -113,9 +113,13 @@ jobs:
           echo "✅ Versions updated successfully"
 
       - name: Configure npm authentication
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "🔑 Configuring npm authentication..."
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          # setup-node sets NPM_CONFIG_USERCONFIG to a temp .npmrc that uses NODE_AUTH_TOKEN
+          # Write token there to ensure npm picks it up
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
           NPM_USER=$(npm whoami 2>&1) || {
             echo "❌ npm authentication failed!"
             echo "::error::npm whoami failed. Check that NPM_TOKEN secret is valid."
@@ -124,7 +128,23 @@ jobs:
           }
           echo "✅ Authenticated as npm user: $NPM_USER"
 
+      - name: Check if npm packages already published
+        id: npm_check
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "🔍 Checking if npm packages are already published at version $VERSION..."
+          # Check a representative package (sparkling-method is a core one)
+          if npm view "sparkling-method@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ sparkling-method@$VERSION already exists on npm — skipping publish"
+            echo "::warning::npm packages at version $VERSION already published. Skipping."
+            echo "already_published=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Version $VERSION not found on npm — proceeding with publish"
+            echo "already_published=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish to npm
+        if: steps.npm_check.outputs.already_published != 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -149,7 +169,7 @@ jobs:
     needs: prepare
     environment:
       name: package releasement
-      url: https://central.sonatype.com/artifact/com.tiktok.sparkling/sparkling-sdk
+      url: https://central.sonatype.com/artifact/com.tiktok.sparkling/sparkling
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -219,7 +239,24 @@ jobs:
           echo "   Username length: ${#MAVEN_CENTRAL_USERNAME} chars"
           echo "   Signing Key ID: ${SIGNING_KEY_ID}"
 
+      - name: Check if Android SDK already published
+        id: maven_check
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "🔍 Checking if Android SDK is already published at version $VERSION..."
+          MAVEN_URL="https://repo1.maven.org/maven2/com/tiktok/sparkling/sparkling/$VERSION/sparkling-$VERSION.pom"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$MAVEN_URL" 2>/dev/null || echo "000")
+          if [ "$HTTP_STATUS" == "200" ]; then
+            echo "⚠️ com.tiktok.sparkling:sparkling:$VERSION already exists on Maven Central — skipping publish"
+            echo "::warning::Android SDK at version $VERSION already published on Maven Central. Skipping."
+            echo "already_published=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Version $VERSION not found on Maven Central (HTTP $HTTP_STATUS) — proceeding with publish"
+            echo "already_published=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish to Maven Central
+        if: steps.maven_check.outputs.already_published != 'true'
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -291,7 +328,22 @@ jobs:
           echo "✅ CocoaPods trunk authentication successful:"
           echo "$TRUNK_INFO"
 
+      - name: Check if SparklingMethod already published
+        id: pod_method_check
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "🔍 Checking if SparklingMethod is already published at version $VERSION..."
+          if pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ SparklingMethod $VERSION already exists on CocoaPods — skipping publish"
+            echo "::warning::SparklingMethod at version $VERSION already published. Skipping."
+            echo "already_published=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ SparklingMethod $VERSION not found on CocoaPods — proceeding with publish"
+            echo "already_published=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish SparklingMethod to CocoaPods
+        if: steps.pod_method_check.outputs.already_published != 'true'
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
@@ -362,7 +414,22 @@ jobs:
             exit 1
           fi
 
+      - name: Check if Sparkling SDK already published
+        id: pod_sdk_check
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "🔍 Checking if Sparkling SDK is already published at version $VERSION..."
+          if pod trunk info Sparkling 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ Sparkling $VERSION already exists on CocoaPods — skipping publish"
+            echo "::warning::Sparkling SDK at version $VERSION already published. Skipping."
+            echo "already_published=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Sparkling $VERSION not found on CocoaPods — proceeding with publish"
+            echo "already_published=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish Sparkling to CocoaPods
+        if: steps.pod_sdk_check.outputs.already_published != 'true'
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
@@ -619,9 +686,11 @@ jobs:
 
       # Step 4: Publish sparkling-app-template to npm
       - name: Configure npm authentication
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "🔑 [Step 4] Configuring npm authentication..."
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
           NPM_USER=$(npm whoami 2>&1) || {
             echo "❌ npm authentication failed!"
             echo "::error::npm whoami failed. Check that NPM_TOKEN secret is valid."
@@ -630,7 +699,22 @@ jobs:
           }
           echo "✅ Authenticated as npm user: $NPM_USER"
 
+      - name: Check if template already published
+        id: template_check
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "🔍 Checking if sparkling-app-template is already published at version $VERSION..."
+          if npm view "sparkling-app-template@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ sparkling-app-template@$VERSION already exists on npm — skipping publish"
+            echo "::warning::sparkling-app-template at version $VERSION already published. Skipping."
+            echo "already_published=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ sparkling-app-template@$VERSION not found on npm — proceeding with publish"
+            echo "already_published=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish template to npm
+        if: steps.template_check.outputs.already_published != 'true'
         working-directory: template/sparkling-app-template
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
