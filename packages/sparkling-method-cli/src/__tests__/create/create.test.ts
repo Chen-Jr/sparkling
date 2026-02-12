@@ -466,6 +466,212 @@ describe('Project Creation (runInit)', () => {
     });
   });
 
+  describe('non-interactive mode', () => {
+    it('should create project without prompts when all options are provided', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = {
+          template: templateDir,
+          packageName: 'com.noninteractive.test',
+          moduleName: 'NonInteractiveModule',
+          androidDsl: 'kts',
+        };
+
+        await runInit('non-interactive-test', options);
+
+        // Prompts should NOT have been called
+        expect(mockedPrompt).not.toHaveBeenCalled();
+
+        const projectDir = path.join(tmpDir, 'non-interactive-test');
+        expect(await fs.pathExists(projectDir)).toBe(true);
+
+        // Verify module config
+        const config = await fs.readJson(path.join(projectDir, 'module.config.json'));
+        expect(config.packageName).toBe('com.noninteractive.test');
+        expect(config.moduleName).toBe('NonInteractiveModule');
+        expect(config.androidDsl).toBe('kts');
+        expect(config.projectName).toBe('non-interactive-test');
+
+        // Verify package.json
+        const pkgJson = await fs.readJson(path.join(projectDir, 'package.json'));
+        expect(pkgJson.name).toBe('non-interactive-test');
+      });
+    });
+
+    it('should create project with groovy DSL in non-interactive mode', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = {
+          template: templateDir,
+          packageName: 'com.groovy.test',
+          moduleName: 'GroovyModule',
+          androidDsl: 'groovy',
+        };
+
+        await runInit('groovy-test', options);
+
+        expect(mockedPrompt).not.toHaveBeenCalled();
+
+        const config = await fs.readJson(path.join(tmpDir, 'groovy-test', 'module.config.json'));
+        expect(config.androidDsl).toBe('groovy');
+
+        // Verify groovy build file was created (not kts)
+        const gradlePath = path.join(tmpDir, 'groovy-test', 'android', 'build.gradle');
+        expect(await fs.pathExists(gradlePath)).toBe(true);
+      });
+    });
+
+    it('should default androidDsl to kts when not provided in non-interactive mode', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = {
+          template: templateDir,
+          packageName: 'com.default.dsl',
+          moduleName: 'DefaultDslModule',
+          // androidDsl intentionally omitted
+        };
+
+        await runInit('default-dsl-test', options);
+
+        expect(mockedPrompt).not.toHaveBeenCalled();
+
+        const config = await fs.readJson(path.join(tmpDir, 'default-dsl-test', 'module.config.json'));
+        expect(config.androidDsl).toBe('kts');
+      });
+    });
+
+    it('should reject invalid androidDsl value in non-interactive mode', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = {
+          template: templateDir,
+          packageName: 'com.invalid.dsl',
+          moduleName: 'InvalidDslModule',
+          androidDsl: 'maven' as any,
+        };
+
+        await expect(runInit('invalid-dsl-test', options)).rejects.toThrow(
+          'Invalid --android-dsl value "maven". Must be "kts" or "groovy".'
+        );
+      });
+    });
+
+    it('should create correct platform scaffolds in non-interactive mode', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = {
+          template: templateDir,
+          packageName: 'com.platform.scaffold',
+          moduleName: 'PlatformModule',
+          androidDsl: 'kts',
+        };
+
+        await runInit('platform-test', options);
+
+        const projectDir = path.join(tmpDir, 'platform-test');
+
+        // Verify Android structure
+        const androidDir = path.join(projectDir, 'android', 'src', 'main', 'java', 'com', 'platform', 'scaffold', 'platformmodule');
+        expect(await fs.pathExists(androidDir)).toBe(true);
+
+        // Verify iOS structure
+        const iosDir = path.join(projectDir, 'ios', 'Source', 'Core', 'platformmodule');
+        expect(await fs.pathExists(iosDir)).toBe(true);
+      });
+    });
+
+    it('should fall back to interactive prompts when only packageName is provided', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = {
+          template: templateDir,
+          packageName: 'com.partial.test',
+          // moduleName intentionally omitted
+        };
+
+        mockedPrompt.mockResolvedValueOnce({
+          packageName: 'com.partial.test',
+          moduleName: 'PartialModule',
+          androidDsl: 'kts',
+        });
+
+        await runInit('partial-test', options);
+
+        // Prompts should have been called because moduleName was missing
+        expect(mockedPrompt).toHaveBeenCalled();
+      });
+    });
+
+    it('should fall back to interactive prompts when only moduleName is provided', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = {
+          template: templateDir,
+          moduleName: 'OnlyModule',
+          // packageName intentionally omitted
+        };
+
+        mockedPrompt.mockResolvedValueOnce({
+          packageName: 'org.sparkling',
+          moduleName: 'OnlyModule',
+          androidDsl: 'kts',
+        });
+
+        await runInit('only-module-test', options);
+
+        // Prompts should have been called because packageName was missing
+        expect(mockedPrompt).toHaveBeenCalled();
+      });
+    });
+
+    it('should trim whitespace from non-interactive option values', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = {
+          template: templateDir,
+          packageName: '  com.whitespace.test  ',
+          moduleName: '  WhitespaceModule  ',
+          androidDsl: 'kts',
+        };
+
+        await runInit('whitespace-test', options);
+
+        expect(mockedPrompt).not.toHaveBeenCalled();
+
+        const config = await fs.readJson(path.join(tmpDir, 'whitespace-test', 'module.config.json'));
+        expect(config.packageName).toBe('com.whitespace.test');
+        expect(config.moduleName).toBe('WhitespaceModule');
+      });
+    });
+
+    it('should work with --force in non-interactive mode', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+
+        // Create existing directory
+        const existingDir = path.join(tmpDir, 'force-test');
+        await fs.ensureDir(existingDir);
+        await fs.writeFile(path.join(existingDir, 'old-file.txt'), 'old content');
+
+        const options: InitOptions = {
+          template: templateDir,
+          force: true,
+          packageName: 'com.force.test',
+          moduleName: 'ForceModule',
+          androidDsl: 'kts',
+        };
+
+        await runInit('force-test', options);
+
+        expect(mockedPrompt).not.toHaveBeenCalled();
+
+        // Old file should be gone, new project should exist
+        expect(await fs.pathExists(path.join(existingDir, 'old-file.txt'))).toBe(false);
+        expect(await fs.pathExists(path.join(existingDir, 'package.json'))).toBe(true);
+      });
+    });
+  });
+
   describe('snapshot testing', () => {
     it('should create consistent project structure', async () => {
       await withTempDir(async (tmpDir) => {

@@ -30,7 +30,10 @@ program
   .description('Create a new sparkling-method workspace from the bundled template')
   .option('-f, --force', 'Overwrite the target directory if it already exists', false)
   .option('-t, --template <path>', 'Use a custom template directory')
-  .action(async (name: string | undefined, options: { force?: boolean; template?: string }) => {
+  .option('--package-name <name>', 'Namespace / bundle identifier (e.g. com.example)')
+  .option('--module-name <name>', 'Module name in PascalCase (e.g. Storage)')
+  .option('--android-dsl <dsl>', 'Android Gradle DSL: kts or groovy', 'kts')
+  .action(async (name: string | undefined, options: { force?: boolean; template?: string; packageName?: string; moduleName?: string; androidDsl?: string }) => {
     try {
       await runInit(name, options);
     } catch (error) {

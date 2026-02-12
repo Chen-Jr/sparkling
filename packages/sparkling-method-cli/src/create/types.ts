@@ -6,6 +6,12 @@ export type AndroidDsl = 'kts' | 'groovy';
 export interface InitOptions {
   template?: string;
   force?: boolean;
+  /** Namespace / bundle identifier (e.g. com.example). Skips the interactive prompt when provided. */
+  packageName?: string;
+  /** Module name in PascalCase (e.g. Storage). Skips the interactive prompt when provided. */
+  moduleName?: string;
+  /** Android Gradle DSL: 'kts' or 'groovy'. Skips the interactive prompt when provided. */
+  androidDsl?: AndroidDsl;
 }
 
 export interface ModuleConfig {

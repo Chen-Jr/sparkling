@@ -42,9 +42,12 @@ export function open(params: OpenRequest, callback: (result: OpenResponse) => vo
         ...params.options,
     }, (v: unknown) => {
         const response = v as OpenResponse;
-        callback({
-            code: response?.code ?? -1,
-            msg: response?.msg ?? 'Unknown error',
-        });
+        const code = response?.code ?? -1;
+        // Pipe status codes: 1 = succeeded, 0 = failed, negative = various errors.
+        // When the native side reports success it may omit `msg`, so fall back to
+        // 'ok' instead of the misleading 'Unknown error'.
+        const isSuccess = code === 1;
+        const msg = response?.msg ?? (isSuccess ? 'ok' : 'Unknown error');
+        callback({ code, msg });
     });
 }

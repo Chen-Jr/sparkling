@@ -181,15 +181,11 @@ export async function createSparklingApp(
   }
 
   if (builtinTemplate?.canonicalName === DEFAULT_TEMPLATE_NAME) {
-    const cliTemplateVersion = version ?? "0.0.0";
-    if (templateVersion && templateVersion !== cliTemplateVersion) {
-      console.log(
-        ui.warn(
-          `Template version ${templateVersion} does not match CLI version ${cliTemplateVersion}; using CLI version.`,
-        ),
-      );
+    // Always use the latest template from npm unless the user explicitly
+    // provides a specific version via --template-version.
+    if (!userProvidedTemplateVersion) {
+      templateVersion = undefined; // resolves to "latest" in resolveDefaultTemplate
     }
-    templateVersion = cliTemplateVersion;
   }
 
   const androidDsl: AndroidDslChoice = await askAndroidDsl(flags);
