@@ -47,6 +47,7 @@ export async function installDependencies(distFolder: string, packageManager?: s
 
 export async function initializeGitRepo(distFolder: string): Promise<void> {
   const stdioMode = isVerboseEnabled() ? 'inherit' : 'pipe';
+  const s = createSpinner();
   try {
     try {
       execSync('git --version', { stdio: stdioMode });
@@ -55,6 +56,7 @@ export async function initializeGitRepo(distFolder: string): Promise<void> {
       return;
     }
 
+    s.start('Initializing git repository...');
     if (isVerboseEnabled()) {
       verboseLog(`Initializing git repository in ${distFolder}`);
     }
@@ -63,13 +65,14 @@ export async function initializeGitRepo(distFolder: string): Promise<void> {
     try {
       execSync('git add .', { cwd: distFolder, stdio: stdioMode });
       execSync('git commit -m "init: scaffolded by sparkling"', { cwd: distFolder, stdio: stdioMode });
-      console.log(ui.success('✔ Initialized empty Git repository'));
+      s.stop('Initialized git repository');
       console.log(ui.success('✔ Created initial commit: "init: scaffolded by sparkling"'));
     } catch (error) {
-      console.log(ui.success('✔ Initialized empty Git repository'));
+      s.stop('Initialized git repository');
       console.warn(ui.warn('Warning: Git repository initialized but initial commit failed. Configure git user.name and user.email, then run "git add . && git commit -m \"init: scaffolded by sparkling\"" manually.'));
     }
   } catch (error) {
+    s.stop('Failed to initialize git repository');
     console.warn(ui.warn('Warning: Failed to initialize git repository. Run "git init" manually.'));
   }
 }

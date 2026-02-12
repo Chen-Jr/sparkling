@@ -24,9 +24,94 @@ export interface AutolinkOptions {
 }
 
 /**
+ * Extract workspace glob patterns from a candidate workspace root.
+ * Supports npm/yarn (package.json "workspaces"), pnpm (pnpm-workspace.yaml),
+ * and lerna (lerna.json "packages").
+ * Returns the patterns array, or null if none could be extracted.
+ */
+function getWorkspacePatterns(candidateRoot: string): string[] | null {
+  // 1. package.json with "workspaces" (npm / yarn)
+  const pkgPath = path.join(candidateRoot, 'package.json');
+  if (fs.existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      if (Array.isArray(pkg.workspaces)) return pkg.workspaces;
+      if (Array.isArray(pkg.workspaces?.packages)) return pkg.workspaces.packages;
+    } catch { /* ignore */ }
+  }
+
+  // 2. pnpm-workspace.yaml — parse the "packages:" list with a simple regex
+  //    since we don't have a YAML parser dependency.
+  const pnpmWsPath = path.join(candidateRoot, 'pnpm-workspace.yaml');
+  if (fs.existsSync(pnpmWsPath)) {
+    try {
+      const content = fs.readFileSync(pnpmWsPath, 'utf8');
+      const patterns: string[] = [];
+      // Match lines like "  - 'packages/*'" or "  - packages/*"
+      const lineRe = /^\s*-\s+['"]?([^'"#\n]+?)['"]?\s*$/gm;
+      let m: RegExpExecArray | null;
+      while ((m = lineRe.exec(content)) !== null) {
+        const p = m[1].trim();
+        if (p) patterns.push(p);
+      }
+      if (patterns.length) return patterns;
+    } catch { /* ignore */ }
+  }
+
+  // 3. lerna.json with "packages"
+  const lernaPath = path.join(candidateRoot, 'lerna.json');
+  if (fs.existsSync(lernaPath)) {
+    try {
+      const lerna = JSON.parse(fs.readFileSync(lernaPath, 'utf8'));
+      if (Array.isArray(lerna.packages)) return lerna.packages;
+    } catch { /* ignore */ }
+  }
+
+  return null;
+}
+
+/**
+ * Check whether `cwd` is a member of the workspace rooted at `wsRoot` by
+ * testing the relative path of `cwd` against the workspace glob patterns.
+ *
+ * For example, if wsRoot has patterns ["packages/*"] and cwd is
+ * "<wsRoot>/packages/my-app", the relative path "packages/my-app" matches
+ * the pattern "packages/*", so this returns true.
+ */
+function isWorkspaceMember(wsRoot: string, cwd: string, patterns: string[]): boolean {
+  const rel = toPosixPath(path.relative(wsRoot, cwd));
+  if (!rel || rel.startsWith('..')) return false;
+
+  // Use minimatch-style matching via fast-glob's micromatch (available
+  // through fast-glob internals). We do a simple manual check instead to
+  // avoid relying on internal APIs: convert each workspace pattern to a
+  // regex that matches the relative path.
+  for (const pattern of patterns) {
+    const posixPattern = toPosixPath(pattern);
+    // Convert glob pattern to regex:
+    //   "packages/*"  -> matches "packages/foo" (one level)
+    //   "packages/**" -> matches "packages/foo" and "packages/foo/bar"
+    //   "apps/*"      -> matches "apps/my-app"
+    const regexStr = posixPattern
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')  // escape regex special chars (except * and ?)
+      .replace(/\*\*/g, '__GLOBSTAR__')        // placeholder for **
+      .replace(/\*/g, '[^/]+')                 // * matches one path segment
+      .replace(/__GLOBSTAR__/g, '.+');          // ** matches one or more segments
+    const re = new RegExp(`^${regexStr}$`);
+    if (re.test(rel)) return true;
+  }
+  return false;
+}
+
+/**
  * Detect whether `cwd` lives inside a monorepo by walking up to find a
  * workspace-root marker (package.json with "workspaces", pnpm-workspace.yaml,
  * or lerna.json) between the parent directory and the filesystem root.
+ *
+ * To avoid false positives (e.g. an unrelated workspace root higher up in the
+ * directory tree), this function also verifies that `cwd` actually matches one
+ * of the workspace's glob patterns before accepting it as a monorepo member.
+ *
  * Returns the workspace root path if found, otherwise null.
  */
 function findWorkspaceRoot(cwd: string): string | null {
@@ -35,18 +120,20 @@ function findWorkspaceRoot(cwd: string): string | null {
   const { root } = path.parse(cwd);
 
   while (true) {
-    // package.json with a "workspaces" field (npm / yarn)
-    const pkgPath = path.join(current, 'package.json');
-    if (fs.existsSync(pkgPath)) {
-      try {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-        if (pkg.workspaces) return current;
-      } catch { /* ignore */ }
+    const patterns = getWorkspacePatterns(current);
+    if (patterns && patterns.length > 0) {
+      if (isWorkspaceMember(current, cwd, patterns)) {
+        return current;
+      }
+      // Found a workspace root but cwd is not a member — keep searching
+      // upward in case of nested workspaces, but this is uncommon. In most
+      // cases we should stop here to avoid scanning unrelated directories.
+      if (isVerboseEnabled()) {
+        verboseLog(
+          `Found workspace root at ${current} but ${cwd} is not listed as a member; skipping.`,
+        );
+      }
     }
-    // pnpm-workspace.yaml
-    if (fs.existsSync(path.join(current, 'pnpm-workspace.yaml'))) return current;
-    // lerna.json
-    if (fs.existsSync(path.join(current, 'lerna.json'))) return current;
 
     if (current === root) break;
     current = path.dirname(current);
@@ -514,7 +601,7 @@ function injectAndroidDependencies(appGradlePath: string, modules: MethodModuleC
   const depIndent = depIndentMatch ? depIndentMatch[1] : '';
   const innerIndent = `${depIndent}    `;
 
-  const depLinesKts = modules.map(m => `${innerIndent}    project(":${m.name}")`).join('\n');
+  const depLinesKts = modules.map(m => `${innerIndent}    project(":${m.name}")`).join(',\n');
   const ktsBlock = [
     `${innerIndent}// BEGIN SPARKLING AUTOLINK`,
     `${innerIndent}listOf(`,

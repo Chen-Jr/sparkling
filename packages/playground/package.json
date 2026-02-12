@@ -1,9 +1,9 @@
 {
   "name": "sparkling-playground",
-  "version": "2.0.0-rc.5",
+  "version": "2.0.0-rc.6",
   "type": "module",
   "description": "Multi-page Sparkling app demos with full features",
-  "homepage": "",
+  "homepage": "https://tiktok.github.io/sparkling/",
   "repository": {
     "type": "git",
     "url": "https://github.com/tiktok/sparkling",

@@ -328,6 +328,7 @@ export async function createSparklingApp(
   }
 
   if (shouldInitGit) {
+    console.log(ui.info('Setting up git repository, this may take a moment...'));
     await initializeGitRepo(distFolder);
   }
 

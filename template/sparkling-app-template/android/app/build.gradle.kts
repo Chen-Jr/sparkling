@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.sparkling.go"
-        minSdk = 21
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -60,8 +60,8 @@ android {
         androidTestImplementation(libs.androidx.junit)
         androidTestImplementation(libs.androidx.espresso.core)
 
-        implementation("com.tiktok.sparkling:sparkling:2.0.0-rc.5")
-        implementation("com.tiktok.sparkling:sparkling-method:2.0.0-rc.5")
+        implementation("com.tiktok.sparkling:sparkling:2.0.0-rc.6")
+        implementation("com.tiktok.sparkling:sparkling-method:2.0.0-rc.6")
         implementation("com.squareup.okhttp3:okhttp:4.9.0")
 
         implementation(libs.fresco)
