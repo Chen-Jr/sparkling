@@ -31,6 +31,15 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Cross-platform sed in-place: macOS requires `sed -i ''`, Linux requires `sed -i`
+sedi() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "$@"
+    else
+        sed -i "$@"
+    fi
+}
+
 # Show usage
 show_usage() {
     echo "Usage: ./align-version.sh [version] [options]"
@@ -122,7 +131,7 @@ update_typescript_versions() {
             else
                 # Use sed to update version in package.json
                 # Handle both "version": "x.x.x" and "version":"x.x.x" formats
-                sed -i '' "s/\"version\": *\"[^\"]*\"/\"version\": \"$VERSION\"/" "$filepath"
+                sedi "s/\"version\": *\"[^\"]*\"/\"version\": \"$VERSION\"/" "$filepath"
                 print_success "Updated $file: $current_version -> $VERSION"
             fi
         else
@@ -148,7 +157,7 @@ update_ios_versions() {
                 print_info "[DRY RUN] Would update $file: $current_version -> $VERSION"
             else
                 # Update s.version in podspec file
-                sed -i '' "s/s\.version.*=.*\"[^\"]*\"/s.version        = \"$VERSION\"/" "$filepath"
+                sedi "s/s\.version.*=.*\"[^\"]*\"/s.version        = \"$VERSION\"/" "$filepath"
                 print_success "Updated $file: $current_version -> $VERSION"
             fi
         else
