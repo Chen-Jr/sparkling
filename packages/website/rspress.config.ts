@@ -1,6 +1,6 @@
 import { defineConfig } from '@rspress/core';
-import path from 'node:path';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 
 const require = createRequire(import.meta.url);
 const rootPkg = require('../../package.json');
@@ -24,7 +24,7 @@ const navEn = [
 
 const navZh = [
   { text: '指南', link: '/guide/get-started/create-new-app' },
-  { text: '接口', link: '/apis/sparkling-sdk-android' },
+  { text: 'APIs', link: '/apis/sparkling-sdk-android' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -37,13 +37,13 @@ const sidebarEn = {
     {
       text: 'Get Started',
       items: [
-        { text: 'Create New App', link: '/guide/get-started/create-new-app' },
+        { text: 'Create a New App', link: '/guide/get-started/create-new-app' },
         {
-          text: 'Integrate Sparkling into Existing App',
+          text: 'Integrate into Existing App',
           link: '/guide/get-started/integrate-sparkling-into-existing-app',
         },
         {
-          text: 'Create Custom Method',
+          text: 'Create a Custom Method',
           link: '/guide/get-started/create-custom-method',
         },
       ],
