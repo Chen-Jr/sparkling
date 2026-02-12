@@ -310,7 +310,7 @@ importers:
         specifier: ^3.5.3
         version: 3.8.1
       sparkling-app-cli:
-        specifier: ~2.0.0-rc.5
+        specifier: ~2.0.0-rc.6
         version: link:../../packages/sparkling-app-cli
       typescript:
         specifier: ^5.8.3
