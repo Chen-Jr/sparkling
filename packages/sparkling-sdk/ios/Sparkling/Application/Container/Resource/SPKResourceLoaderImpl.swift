@@ -159,7 +159,7 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
         }
         
         if let bundleRoot = Bundle.main.resourceURL {
-            let searchPrefixes = ["LynxResources/Assets", "", "Assets"]
+            let searchPrefixes = ["LynxResources", "", "Assets"]
             for prefix in searchPrefixes {
                 let filePath: URL
                 if prefix.isEmpty {
