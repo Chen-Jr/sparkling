@@ -18,7 +18,15 @@ function HomeLayout() {
   useEffect(() => {
     const brand = document.querySelector('.rp-home-hero__title-brand');
     if (brand) {
-      brand.textContent = `Sparkling Version ${__SPARKLING_VERSION__}`;
+      (brand as HTMLElement).innerHTML = `
+        <a
+          href="https://github.com/tiktok/sparkling/releases"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Sparkling Version ${__SPARKLING_VERSION__}
+        </a>
+      `;
     }
   }, []);
 
