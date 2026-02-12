@@ -56,7 +56,7 @@ program
   .description('Copy dist assets into Android/iOS resource locations')
   .option('--source <path>', 'Path to compiled assets', 'dist')
   .option('--android-dest <path>', 'Android asset destination', 'android/app/src/main/assets')
-  .option('--ios-dest <path>', 'iOS asset destination', 'ios/SparklingGo/SparklingGo/Resources/Assets')
+  .option('--ios-dest <path>', 'iOS asset destination', 'ios/LynxResources/Assets')
   .action(async opts => {
     const cwd = process.cwd();
     await copyAssets({

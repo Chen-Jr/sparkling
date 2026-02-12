@@ -25,6 +25,41 @@ interface SimulatorDevice {
   isAvailable?: boolean;
 }
 
+const DEFAULT_BUNDLE_ID = 'com.sparkling.app.SparklingGo';
+
+/**
+ * Read the main app bundle identifier from the Xcode project.
+ * Falls back to the env var or the hardcoded default.
+ */
+function resolveBundleId(cwd: string): string {
+  const envOverride = process.env.SPARKLING_IOS_BUNDLE_ID;
+  if (envOverride) return envOverride;
+
+  const pbxprojPath = path.resolve(cwd, 'ios', 'SparklingGo.xcodeproj', 'project.pbxproj');
+  if (!fs.existsSync(pbxprojPath)) return DEFAULT_BUNDLE_ID;
+
+  try {
+    const content = fs.readFileSync(pbxprojPath, 'utf8');
+    // Match all PRODUCT_BUNDLE_IDENTIFIER values
+    const matches = [...content.matchAll(/PRODUCT_BUNDLE_IDENTIFIER\s*=\s*([^;\n]+)/g)]
+      .map(m => m[1].trim().replace(/^"|"$/g, ''));
+    // Pick the first one that doesn't look like a test target
+    const appBundleId = matches.find(id => !/tests?$/i.test(id));
+    if (appBundleId) {
+      if (isVerboseEnabled()) {
+        verboseLog(`Resolved bundle ID from pbxproj: ${appBundleId}`);
+      }
+      return appBundleId;
+    }
+  } catch (error) {
+    if (isVerboseEnabled()) {
+      verboseLog(`Failed to read bundle ID from pbxproj: ${String(error)}`);
+    }
+  }
+
+  return DEFAULT_BUNDLE_ID;
+}
+
 function resolveWorkspacePath(cwd: string): string | null {
   const candidates = [
     path.resolve(cwd, 'ios', 'SparklingGo.xcworkspace'),
@@ -238,7 +273,7 @@ export async function runIos(options: RunIosOptions): Promise<void> {
   }
   console.log(ui.headline(`Using simulator: ${device.name} (${device.udid})${device.runtime ? ` [${device.runtime}]` : ''}`));
 
-  const bundleId = process.env.SPARKLING_IOS_BUNDLE_ID ?? 'com.sparkling.app.SparklingGo';
+  const bundleId = resolveBundleId(options.cwd);
   const podfilePath = path.resolve(options.cwd, 'ios', 'Podfile');
   const hasPodfile = fs.existsSync(podfilePath);
   if (isVerboseEnabled()) {
@@ -261,7 +296,7 @@ export async function runIos(options: RunIosOptions): Promise<void> {
   // If skipping copy, ensure Resources/Assets is a symlink to dist
   if (options.skipCopy) {
     const distPath = path.resolve(options.cwd, 'dist');
-    const assetsDir = path.resolve(options.cwd, 'ios/SparklingGo/SparklingGo/Resources/Assets');
+    const assetsDir = path.resolve(options.cwd, 'ios/LynxResources/Assets');
     const assetsParent = path.dirname(assetsDir);
     if (isVerboseEnabled()) {
       verboseLog(`Ensuring Assets symlink points to ${distPath}`);
@@ -305,13 +340,51 @@ export async function runIos(options: RunIosOptions): Promise<void> {
     verboseLog(`Using workspace at ${workspacePath}`);
   }
 
-  await runCommand('xcrun', ['simctl', 'boot', device.udid], { cwd: options.cwd, ignoreFailure: true });
-  await runCommand('xcrun', ['simctl', 'bootstatus', device.udid, '-b'], { cwd: options.cwd, ignoreFailure: true });
-  // Focus the chosen simulator only so we don't spawn the default device alongside it
-  await runCommand('open', ['-a', 'Simulator', '--args', '-CurrentDeviceUDID', device.udid], { cwd: options.cwd, ignoreFailure: true });
+  // ── Step 1: Best-effort simulator boot (never blocks the build) ──
+  // Boot timeout: 120s is generous but prevents indefinite hangs caused by
+  // simdiskimaged or CoreSimulatorService issues (known macOS/Xcode bug).
+  const BOOT_TIMEOUT_MS = 120_000;
+  let simulatorReady = (device.state ?? '').toLowerCase() === 'booted';
 
+  if (!simulatorReady) {
+    console.log(ui.info(`Booting simulator ${device.name}...`));
+    try {
+      await runCommand('xcrun', ['simctl', 'boot', device.udid], {
+        cwd: options.cwd,
+        timeoutMs: BOOT_TIMEOUT_MS,
+      });
+      console.log(ui.info('Waiting for simulator to finish booting...'));
+      // Do NOT pass -b here: we already issued the boot command above.
+      // -b would attempt a second boot and can hang indefinitely.
+      await runCommand('xcrun', ['simctl', 'bootstatus', device.udid], {
+        cwd: options.cwd,
+        timeoutMs: BOOT_TIMEOUT_MS,
+      });
+      simulatorReady = true;
+    } catch (error) {
+      console.warn(ui.warn(
+        `Simulator boot failed: ${String(error)}\n` +
+        'The Xcode build will continue. You can start the simulator manually or deploy to a physical device.',
+      ));
+    }
+  } else {
+    console.log(ui.info(`Simulator ${device.name} is already booted.`));
+  }
+
+  if (simulatorReady) {
+    // Focus the chosen simulator only so we don't spawn the default device alongside it
+    console.log(ui.info('Opening Simulator app...'));
+    await runCommand('open', ['-a', 'Simulator', '--args', '-CurrentDeviceUDID', device.udid], {
+      cwd: options.cwd,
+      ignoreFailure: true,
+      timeoutMs: 30_000,
+    });
+  }
+
+  // ── Step 2: Build (always runs, regardless of simulator state) ──
   const destination = `id=${device.udid}`;
   const derivedDataPath = path.resolve(options.cwd, 'ios/build');
+  console.log(ui.info('Building Xcode project (this may take a while)...'));
   await runCommand('xcodebuild', [
     '-workspace',
     workspacePath,
@@ -332,11 +405,22 @@ export async function runIos(options: RunIosOptions): Promise<void> {
     'build',
   ], { cwd: options.cwd });
 
+  // ── Step 3: Install & launch (best-effort, only if simulator is up) ──
   const appPath = path.resolve(options.cwd, 'ios/build/Build/Products/Debug-iphonesimulator/SparklingGo.app');
-  if (fs.existsSync(appPath)) {
-    await runCommand('xcrun', ['simctl', 'install', device.udid, appPath], { cwd: options.cwd, ignoreFailure: true });
-    await runCommand('xcrun', ['simctl', 'launch', device.udid, bundleId], { cwd: options.cwd, ignoreFailure: true });
-  } else {
+  if (!fs.existsSync(appPath)) {
     console.warn(ui.warn(`Built app not found at ${appPath}, skipped simulator install/launch.`));
+  } else if (!simulatorReady) {
+    console.log(ui.success(`Build succeeded. App is at: ${appPath}`));
+    console.log(ui.tip(
+      'The simulator is not running. To install manually:\n' +
+      `  xcrun simctl boot "${device.udid}"\n` +
+      `  xcrun simctl install "${device.udid}" "${appPath}"\n` +
+      `  xcrun simctl launch "${device.udid}" ${bundleId}`,
+    ));
+  } else {
+    console.log(ui.info('Installing app on simulator...'));
+    await runCommand('xcrun', ['simctl', 'install', device.udid, appPath], { cwd: options.cwd, ignoreFailure: true });
+    console.log(ui.info(`Launching ${bundleId}...`));
+    await runCommand('xcrun', ['simctl', 'launch', device.udid, bundleId], { cwd: options.cwd, ignoreFailure: true });
   }
 }

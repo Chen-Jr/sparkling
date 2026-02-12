@@ -23,6 +23,37 @@ export interface AutolinkOptions {
   platform?: 'android' | 'ios' | 'all';
 }
 
+/**
+ * Detect whether `cwd` lives inside a monorepo by walking up to find a
+ * workspace-root marker (package.json with "workspaces", pnpm-workspace.yaml,
+ * or lerna.json) between the parent directory and the filesystem root.
+ * Returns the workspace root path if found, otherwise null.
+ */
+function findWorkspaceRoot(cwd: string): string | null {
+  const parentDir = path.dirname(cwd);
+  let current = parentDir;
+  const { root } = path.parse(cwd);
+
+  while (true) {
+    // package.json with a "workspaces" field (npm / yarn)
+    const pkgPath = path.join(current, 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (pkg.workspaces) return current;
+      } catch { /* ignore */ }
+    }
+    // pnpm-workspace.yaml
+    if (fs.existsSync(path.join(current, 'pnpm-workspace.yaml'))) return current;
+    // lerna.json
+    if (fs.existsSync(path.join(current, 'lerna.json'))) return current;
+
+    if (current === root) break;
+    current = path.dirname(current);
+  }
+  return null;
+}
+
 async function discoverModules(cwd: string): Promise<MethodModuleConfig[]> {
   if (!cwd || typeof cwd !== 'string') {
     console.warn(ui.warn('discoverModules: cwd must be a non-empty string'));
@@ -30,35 +61,70 @@ async function discoverModules(cwd: string): Promise<MethodModuleConfig[]> {
   }
 
   const seen = new Map<string, MethodModuleConfig>();
-  const searchRoots = [
-    path.resolve(cwd, '..'),
-    path.resolve(cwd, 'node_modules'),
-  ];
+  const nodeModulesDir = path.resolve(cwd, 'node_modules');
 
-  for (const root of searchRoots) {
+  interface SearchEntry {
+    root: string;
+    pattern: string;
+    ignore: string[];
+  }
+
+  const searches: SearchEntry[] = [];
+
+  // 1. Sibling packages — only scan when inside a monorepo to avoid crawling
+  //    large directories (e.g. ~/Documents) for standalone projects.
+  const workspaceRoot = findWorkspaceRoot(cwd);
+  if (workspaceRoot) {
+    if (isVerboseEnabled()) {
+      verboseLog(`Detected workspace root at ${workspaceRoot}`);
+    }
+    searches.push({
+      root: workspaceRoot,
+      // Scan up to 3 levels deep to cover common monorepo layouts
+      // (e.g. packages/methods/my-method/module.config.json)
+      pattern: '{*/,*/*/,*/*/*/}module.config.json',
+      ignore: ['node_modules/**', 'dist/**', '.turbo/**', '.rslib/**'],
+    });
+  } else if (isVerboseEnabled()) {
+    verboseLog('No workspace root detected, skipping sibling package scan.');
+  }
+
+  // 2. node_modules — use targeted patterns for sparkling method packages
+  //    instead of a full recursive crawl.
+  if (fs.existsSync(nodeModulesDir)) {
+    searches.push({
+      root: nodeModulesDir,
+      // Match both top-level (sparkling-*/module.config.json) and scoped
+      // (@*/sparkling-*/module.config.json) method packages.
+      pattern: '{sparkling-*/,@*/sparkling-*/}module.config.json',
+      ignore: ['**/dist/**', '**/.turbo/**', '**/.rslib/**'],
+    });
+  }
+
+  for (const search of searches) {
     // Skip if root directory doesn't exist
-    if (!fs.existsSync(root)) {
+    if (!fs.existsSync(search.root)) {
       continue;
     }
 
     if (isVerboseEnabled()) {
-      verboseLog(`Scanning for module.config.json under ${root}`);
+      verboseLog(`Scanning for ${search.pattern} under ${search.root}`);
     }
 
     let matches: string[] = [];
     try {
-      matches = await fg('**/module.config.json', {
-        cwd: root,
+      matches = await fg(search.pattern, {
+        cwd: search.root,
         absolute: true,
-        ignore: ['**/dist/**', '**/.turbo/**', '**/.rslib/**'],
+        ignore: search.ignore,
       });
     } catch (error) {
-      console.warn(ui.warn(`Failed to search for modules in ${root}: ${error instanceof Error ? error.message : String(error)}`));
+      console.warn(ui.warn(`Failed to search for modules in ${search.root}: ${error instanceof Error ? error.message : String(error)}`));
       continue;
     }
 
     if (isVerboseEnabled()) {
-      verboseLog(`Found ${matches.length} module config(s) under ${root}`);
+      verboseLog(`Found ${matches.length} module config(s) under ${search.root}`);
     }
 
     for (const configPath of matches) {
@@ -636,8 +702,7 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
   const defaultIosBundle = 'com.example.sparkling.go';
 
   if (!modules.length) {
-    console.log(ui.tip('No Sparkling method modules found for autolink.'));
-    return [];
+    console.log(ui.info('No Sparkling method modules found. Cleaning up stale autolink entries...'));
   }
 
   let androidPackage = defaultAndroidPackage;
@@ -683,6 +748,8 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
     injectPodfile(podfile, modules, path.dirname(podfile));
   }
 
+  // Always write registry files so stale entries from previously-linked
+  // modules are cleaned up when all method modules are removed.
   if (doAndroid) {
     writeAndroidRegistry(modules, androidPackage, options.cwd);
   }
@@ -691,6 +758,10 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
   }
 
   const platformLabel = platform === 'all' ? 'Android & iOS' : platform.toUpperCase();
-  console.log(ui.success(`Autolinked ${modules.length} module(s) for ${platformLabel}.`));
+  if (modules.length) {
+    console.log(ui.success(`Autolinked ${modules.length} module(s) for ${platformLabel}.`));
+  } else {
+    console.log(ui.success(`Cleaned autolink entries for ${platformLabel}.`));
+  }
   return modules;
 }
