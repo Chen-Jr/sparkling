@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -88,6 +89,12 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Ensure latest npm (>= 11.5.1 required for Trusted Publishing)
+        run: |
+          echo "📦 Upgrading npm for Trusted Publishing support..."
+          npm install -g npm@latest
+          echo "✅ npm version: $(npm --version)"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -112,22 +119,6 @@ jobs:
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
           echo "✅ Versions updated successfully"
 
-      - name: Configure npm authentication
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "🔑 Configuring npm authentication..."
-          # setup-node sets NPM_CONFIG_USERCONFIG to a temp .npmrc that uses NODE_AUTH_TOKEN
-          # Write token there to ensure npm picks it up
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
-          NPM_USER=$(npm whoami 2>&1) || {
-            echo "❌ npm authentication failed!"
-            echo "::error::npm whoami failed. Check that NPM_TOKEN secret is valid."
-            echo "   Output: $NPM_USER"
-            exit 1
-          }
-          echo "✅ Authenticated as npm user: $NPM_USER"
-
       - name: Check if npm packages already published
         id: npm_check
         run: |
@@ -146,13 +137,14 @@ jobs:
       - name: Publish to npm
         if: steps.npm_check.outputs.already_published != 'true'
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'
           SPARKLING_VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           echo "🚀 Publishing TypeScript packages to npm..."
           echo "   Version: ${{ needs.prepare.outputs.version }}"
           echo "   Is RC: ${{ needs.prepare.outputs.is_rc }}"
+          echo "   Auth: Trusted Publishing (OIDC)"
+          echo "   Provenance: enabled"
           if [ "${{ needs.prepare.outputs.is_rc }}" == "true" ]; then
             echo "   Tag: rc"
             node scripts/release-unify-and-publish.mjs publish --version ${{ needs.prepare.outputs.version }} --tag rc
@@ -471,6 +463,12 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Ensure latest npm (>= 11.5.1 required for Trusted Publishing)
+        run: |
+          echo "📦 Upgrading npm for Trusted Publishing support..."
+          npm install -g npm@latest
+          echo "✅ npm version: $(npm --version)"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -685,20 +683,6 @@ jobs:
           fi
 
       # Step 4: Publish sparkling-app-template to npm
-      - name: Configure npm authentication
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "🔑 [Step 4] Configuring npm authentication..."
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > "${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
-          NPM_USER=$(npm whoami 2>&1) || {
-            echo "❌ npm authentication failed!"
-            echo "::error::npm whoami failed. Check that NPM_TOKEN secret is valid."
-            echo "   Output: $NPM_USER"
-            exit 1
-          }
-          echo "✅ Authenticated as npm user: $NPM_USER"
-
       - name: Check if template already published
         id: template_check
         run: |
@@ -717,12 +701,13 @@ jobs:
         if: steps.template_check.outputs.already_published != 'true'
         working-directory: template/sparkling-app-template
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'
         run: |
           echo "🚀 [Step 4] Publishing sparkling-app-template to npm..."
           echo "   Version: ${{ needs.prepare.outputs.version }}"
           echo "   Working directory: $(pwd)"
+          echo "   Auth: Trusted Publishing (OIDC)"
+          echo "   Provenance: enabled"
           echo ""
           if [ "${{ needs.prepare.outputs.is_rc }}" == "true" ]; then
             echo "   Tag: rc"
