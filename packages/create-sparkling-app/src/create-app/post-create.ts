@@ -61,16 +61,7 @@ export async function initializeGitRepo(distFolder: string): Promise<void> {
       verboseLog(`Initializing git repository in ${distFolder}`);
     }
     execSync('git init', { cwd: distFolder, stdio: stdioMode });
-
-    try {
-      execSync('git add .', { cwd: distFolder, stdio: stdioMode });
-      execSync('git commit -m "init: scaffolded by sparkling"', { cwd: distFolder, stdio: stdioMode });
-      s.stop('Initialized git repository');
-      console.log(ui.success('✔ Created initial commit: "init: scaffolded by sparkling"'));
-    } catch (error) {
-      s.stop('Initialized git repository');
-      console.warn(ui.warn('Warning: Git repository initialized but initial commit failed. Configure git user.name and user.email, then run "git add . && git commit -m \"init: scaffolded by sparkling\"" manually.'));
-    }
+    s.stop('Initialized git repository');
   } catch (error) {
     s.stop('Failed to initialize git repository');
     console.warn(ui.warn('Warning: Failed to initialize git repository. Run "git init" manually.'));

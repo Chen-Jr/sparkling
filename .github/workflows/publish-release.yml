@@ -108,8 +108,8 @@ jobs:
 
       - name: Build packages
         run: |
-          echo "🔨 Building all packages..."
-          pnpm -r build
+          echo "🔨 Building all packages (skipping website)..."
+          pnpm --filter '!sparkling-website' -r build
           echo "✅ All packages built successfully"
 
       - name: Update versions
@@ -503,8 +503,8 @@ jobs:
 
       - name: Build packages
         run: |
-          echo "🔨 Building all packages..."
-          pnpm -r build
+          echo "🔨 Building all packages (skipping website)..."
+          pnpm --filter '!sparkling-website' -r build
           echo "✅ All packages built successfully"
 
       # Step 3a: Update template version
