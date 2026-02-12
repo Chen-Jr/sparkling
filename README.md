@@ -1,10 +1,9 @@
 <img align="center" src="TikTok_Sparkling.png" alt="alt text" />
 
 <p align="center">
-  ❇️ Sparkling is the mobile cross-platform infrastructure used by TikTok
+  ❇️ The Cross-platform Infrastructure behind TikTok
 </p>
 
----
 
 ## Content
 - [About Sparkling](#about-sparkling)
@@ -14,11 +13,11 @@
 - [License](#license)
 
 ## About Sparkling
-TikTok Sparkling is the mobile cross-platform development infrastructure for TikTok mobile app. Powered by [Lynx](http://lynxjs.org) & WebView.
+Large-scale apps like TikTok are never built with a single technology. Sparkling is the cross-platform infrastructure we built to power the TikTok app. It unlocks [Lynx](https://lynxjs.org) at our scale, and we believe it can do the same for your app.
 
-- 📦 **Out-of-the-box Lynx development framework.** You can start a new Lynx app with Android, iOS project by Sparkling cli in minutes.
-- 🔀 **Scheme Driven Navigation between mutliple pages.** You can navigate between multiple Lynx pages in your app by router.
-- 🧩 **TikTok-Proven Native Abilities.** Lots of Lynx native abilities are supported, such as media, storage, etc.
+- 📦 **Scaffold in minutes.** Create a Lynx app targeting Android & iOS with a single CLI command.
+- 🔀 **Scheme-driven navigation.** Route between Lynx pages and native screens with a unified URL scheme.
+- 🧩 **Production-proven native APIs.** Access media, storage, and more through the same bridges used by TikTok.
 
 ## Documentation
 The full documentation for Sparkling can be found in [`docs`](/docs)
