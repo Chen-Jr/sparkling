@@ -49,7 +49,7 @@ jobs:
           echo "========================================="
 
   # ──────────────────────────────────────────────────────────────
-  # Step 1: Align all versions (Android/iOS/TS)
+  # Step 1: Update all versions (Android/iOS/JS)
   # This is done inside each publish job since they run on
   # different runners. The prepare job provides the version.
   # ──────────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ jobs:
 
   # 2a. Publish TypeScript packages to npm
   publish-typescript:
-    name: Publish TypeScript Packages
+    name: Publish NPM Packages
     runs-on: ubuntu-latest
     needs: prepare
     environment:
@@ -75,7 +75,7 @@ jobs:
       - name: Log job start
         run: |
           echo "========================================="
-          echo "  Step 2a: Publish TypeScript Packages"
+          echo "  Step 2a: Publish NPM Packages"
           echo "========================================="
           echo "  Version: ${{ needs.prepare.outputs.version }}"
           echo "  Is RC:   ${{ needs.prepare.outputs.is_rc }}"
@@ -257,7 +257,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: true
 
       - name: Install CocoaPods
         run: |
@@ -328,7 +327,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: true
 
       - name: Install CocoaPods
         run: |
@@ -415,7 +413,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: true
 
       - name: Install CocoaPods
         run: |
@@ -453,13 +450,13 @@ jobs:
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
           echo "✅ Versions updated successfully"
 
-      # Step 3b: Update TS dependencies in template package.json
-      - name: Update template TS dependencies
+      # Step 3b: Update npm dependencies in template package.json
+      - name: Update template npm dependencies
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
           TEMPLATE_PKG="template/sparkling-app-template/package.json"
 
-          echo "📝 [Step 3b] Updating template TS dependencies..."
+          echo "📝 [Step 3b] Updating template npm dependencies..."
           echo "   File: $TEMPLATE_PKG"
 
           echo "   Updating sparkling-navigation -> ^${VERSION}"
@@ -540,11 +537,11 @@ jobs:
           echo ""
           echo "✅ All npm packages are available"
 
-      # Step 3f: Verify TS build
-      - name: Verify template TS build
+      # Step 3f: Verify JS build
+      - name: Verify template JS build
         working-directory: template/sparkling-app-template
         run: |
-          echo "🔨 [Step 3f] Verifying template TS build..."
+          echo "🔨 [Step 3f] Verifying template JS build..."
           echo "   Working directory: $(pwd)"
           echo ""
           echo "   Installing template dependencies..."
@@ -553,7 +550,7 @@ jobs:
           echo "   Running build..."
           pnpm build
           echo ""
-          echo "✅ Template TS build succeeded!"
+          echo "✅ Template JS build succeeded!"
 
       # Step 3g: Verify Android build
       - name: Verify template Android build

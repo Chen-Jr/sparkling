@@ -6,6 +6,7 @@
 import { Command } from 'commander';
 import packageJson from '../package.json';
 import { runInit } from './create';
+import type { InitOptions } from './create/types';
 import { runCodegen } from './codegen';
 import { ui } from './ui';
 import { enableVerboseLogging, isVerboseEnabled, verboseLog } from './verbose';
@@ -35,7 +36,7 @@ program
   .option('--android-dsl <dsl>', 'Android Gradle DSL: kts or groovy', 'kts')
   .action(async (name: string | undefined, options: { force?: boolean; template?: string; packageName?: string; moduleName?: string; androidDsl?: string }) => {
     try {
-      await runInit(name, options);
+      await runInit(name, { ...options, androidDsl: options.androidDsl as InitOptions['androidDsl'] });
     } catch (error) {
       console.error(ui.error(error instanceof Error ? error.message : String(error)));
       process.exitCode = 1;
