@@ -188,7 +188,7 @@ async function installPods(podfilePath: string): Promise<void> {
   }
 
   try {
-    const env = { ...(gemfile ? { BUNDLE_GEMFILE: gemfile } : {}), RUBYOPT: '-rlogger' };
+    const env = { ...(gemfile ? { BUNDLE_GEMFILE: gemfile } : {}) };
     await runCommand('bundle', ['exec', 'pod', 'install'], { cwd: podDir, env });
   } catch (error) {
     throw new Error(
