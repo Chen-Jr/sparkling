@@ -58,3 +58,4 @@ Key folders/files created by the default template:
 - For running native shells:
   - Android Studio / Android SDK (Android) / JDK 11
   - Xcode 16+ + iOS Simulator (iOS)
+  - Ruby (>=2.7, <3.4) for iOS build

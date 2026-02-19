@@ -127,6 +127,7 @@ doctor 命令检查的内容：
 | JDK | 版本 >= 11（Android） |
 | Android SDK | 已设置 `ANDROID_HOME`，已安装 `android-34` |
 | adb | 在 PATH 中可用 |
+| Ruby | 版本 >= 2.7, < 3.4 |
 | Xcode | 版本 >= 16（仅 macOS） |
 | CocoaPods | 已安装（仅 macOS） |
 | iOS 模拟器 | 至少有一个可用（仅 macOS） |
