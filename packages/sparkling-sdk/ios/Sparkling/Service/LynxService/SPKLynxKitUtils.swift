@@ -150,7 +150,7 @@ open class SPKLynxKitUtils: SPKKitUtils {
         guard let originStr = origin, !originStr.isEmpty, let u = URL(string: originStr) else {
             return origin
         }
-        let existingKeys = Set(u.spk.decodedQueryItems?.keys ?? [])
+        let existingKeys = Set(u.spk.decodedQueryItems?.map { $0.key } ?? [])
         var toAppend: [String: String] = [:]
         for (k, v) in merged where !existingKeys.contains(k) {
             toAppend[k] = v

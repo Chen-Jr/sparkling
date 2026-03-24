@@ -37,7 +37,7 @@ const config: AppConfig = {
       packageName: 'com.example.sparkling.go',
     },
     ios: {
-      bundleIdentifier: 'com.example.sparkling.go',
+      bundleIdentifier: 'com.sparkling.app.SparklingGo',
     },
   },
   paths: {

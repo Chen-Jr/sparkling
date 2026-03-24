@@ -21,7 +21,6 @@ export function App(props: { onMounted?: () => void }) {
   
 
   return (
-    // Native nav consumes top safe area; Lynx only needs bottom inset here.
     <SafeAreaView edges={['bottom']} style={{ flex: 1 }} className="page">
       <view className="App">
         <view className="Banner">

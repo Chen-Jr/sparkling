@@ -19,18 +19,14 @@ class SparklingLynxElement: SPKLynxElement {
 }
 
 struct SPKSwiftVC: UIViewControllerRepresentable {
-    @State private var state_frame: CGRect
+    var frame: CGRect
     
-    init(state_frame: CGRect = .zero) {
-        self.state_frame = state_frame
+    init(frame: CGRect = .zero) {
+        self.frame = frame
     }
     
-    func makeUIViewController(context: Context) -> some UIViewController {
-        #if DEBUG
-        let url = "hybrid://lynxview?url=http%3A%2F%2Flocalhost%3A5969%2Fmain.lynx.bundle&hide_status_bar=1&hide_nav_bar=1"
-        #else
+    func makeUIViewController(context: Context) -> UINavigationController {
         let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_status_bar=1&hide_nav_bar=1"
-        #endif
         let context = SPKContext()
         let elements = SparklingLynxElement(lynxElementName: "input", lynxElementClassName: LynxInput.self)
         context.customUIElements = [elements]

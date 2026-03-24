@@ -18,11 +18,10 @@ export function App(props: { onMounted?: () => void }) {
   const openSecondPage = useCallback(() => {
     router.navigate(
       {
-        path: './second.lynx.bundle',
+        path: 'second.lynx.bundle',
         options: {
           params: {
             title: 'Second Page',
-            screen_orientation: 'portrait',
           },
         },
       },
