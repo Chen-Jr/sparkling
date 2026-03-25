@@ -2,6 +2,8 @@ import { useCallback, useEffect } from '@lynx-js/react'
 
 import { close } from 'sparkling-navigation'
 
+import { SafeAreaView } from '../../components/SafeAreaView.js'
+
 import './App.css'
 
 export function App(props: { onMounted?: () => void }) {
@@ -19,7 +21,7 @@ export function App(props: { onMounted?: () => void }) {
   
 
   return (
-    <view className="page">
+    <SafeAreaView edges={['bottom']} style={{ flex: 1 }} className="page">
       <view className="App">
         <view className="Banner">
           <text className="Title">This is the second page</text>
@@ -30,6 +32,6 @@ export function App(props: { onMounted?: () => void }) {
           </text>
         </view>
       </view>
-    </view>
+    </SafeAreaView>
   )
 }

@@ -22,13 +22,8 @@ end
 
 def sparkling_methods_dep
   # BEGIN SPARKLING AUTOLINK
-  pod 'Sparkling-Router', :path => '../node_modules/sparkling-navigation/ios'
-  # END SPARKLING AUTOLINK
-end
-
-def sparkling_devtool
-  # BEGIN SPARKLING AUTOLINK
   pod 'Sparkling-DebugTool', :path => '../node_modules/sparkling-debug-tool/ios'
+  pod 'Sparkling-Router', :path => '../node_modules/sparkling-navigation/ios'
   # END SPARKLING AUTOLINK
 end
 
@@ -60,7 +55,6 @@ end
 use_frameworks!
 target 'SparklingGo' do
   sparkling_kit
-  sparkling_devtool
 end
 
 target 'SparklingGoTests' do
