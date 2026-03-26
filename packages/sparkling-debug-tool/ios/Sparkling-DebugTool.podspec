@@ -16,6 +16,7 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.source_files = [
+    'packages/sparkling-debug-tool/ios/Sources/**/*.{h,m,swift}',
     'ios/Sources/**/*.{h,m,swift}',
     'Sources/**/*.{h,m,swift}'
   ]
