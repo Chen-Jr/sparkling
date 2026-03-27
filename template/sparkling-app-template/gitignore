@@ -42,3 +42,4 @@ Thumbs.db
 # Ruby / Bundler (used by CocoaPods)
 vendor/bundle/
 .bundle/
+Gemfile.lock

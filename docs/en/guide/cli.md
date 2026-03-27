@@ -144,7 +144,7 @@ The doctor command checks:
 | JDK | Version >= 11 (Android) |
 | Android SDK | `ANDROID_HOME` set, `android-34` installed |
 | adb | Available in PATH |
-| Ruby | Version >= 2.7, < 3.4 |
+| Ruby | Version >= 3.2.6, < 3.4 |
 | Xcode | Version >= 16 (macOS only) |
 | CocoaPods | Installed (macOS only) |
 | iOS Simulator | At least one available (macOS only) |
