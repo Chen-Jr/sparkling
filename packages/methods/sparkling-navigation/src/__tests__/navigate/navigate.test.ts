@@ -127,7 +127,7 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] navigate: c
 
       expect(mockOpen).toHaveBeenCalledWith(
         {
-          scheme: 'hybrid://lynxview_page?bundle=pages%2Fsecond.lynx.bundle&title=Second+Page&screen_orientation=portrait',
+          scheme: 'hybrid://lynxview_page?bundle=pages%2Fsecond.lynx.bundle&title=Second%20Page&screen_orientation=portrait',
           options: { animated: true },
         },
         callback
@@ -210,6 +210,75 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] navigate: c
           options: undefined,
         },
         callback
+      );
+    });
+  });
+
+  describe('dev mode with globalProps', () => {
+    const savedLynx = (globalThis as any).lynx;
+    const savedDev = (globalThis as any).__DEV__;
+    const savedPublicPath = (globalThis as any).__webpack_public_path__;
+
+    beforeEach(() => {
+      (globalThis as any).__DEV__ = true;
+      (globalThis as any).__webpack_public_path__ = 'http://localhost:5969/';
+    });
+
+    afterEach(() => {
+      (globalThis as any).lynx = savedLynx;
+      (globalThis as any).__DEV__ = savedDev;
+      (globalThis as any).__webpack_public_path__ = savedPublicPath;
+    });
+
+    it('should use base URL from globalProps.queryItems.url over __webpack_public_path__', () => {
+      (globalThis as any).lynx = {
+        __globalProps: {
+          queryItems: { url: 'http://192.168.1.100:5969/main.lynx.bundle' },
+        },
+      };
+      const callback = jest.fn();
+
+      navigate({ path: 'second.lynx.bundle' }, callback);
+
+      expect(mockOpen).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scheme: expect.stringContaining('url=http%3A%2F%2F192.168.1.100%3A5969%2Fsecond.lynx.bundle'),
+        }),
+        callback,
+      );
+    });
+
+    it('should fall back to __webpack_public_path__ when globalProps has no url', () => {
+      (globalThis as any).lynx = {
+        __globalProps: { queryItems: {} },
+      };
+      const callback = jest.fn();
+
+      navigate({ path: 'second.lynx.bundle' }, callback);
+
+      expect(mockOpen).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scheme: expect.stringContaining('url=http%3A%2F%2Flocalhost%3A5969%2Fsecond.lynx.bundle'),
+        }),
+        callback,
+      );
+    });
+
+    it('should ignore non-HTTP URLs in globalProps', () => {
+      (globalThis as any).lynx = {
+        __globalProps: {
+          queryItems: { url: 'file:///local/main.lynx.bundle' },
+        },
+      };
+      const callback = jest.fn();
+
+      navigate({ path: 'second.lynx.bundle' }, callback);
+
+      expect(mockOpen).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scheme: expect.stringContaining('url=http%3A%2F%2Flocalhost%3A5969%2Fsecond.lynx.bundle'),
+        }),
+        callback,
       );
     });
   });
