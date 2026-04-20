@@ -11,6 +11,8 @@
   },
   "files": [
     "ios",
+    "!ios/macro",
+    "!ios/SparklingMarco",
     "README.md"
   ]
 }
